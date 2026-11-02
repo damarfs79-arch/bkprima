@@ -14,20 +14,9 @@
       
       <!-- Top Brand Header -->
       <div class="flex flex-col items-center text-center mb-4 sm:mb-5">
-        <!-- School Crest & Logo -->
-        <div class="relative mb-2.5 group">
-          <div class="absolute -inset-1 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl blur opacity-25 group-hover:opacity-40 transition duration-300"></div>
-          <div class="relative w-14 h-14 rounded-2xl bg-white p-2 shadow-md border border-slate-200/80 flex items-center justify-center">
-            <img src="/logo-smk.png" alt="Logo SMK PGRI 05 Jember" class="w-full h-full object-contain" />
-          </div>
-        </div>
-
-        <!-- Official Department Pill -->
-        <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 border border-blue-200/70 text-blue-700 mb-2">
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 20 20" fill="currentColor">
-            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-          </svg>
-          <span class="text-[10px] font-bold tracking-wider uppercase">Portal Guru BK &amp; Kesiswaan</span>
+        <!-- Official Logo BK Prima (Foto 1) -->
+        <div class="mb-2">
+          <img src="/logo-bkprima.png" alt="BK Prima - Sistem Informasi &amp; Konseling SMK PGRI 5 Jember" class="h-14 sm:h-16 w-auto object-contain drop-shadow-xs" />
         </div>
 
         <h1 class="text-2xl font-extrabold text-slate-900 tracking-tight">

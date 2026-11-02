@@ -87,8 +87,11 @@
         </div>
         <div class="flex items-baseline gap-2">
           <span class="text-3xl sm:text-4xl font-black text-slate-900">{{ avg2026 }}%</span>
-          <span class="text-sm font-black text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-md flex items-center">
-            ▲ +{{ (avg2026 - avg2025).toFixed(1) }}%
+          <span class="text-sm font-black text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-md flex items-center gap-1">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M12 7a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0V8.414l-4.293 4.293a1 1 0 01-1.414 0L8 10.414l-4.293 4.293a1 1 0 01-1.414-1.414l5-5a1 1 0 011.414 0L11 10.586 14.586 7H12z" clip-rule="evenodd" />
+            </svg>
+            <span>+{{ (avg2026 - avg2025).toFixed(1) }}%</span>
           </span>
         </div>
         <p class="text-xs sm:text-sm text-slate-600 font-bold mt-1.5">Tahun Berjalan (Meningkat)</p>
@@ -454,8 +457,13 @@
               class="font-black flex items-center gap-1 text-sm sm:text-base"
               :class="currentHoverItem.val2026 >= currentHoverItem.val2025 ? 'text-emerald-400' : 'text-rose-400'"
             >
-              {{ currentHoverItem.val2026 >= currentHoverItem.val2025 ? '▲ Naik +' : '▼ Turun -' }}
-              {{ Math.abs(currentHoverItem.val2026 - currentHoverItem.val2025).toFixed(1) }}{{ activeDataset === 'kehadiran' ? '%' : ' Kasus' }}
+              <svg v-if="currentHoverItem.val2026 >= currentHoverItem.val2025" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M12 7a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0V8.414l-4.293 4.293a1 1 0 01-1.414 0L8 10.414l-4.293 4.293a1 1 0 01-1.414-1.414l5-5a1 1 0 011.414 0L11 10.586 14.586 7H12z" clip-rule="evenodd" />
+              </svg>
+              <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M12 13a1 1 0 100 2h5a1 1 0 001-1V9a1 1 0 10-2 0v3.586l-4.293-4.293a1 1 0 00-1.414 0L8 9.586 3.707 5.293a1 1 0 00-1.414 1.414l5 5a1 1 0 001.414 0L11 9.414 14.586 13H12z" clip-rule="evenodd" />
+              </svg>
+              <span>{{ currentHoverItem.val2026 >= currentHoverItem.val2025 ? 'Naik +' : 'Turun -' }} {{ Math.abs(currentHoverItem.val2026 - currentHoverItem.val2025).toFixed(1) }}{{ activeDataset === 'kehadiran' ? '%' : ' Kasus' }}</span>
             </span>
             <span class="text-xs text-slate-400 font-bold">Perubahan Disiplin</span>
           </div>
@@ -466,7 +474,7 @@
               class="font-black text-sm"
               :class="currentHoverItem.val2026 >= 90 ? 'text-emerald-300' : 'text-amber-300'"
             >
-              {{ currentHoverItem.val2026 >= 90 ? '✓ Capai Target (≥90%)' : '⚠ Di Bawah Target (<90%)' }}
+              {{ currentHoverItem.val2026 >= 90 ? 'Capai Target (≥90%)' : 'Di Bawah Target (<90%)' }}
             </span>
             <span class="text-xs text-slate-400 font-bold">Standar Disiplin</span>
           </div>
@@ -474,8 +482,11 @@
       </div>
 
       <!-- Idle Hint if no point is hovered (Font Jelas) -->
-      <div v-else class="mt-3 text-center text-xs sm:text-sm text-slate-600 font-medium py-1">
-        💡 <strong>Petunjuk:</strong> Arahkan kursor pada titik grafik untuk rincian otomatis, atau lihat tabel data bulanan di bawah.
+      <div v-else class="mt-3 text-center text-xs sm:text-sm text-slate-600 font-medium py-1 flex items-center justify-center gap-1.5">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-slate-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <span><strong>Petunjuk:</strong> Arahkan kursor pada titik grafik untuk rincian otomatis, atau lihat tabel data bulanan di bawah.</span>
       </div>
 
     </div>
@@ -542,7 +553,13 @@
                   class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs sm:text-sm font-black"
                   :class="item.val2026 >= item.val2025 ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'"
                 >
-                  {{ item.val2026 >= item.val2025 ? '▲ +' : '▼ -' }}{{ Math.abs(item.val2026 - item.val2025).toFixed(1) }}%
+                  <svg v-if="item.val2026 >= item.val2025" xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M12 7a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0V8.414l-4.293 4.293a1 1 0 01-1.414 0L8 10.414l-4.293 4.293a1 1 0 01-1.414-1.414l5-5a1 1 0 011.414 0L11 10.586 14.586 7H12z" clip-rule="evenodd" />
+                  </svg>
+                  <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M12 13a1 1 0 100 2h5a1 1 0 001-1V9a1 1 0 10-2 0v3.586l-4.293-4.293a1 1 0 00-1.414 0L8 9.586 3.707 5.293a1 1 0 00-1.414 1.414l5 5a1 1 0 001.414 0L11 9.414 14.586 13H12z" clip-rule="evenodd" />
+                  </svg>
+                  <span>{{ item.val2026 >= item.val2025 ? '+' : '-' }}{{ Math.abs(item.val2026 - item.val2025).toFixed(1) }}%</span>
                 </span>
               </td>
               <td class="py-3 px-3.5 text-center">
@@ -551,7 +568,7 @@
                   class="inline-block px-2.5 py-1 rounded-full text-xs font-black border"
                   :class="item.val2026 >= 90 ? 'bg-emerald-50 text-emerald-800 border-emerald-300' : 'bg-amber-50 text-amber-800 border-amber-300'"
                 >
-                  {{ item.val2026 >= 90 ? '✓ Memenuhi Target' : '⚠ Perlu Pembinaan' }}
+                  {{ item.val2026 >= 90 ? 'Memenuhi Target' : 'Perlu Pembinaan' }}
                 </span>
                 <span v-else class="text-xs font-bold text-slate-600">-</span>
               </td>

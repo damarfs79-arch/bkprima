@@ -57,7 +57,12 @@
                 <p class="font-bold text-white text-sm">Gerbang Utama</p>
                 <p class="text-blue-200 text-[11px]">Pintu Masuk Siswa & Parkir Kendaraan Roda 2</p>
                 <div class="flex items-center gap-2 mt-2">
-                  <span class="text-xs font-bold text-amber-300">⏰ 06.30 – 07.30 WIB</span>
+                  <span class="text-xs font-bold text-amber-300 flex items-center gap-1">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-amber-300 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span>06.30 – 07.30 WIB</span>
+                  </span>
                   <span class="text-[10px] bg-white/20 px-2 py-0.5 rounded-md text-white font-medium">Piket Pagi Masuk</span>
                 </div>
               </div>

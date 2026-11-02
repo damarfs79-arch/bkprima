@@ -6,7 +6,7 @@ import { RouterLink } from './inertia-compat.js'
 const appName = import.meta.env.VITE_APP_NAME || 'BK Prima'
 
 createInertiaApp({
-  title: (title) => title ? `${title} - ${appName}` : appName,
+  title: (title) => title ? `${title} - ${appName}` : `${appName} - SMK PGRI 05 Jember`,
   resolve: async (name) => {
     const pages = import.meta.glob('./Pages/**/*.vue')
     const importPage = pages[`./Pages/${name}.vue`]
@@ -46,21 +46,6 @@ createInertiaApp({
     }
 
     app.mount(el)
-
-    // Remove pre-rendered splash loading screen smoothly on mount
-    const preloader = document.getElementById('initial-loading-screen')
-    if (preloader) {
-      preloader.style.opacity = '0'
-      preloader.style.transition = 'opacity 0.4s ease-out'
-      setTimeout(() => {
-        if (preloader.parentNode) preloader.parentNode.removeChild(preloader)
-      }, 400)
-    }
   },
-  progress: {
-    delay: 50,
-    color: '#2563eb',
-    includeCSS: true,
-    showSpinner: true,
-  },
+  progress: false,
 })

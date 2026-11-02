@@ -21,34 +21,19 @@
     <div class="relative z-10 flex flex-col items-center justify-center px-6 max-w-sm mx-auto my-auto animate-fadeIn">
       
       <!-- School Logo in Pure White Circular Crest -->
-      <div class="relative mb-5">
-        <div class="absolute -inset-2 bg-blue-500/25 rounded-full blur-xl animate-pulse"></div>
-        <div class="w-24 h-24 sm:w-28 sm:h-28 rounded-full bg-white p-2.5 shadow-2xl shadow-black/50 border-[3px] border-white/95 flex items-center justify-center relative z-10 transition-transform duration-300 hover:scale-105">
+      <!-- App Brand Logo (Foto 1) -->
+      <div class="flex flex-col items-center justify-center mb-5">
+        <div class="p-4 sm:p-5 bg-white/95 rounded-3xl shadow-2xl backdrop-blur-md border border-white/20 mb-2 max-w-[320px] transition-transform duration-300 hover:scale-102">
           <img 
-            src="/logo-smk.png" 
-            alt="Logo SMK PGRI 5 Jember" 
-            class="w-full h-full object-contain filter drop-shadow-sm" 
+            src="/logo-bkprima.png" 
+            alt="BK Prima - Sistem Informasi &amp; Konseling SMK PGRI 5 Jember" 
+            class="w-full h-auto object-contain filter drop-shadow-xs" 
           />
         </div>
       </div>
 
-      <!-- App Brand: [BK] Prima -->
-      <div class="flex items-center justify-center gap-2 mb-2">
-        <span class="bg-blue-600 text-white font-extrabold text-xs sm:text-sm px-2.5 py-1 rounded-md shadow-md shadow-blue-600/30 tracking-wider">
-          BK
-        </span>
-        <span class="text-3xl sm:text-4xl font-black text-white tracking-tight drop-shadow-lg">
-          Prima
-        </span>
-      </div>
-
-      <!-- School Name -->
-      <h2 class="text-white font-bold tracking-widest text-xs sm:text-sm uppercase drop-shadow-md mb-2">
-        SMK PGRI 5 JEMBER
-      </h2>
-
       <!-- Subtitle / Tagline -->
-      <p class="text-slate-200/90 text-xs sm:text-sm text-center leading-relaxed max-w-[280px] sm:max-w-[300px] drop-shadow font-normal">
+      <p class="text-slate-200/90 text-xs sm:text-sm text-center leading-relaxed max-w-[280px] sm:max-w-[300px] drop-shadow font-normal mb-2">
         Sistem Presensi Digital &amp; Manajemen<br />
         Kedisiplinan Konseling Sekolah
       </p>

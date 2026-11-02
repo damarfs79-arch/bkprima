@@ -1,25 +1,16 @@
 <template>
   <div class="min-h-screen bg-slate-50 flex flex-col lg:flex-row font-sans text-gray-800 relative">
-    
-    <!-- Top Global Inertia Loading Bar (Sleek Mobile/App Transition) -->
-    <div
-      v-if="isNavigating"
-      class="fixed top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-blue-500 via-indigo-500 to-emerald-400 z-[999999] shadow-sm shadow-blue-500/50 animate-pulse transition-all duration-300 pointer-events-none"
-    ></div>
     <aside class="hidden lg:flex w-64 xl:w-72 flex-col bg-white border-r border-gray-200/80 min-h-screen sticky top-0 h-screen shrink-0 z-30 shadow-xs select-none">
       
-      <!-- Brand Logo Header -->
-      <div class="p-5 border-b border-gray-100 flex items-center gap-3">
-        <div class="w-10 h-10 rounded-2xl bg-blue-50 border border-blue-100 flex items-center justify-center p-1.5 shadow-2xs">
-          <img src="/logo-smk.png" alt="Logo SMK" class="w-full h-full object-contain" />
-        </div>
-        <div>
-          <div class="flex items-center gap-1.5">
-            <span class="bg-blue-600 text-white text-[10px] font-black px-1.5 py-0.5 rounded-md leading-none tracking-wider">BK</span>
-            <span class="text-xl font-black text-gray-900 tracking-tight">Prima</span>
-          </div>
-          <p class="text-[10px] font-bold text-gray-400 tracking-wider uppercase">SMK PGRI 05 JEMBER</p>
-        </div>
+      <!-- Brand Logo Header (Foto 1) -->
+      <div class="p-4 sm:p-5 border-b border-gray-100">
+        <router-link to="/absensi" class="flex items-center gap-3 group">
+          <img
+            src="/logo-bkprima.png"
+            alt="BK Prima - Sistem Informasi &amp; Konseling SMK PGRI 5 Jember"
+            class="h-10 sm:h-11 w-auto max-w-full object-contain transition-transform duration-200 group-hover:scale-102"
+          />
+        </router-link>
       </div>
 
 
@@ -90,12 +81,8 @@
           </svg>
         </button>
 
-        <router-link to="/absensi" class="flex items-center gap-2">
-          <img src="/logo-smk.png" alt="Logo SMK" class="w-7 h-7 object-contain" />
-          <div class="flex items-center gap-1">
-            <span class="bg-blue-600 text-white text-[9px] font-extrabold px-1.5 py-0.5 rounded leading-none">BK</span>
-            <span class="text-base font-black text-gray-900 tracking-tight">Prima</span>
-          </div>
+        <router-link to="/absensi" class="flex items-center">
+          <img src="/logo-bkprima.png" alt="BK Prima SMK PGRI 5 Jember" class="h-8 w-auto object-contain" />
         </router-link>
       </div>
 
@@ -133,8 +120,10 @@
               <p class="text-[9px] font-bold text-gray-400">SMK PGRI 05 JEMBER</p>
             </div>
           </div>
-          <button @click="mobileDrawerOpen = false" class="p-2 text-gray-400 hover:text-gray-700 rounded-xl">
-            ✕
+          <button @click="mobileDrawerOpen = false" class="p-2 text-gray-400 hover:text-gray-700 rounded-xl cursor-pointer" title="Tutup Menu">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
           </button>
         </div>
 
@@ -213,18 +202,22 @@
     <!-- 5. MOBILE BOTTOM NAVIGATION (ANIMATED SLIDING CIRCLE)        -->
     <!-- ============================================================ -->
     <nav class="lg:hidden fixed bottom-4 left-4 right-4 z-40 max-w-sm mx-auto">
-      <div class="bg-blue-600 rounded-3xl shadow-xl shadow-blue-600/35 h-[70px] px-1 flex items-center relative select-none">
+      <div class="bg-blue-600 rounded-3xl shadow-xl shadow-blue-600/35 h-[68px] px-1 flex items-center relative select-none">
         
-        <!-- Sliding Animated Indicator (Lingkaran Putih Bulat Bergerak) -->
+        <!-- Sliding Elevated Animated Indicator (Geser & Naik ke Atas / Tidak Sejajar) -->
         <div 
           class="absolute top-0 bottom-0 left-0 w-1/4 flex items-center justify-center pointer-events-none transition-transform duration-300 ease-[cubic-bezier(0.34,1.35,0.64,1)] z-10"
           :style="{
             transform: `translateX(${activeBottomIndex * 100}%)`
           }"
         >
-          <!-- Elemen Bulat Putih dengan Pusat Biru (Presisi di dalam bar tanpa dinaikkan) -->
-          <div class="w-[58px] h-[58px] rounded-full bg-white flex items-center justify-center shadow-lg shadow-blue-950/25 border-2 border-white/95 transition-transform duration-200">
-            <div class="w-[44px] h-[44px] rounded-full bg-blue-600 flex items-center justify-center shadow-inner">
+          <!-- Elemen Bulat Putih dengan Pusat Biru Naik ke Atas (-translate-y-4) -->
+          <div class="w-[62px] h-[62px] rounded-full bg-white flex items-center justify-center shadow-xl shadow-blue-950/35 border-[3px] border-white -translate-y-4 transition-transform duration-200">
+            <div class="w-[48px] h-[48px] rounded-full bg-blue-600 flex flex-col items-center justify-center shadow-inner">
+              <component :is="bottomNavTabs[activeBottomIndex].activeIcon || bottomNavTabs[activeBottomIndex].icon" class="w-5 h-5 text-white" />
+              <span class="text-[7.5px] font-black text-white leading-none mt-0.5 tracking-tight px-0.5">
+                {{ bottomNavTabs[activeBottomIndex].label }}
+              </span>
             </div>
           </div>
         </div>
@@ -237,27 +230,81 @@
           @click="handleBottomTabClick(idx)"
           class="flex-1 flex flex-col items-center justify-center relative z-20 h-full py-1 cursor-pointer select-none text-center"
         >
-          <!-- Active State: Didalam lingkaran putih dan biru -->
+          <!-- Inactive State: Sejajar di dalam bar, memudar saat lingkaran aktif meluncur di atasnya -->
           <div 
-            v-if="activeBottomIndex === idx" 
-            class="flex flex-col items-center justify-center transition-all duration-200 scale-105"
+            class="flex flex-col items-center justify-center py-1 transition-all duration-200"
+            :class="activeBottomIndex === idx ? 'opacity-0 scale-75' : 'opacity-85 hover:opacity-100'"
           >
-            <component :is="item.activeIcon" class="w-5 h-5 text-white" />
-            <span class="text-[7.5px] font-black text-white leading-none mt-0.5 tracking-tight px-0.5">{{ item.label }}</span>
-          </div>
-
-          <!-- Inactive State -->
-          <div 
-            v-else 
-            class="flex flex-col items-center justify-center py-1 opacity-80 hover:opacity-100 transition-all duration-200"
-          >
-            <component :is="item.inactiveIcon" class="w-5 h-5 text-white" />
+            <component :is="item.inactiveIcon || item.icon" class="w-5 h-5 text-white" />
             <span class="text-[10px] font-semibold text-white mt-1 leading-tight">{{ item.label }}</span>
           </div>
         </router-link>
 
       </div>
     </nav>
+    <!-- ============================================================ -->
+    <!-- MODAL CARD: KONFIRMASI KELUAR AKUN                           -->
+    <!-- ============================================================ -->
+    <div
+      v-if="showLogoutModal"
+      class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-150"
+      @click.self="showLogoutModal = false"
+    >
+      <div class="bg-white rounded-3xl max-w-sm sm:max-w-md w-full p-6 sm:p-7 shadow-2xl border border-slate-200 text-center animate-in zoom-in-95 duration-150">
+        
+        <!-- Icon Logout -->
+        <div class="w-14 h-14 mx-auto rounded-2xl bg-rose-50 border border-rose-200 text-rose-600 flex items-center justify-center mb-4">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+          </svg>
+        </div>
+
+        <!-- Eyebrow & Title -->
+        <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">
+          Konfirmasi Keluar Akun
+        </div>
+        <h3 class="text-base sm:text-lg font-bold text-slate-900">
+          Keluar dari Akun BK Prima?
+        </h3>
+
+        <!-- Description -->
+        <p class="text-xs text-slate-500 mt-2 leading-relaxed">
+          Sesi aktif Anda akan diakhiri. Pastikan seluruh pekerjaan atau catatan bimbingan konseling telah tersimpan.
+        </p>
+
+        <!-- Session Info Card -->
+        <div class="mt-4 p-3 bg-slate-50 rounded-xl border border-slate-200/80 text-left text-xs">
+          <div class="flex items-center justify-between">
+            <span class="font-bold text-slate-800">Guru Bimbingan Konseling</span>
+            <span class="px-2 py-0.5 rounded bg-blue-50 text-blue-700 font-bold text-[10px]">Portal Pengguna</span>
+          </div>
+          <p class="text-[11px] text-slate-400 mt-0.5">SMK PGRI 05 Jember &bull; Sesi Bimbingan Aktif</p>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="grid grid-cols-2 gap-2.5 mt-6 pt-2">
+          <button
+            type="button"
+            @click="showLogoutModal = false"
+            class="w-full py-2.5 px-4 rounded-xl border border-slate-200 hover:bg-slate-100 text-slate-700 font-bold text-xs transition cursor-pointer"
+          >
+            Batal
+          </button>
+
+          <button
+            type="button"
+            @click="confirmLogout"
+            class="w-full py-2.5 px-4 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs shadow-md shadow-rose-600/20 transition cursor-pointer flex items-center justify-center gap-1.5"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+            </svg>
+            <span>Ya, Keluar</span>
+          </button>
+        </div>
+
+      </div>
+    </div>
 
   </div>
 </template>
@@ -270,18 +317,17 @@ import { router as inertiaRouter } from '@inertiajs/vue3'
 const router = useRouter()
 const route = useRoute()
 
-// Micro Navigation Loading State for Smooth App Experience
-const isNavigating = ref(false)
-if (typeof window !== 'undefined') {
-  inertiaRouter.on('start', () => { isNavigating.value = true })
-  inertiaRouter.on('finish', () => { isNavigating.value = false })
-  inertiaRouter.on('error', () => { isNavigating.value = false })
-}
+
+
+const showLogoutModal = ref(false)
 
 const handleLogout = () => {
-  if (confirm('Apakah Anda yakin ingin keluar dari akun BK Prima?')) {
-    inertiaRouter.post('/logout')
-  }
+  showLogoutModal.value = true
+}
+
+const confirmLogout = () => {
+  showLogoutModal.value = false
+  inertiaRouter.post('/logout')
 }
 
 const props = defineProps({

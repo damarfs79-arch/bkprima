@@ -46,9 +46,15 @@ Route::post('/profil', [ProfileController::class, 'update'])->name('profile.upda
 
 // 8. Admin IT Panel
 Route::get('/admin', [AdminController::class, 'index'])->name('admin.index');
+Route::post('/admin/guru', [AdminController::class, 'storeGuru'])->name('admin.guru.store');
+Route::put('/admin/guru/{id}', [AdminController::class, 'updateGuru'])->name('admin.guru.update');
+Route::delete('/admin/guru/{id}', [AdminController::class, 'deleteGuru'])->name('admin.guru.delete');
+Route::patch('/admin/konsultasi/{id}', [AdminController::class, 'updateConsultationStatus'])->name('admin.consultation.update');
+Route::delete('/admin/konsultasi/{id}', [AdminController::class, 'deleteConsultation'])->name('admin.consultation.delete');
 
 // 9. Guest Portal (Siswa & Wali Murid)
 Route::get('/tamu', [GuestController::class, 'index'])->name('guest.index');
+Route::post('/tamu/konsultasi', [GuestController::class, 'storeConsultation'])->name('guest.consultation');
 Route::get('/portal-tamu', function () {
     return redirect('/tamu');
 });
