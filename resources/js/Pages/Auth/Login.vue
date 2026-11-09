@@ -68,8 +68,7 @@
                 </svg>
                 NIP / Akun Resmi Kepegawaian
               </label>
-              <span class="inline-flex items-center gap-1 text-[10px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200/60">
-                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+              <span class="text-[10px] font-semibold text-emerald-700">
                 Terverifikasi
               </span>
             </div>
@@ -299,7 +298,7 @@
               <span class="block text-[10px] text-slate-400 font-bold uppercase">Helpdesk IT Sekolah</span>
               <span class="font-bold text-slate-800">Unit Lab Komputer &amp; Server</span>
             </div>
-            <span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 text-[10px] font-bold">Online</span>
+            <span class="text-xs font-semibold text-emerald-700">Online</span>
           </div>
           <div class="p-3 bg-slate-50 rounded-xl border border-slate-100 flex items-center justify-between text-xs">
             <div>

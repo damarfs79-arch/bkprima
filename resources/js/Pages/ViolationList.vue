@@ -5,18 +5,13 @@
       <!-- ============================================================ -->
       <!-- CARD 1: HEADER & STATS SUMMARY                               -->
       <!-- ============================================================ -->
-      <div class="bg-white rounded-3xl p-5 sm:p-6 border border-slate-200/80 shadow-xs space-y-5">
+      <div class="bg-white rounded-xl p-5 sm:p-6 border border-slate-200 shadow-xs space-y-5">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <div class="flex items-center gap-2 mb-1">
-              <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-rose-50 text-rose-700 border border-rose-200/70">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
-                  <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
-                </svg>
-                Kedisiplinan &amp; Penanganan Kasus BK
-              </span>
-            </div>
-            <h1 class="text-xl sm:text-2xl font-black text-slate-900 tracking-tight leading-snug">
+            <p class="text-xs font-semibold uppercase tracking-wider text-rose-600 mb-1">
+              Kedisiplinan &amp; Penanganan Kasus BK
+            </p>
+            <h1 class="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight leading-snug">
               Catatan Pelanggaran &amp; Pemanggilan Siswa
             </h1>
             <p class="text-xs sm:text-sm text-slate-500 mt-0.5">
@@ -27,21 +22,21 @@
           <div class="flex items-center gap-2 self-start sm:self-auto shrink-0">
             <button
               @click="openNewSummonsModal"
-              class="inline-flex items-center justify-center gap-1.5 bg-rose-600 hover:bg-rose-700 active:scale-95 text-white font-bold px-3.5 py-2.5 rounded-xl text-xs shadow-md shadow-rose-600/20 transition cursor-pointer"
+              class="inline-flex items-center justify-center gap-1.5 bg-rose-600 hover:bg-rose-700 text-white font-semibold px-3.5 py-2 rounded-lg text-xs transition cursor-pointer"
             >
               <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
               </svg>
-              <span>+ Panggil Ortu (SP)</span>
+              <span>Panggil Ortu (SP)</span>
             </button>
             <router-link
               to="/verifikasi"
-              class="inline-flex items-center justify-center gap-1.5 bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-bold px-4 py-2.5 rounded-xl text-xs shadow-md shadow-blue-600/20 transition cursor-pointer"
+              class="inline-flex items-center justify-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded-lg text-xs transition cursor-pointer"
             >
               <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4" />
               </svg>
-              <span>+ Catat Pelanggaran</span>
+              <span>Catat Pelanggaran</span>
             </router-link>
           </div>
         </div>
@@ -51,57 +46,56 @@
           <!-- Total Kasus -->
           <div 
             @click="activeMainTab = 'pelanggaran'; selectedStatus = 'Semua'"
-            class="p-4 bg-slate-50/80 hover:bg-slate-100 rounded-2xl border border-slate-200/70 cursor-pointer transition"
+            class="p-4 bg-white hover:bg-slate-50 rounded-xl border border-slate-200 cursor-pointer transition shadow-xs"
           >
             <div class="flex items-center justify-between text-slate-500 mb-1">
-              <span class="text-[11px] font-bold uppercase tracking-wider">TOTAL KASUS</span>
+              <span class="text-xs font-semibold uppercase tracking-wider">TOTAL KASUS</span>
               <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
             </div>
-            <div class="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">{{ violations.length }}</div>
-            <span class="text-[11px] text-slate-400 font-medium">Bulan Oktober 2024</span>
+            <div class="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">{{ violations.length }}</div>
+            <span class="text-xs text-slate-500 font-medium">Bulan Oktober 2024</span>
           </div>
 
           <!-- Kasus Ringan -->
           <div 
             @click="activeMainTab = 'pelanggaran'; selectedStatus = 'Dalam Pembinaan'"
-            class="p-4 bg-blue-50/60 hover:bg-blue-50 rounded-2xl border border-blue-200/60 cursor-pointer transition"
+            class="p-4 bg-white hover:bg-slate-50 rounded-xl border border-slate-200 cursor-pointer transition shadow-xs"
           >
-            <div class="flex items-center justify-between text-blue-600 mb-1">
-              <span class="text-[11px] font-bold uppercase tracking-wider">KASUS RINGAN</span>
-              <span class="text-xs font-bold bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded">+5 - +10</span>
+            <div class="flex items-center justify-between text-slate-500 mb-1">
+              <span class="text-xs font-semibold uppercase tracking-wider">KASUS RINGAN</span>
+              <span class="text-xs font-medium text-slate-500 font-mono">+5 - +10</span>
             </div>
-            <div class="text-2xl sm:text-3xl font-black text-blue-700 tracking-tight">4</div>
-            <span class="text-[11px] text-blue-500 font-medium">Teguran Lisan / Piket</span>
+            <div class="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">4</div>
+            <span class="text-xs text-slate-500 font-medium">Teguran Lisan / Piket</span>
           </div>
 
           <!-- Kasus Sedang / SP -->
           <div 
             @click="activeMainTab = 'panggilan'; summonsFilter = 'SP-1'"
-            class="p-4 bg-amber-50/60 hover:bg-amber-50 rounded-2xl border border-amber-200/60 cursor-pointer transition"
+            class="p-4 bg-white hover:bg-slate-50 rounded-xl border border-slate-200 cursor-pointer transition shadow-xs"
           >
-            <div class="flex items-center justify-between text-amber-600 mb-1">
-              <span class="text-[11px] font-bold uppercase tracking-wider">PERINGATAN SP</span>
-              <span class="text-xs font-bold bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded">+15 - +25</span>
+            <div class="flex items-center justify-between text-slate-500 mb-1">
+              <span class="text-xs font-semibold uppercase tracking-wider">PERINGATAN SP</span>
+              <span class="text-xs font-medium text-amber-600 font-mono">+15 - +25</span>
             </div>
-            <div class="text-2xl sm:text-3xl font-black text-amber-700 tracking-tight">2</div>
-            <span class="text-[11px] text-amber-600 font-medium">Konseling &amp; Surat SP</span>
+            <div class="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">2</div>
+            <span class="text-xs text-slate-500 font-medium">Konseling &amp; Surat SP</span>
           </div>
 
-          <!-- Kasus Berat / Panggilan Ortu (Direct Link to Pemanggilan Tab) -->
+          <!-- Kasus Berat / Panggilan Ortu -->
           <div 
             @click="activeMainTab = 'panggilan'; summonsFilter = 'ALL'"
-            class="p-4 rounded-2xl border cursor-pointer transition"
-            :class="activeMainTab === 'panggilan' ? 'bg-rose-100/70 border-rose-400 ring-2 ring-rose-500/20 shadow-xs' : 'bg-rose-50/60 hover:bg-rose-100/50 border-rose-200/60'"
+            class="p-4 rounded-xl border cursor-pointer transition shadow-xs"
+            :class="activeMainTab === 'panggilan' ? 'bg-slate-50 border-slate-300 ring-1 ring-slate-300' : 'bg-white hover:bg-slate-50 border-slate-200'"
           >
-            <div class="flex items-center justify-between text-rose-600 mb-1">
-              <span class="text-[11px] font-bold uppercase tracking-wider">PANGGILAN ORTU</span>
-              <span class="text-xs font-bold bg-rose-200/80 text-rose-800 px-1.5 py-0.5 rounded">&ge; 30 Poin</span>
+            <div class="flex items-center justify-between text-slate-500 mb-1">
+              <span class="text-xs font-semibold uppercase tracking-wider text-rose-600">PANGGILAN ORTU</span>
+              <span class="text-xs font-medium text-rose-600 font-mono">&ge; 30 Poin</span>
             </div>
-            <div class="text-2xl sm:text-3xl font-black text-rose-700 tracking-tight">{{ summonsList.length }}</div>
-            <span class="text-[11px] text-rose-600 font-medium flex items-center gap-1">
-              <span class="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse"></span>
+            <div class="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">{{ summonsList.length }}</div>
+            <span class="text-xs text-rose-600 font-medium">
               Buka Layanan Surat SP &rarr;
             </span>
           </div>
@@ -111,17 +105,17 @@
       <!-- ============================================================ -->
       <!-- CARD 2: MASTER TABBED CONTAINER (PELANGGARAN VS PANGGILAN)    -->
       <!-- ============================================================ -->
-      <div class="bg-white rounded-3xl border border-slate-200/80 shadow-xs overflow-hidden">
+      <div class="bg-white rounded-xl border border-slate-200 shadow-xs overflow-hidden">
         
         <!-- Header Mode View Switcher Bar -->
-        <div class="p-4 sm:p-5 border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white">
+        <div class="p-4 sm:p-5 border-b border-slate-200 flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white">
           
           <!-- Master Tabs Switcher -->
-          <div class="flex items-center gap-1.5 bg-slate-100 p-1 rounded-2xl border border-slate-200/70 self-start sm:self-auto">
+          <div class="flex items-center gap-1.5 bg-slate-100 p-1 rounded-lg border border-slate-200 self-start sm:self-auto">
             <button
               @click="activeMainTab = 'pelanggaran'"
-              class="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition cursor-pointer"
-              :class="activeMainTab === 'pelanggaran' ? 'bg-white text-blue-600 shadow-2xs' : 'text-slate-600 hover:text-slate-900'"
+              class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-md text-xs font-semibold transition cursor-pointer"
+              :class="activeMainTab === 'pelanggaran' ? 'bg-white text-blue-600 shadow-xs' : 'text-slate-600 hover:text-slate-900'"
             >
               <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -191,6 +185,7 @@
                     <th class="py-3.5 px-4 text-[11px] uppercase tracking-wider">TANGGAL &amp; WAKTU</th>
                     <th class="py-3.5 px-4 text-[11px] uppercase tracking-wider">SISWA TERLAPOR</th>
                     <th class="py-3.5 px-4 text-[11px] uppercase tracking-wider">JENIS PELANGGARAN</th>
+                    <th class="py-3.5 px-4 text-center text-[11px] uppercase tracking-wider">BUKTI FOTO</th>
                     <th class="py-3.5 px-4 text-center text-[11px] uppercase tracking-wider">POIN SANKSI</th>
                     <th class="py-3.5 px-4 text-center text-[11px] uppercase tracking-wider">STATUS KASUS</th>
                     <th class="py-3.5 px-4 text-center text-[11px] uppercase tracking-wider">AKSI</th>
@@ -210,6 +205,22 @@
                     <td class="py-3.5 px-4">
                       <div class="font-semibold text-slate-800">{{ item.category }}</div>
                       <div class="text-[11px] text-slate-400 truncate max-w-xs">{{ item.note }}</div>
+                    </td>
+                    <td class="py-3.5 px-4 text-center">
+                      <button
+                        v-if="item.photoUrl"
+                        type="button"
+                        @click="openPhotoPreview(item)"
+                        class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-700 font-semibold text-[11px] border border-blue-200 transition cursor-pointer"
+                        title="Klik untuk melihat foto bukti"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                        <span>Lihat Foto</span>
+                      </button>
+                      <span v-else class="text-slate-400 text-[11px] italic">Tanpa Foto</span>
                     </td>
                     <td class="py-3.5 px-4 text-center">
                       <span 
@@ -622,7 +633,6 @@
           
           <div class="p-4 border-b border-slate-200 flex items-center justify-between bg-slate-50 no-print">
             <div class="flex items-center gap-2">
-              <span class="w-2.5 h-2.5 rounded-full bg-rose-600"></span>
               <span class="font-bold text-slate-900 text-xs sm:text-sm">Pratinjau Surat Panggilan Resmi Dinas</span>
             </div>
             <div class="flex items-center gap-2">
@@ -827,6 +837,38 @@
         </div>
       </div>
 
+      <!-- ============================================================ -->
+      <!-- MODAL 4: PREVIEW FOTO BUKTI PELANGGARAN                      -->
+      <!-- ============================================================ -->
+      <div 
+        v-if="previewPhotoItem" 
+        class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-xs animate-in fade-in" 
+        @click.self="previewPhotoItem = null"
+      >
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-lg w-full overflow-hidden shadow-2xl text-slate-100 flex flex-col">
+          <div class="px-5 py-3.5 border-b border-slate-800 flex items-center justify-between bg-slate-950">
+            <div>
+              <p class="text-xs sm:text-sm font-bold text-white">{{ previewPhotoItem.studentName }} ({{ previewPhotoItem.className }})</p>
+              <p class="text-[10px] text-slate-400">{{ previewPhotoItem.category }} &bull; {{ previewPhotoItem.date }} ({{ previewPhotoItem.time }})</p>
+            </div>
+            <button @click="previewPhotoItem = null" class="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition cursor-pointer">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+          <div class="bg-black p-3 flex items-center justify-center max-h-[70vh] overflow-hidden">
+            <img :src="previewPhotoItem.photoUrl" alt="Bukti Foto Pelanggaran" class="max-h-[65vh] w-auto max-w-full object-contain mx-auto rounded-lg">
+          </div>
+          <div class="p-3.5 bg-slate-950 border-t border-slate-800 flex items-center justify-between text-xs">
+            <span class="text-[11px] text-slate-400">Bukti Foto Resmi Tersimpan di Sistem BK</span>
+            <router-link :to="'/pelanggaran/detail?id=' + previewPhotoItem.id" class="px-3.5 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs transition">
+              Buka Detail Kasus Lengkap &rarr;
+            </router-link>
+          </div>
+        </div>
+      </div>
+
     </div>
   </AppLayout>
 </template>
@@ -855,6 +897,11 @@ const props = defineProps({
 
 // Active Mode: 'pelanggaran' | 'panggilan'
 const activeMainTab = ref('pelanggaran')
+const previewPhotoItem = ref(null)
+
+const openPhotoPreview = (item) => {
+  previewPhotoItem.value = item
+}
 
 onMounted(() => {
   if (route.query.tab === 'panggilan' || props.initialTab === 'panggilan') {
@@ -870,6 +917,7 @@ onMounted(() => {
       className: v.student_class,
       category: v.category,
       note: v.notes || v.violation_name,
+      photoUrl: v.photo_url || null,
       points: v.points,
       status: v.points >= 25 ? 'Panggilan Ortu' : (v.points >= 10 ? 'Dalam Pembinaan' : 'Selesai Dibina')
     }))

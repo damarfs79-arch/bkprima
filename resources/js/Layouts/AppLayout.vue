@@ -2,13 +2,13 @@
   <div class="min-h-screen bg-slate-50 flex flex-col lg:flex-row font-sans text-gray-800 relative">
     <aside class="hidden lg:flex w-64 xl:w-72 flex-col bg-white border-r border-gray-200/80 min-h-screen sticky top-0 h-screen shrink-0 z-30 shadow-xs select-none">
       
-      <!-- Brand Logo Header (Foto 1) -->
+      <!-- Brand Logo Header -->
       <div class="p-4 sm:p-5 border-b border-gray-100">
-        <router-link to="/absensi" class="flex items-center gap-3 group">
+        <router-link to="/absensi" class="flex items-center gap-3">
           <img
             src="/logo-bkprima.png"
             alt="BK Prima - Sistem Informasi &amp; Konseling SMK PGRI 5 Jember"
-            class="h-10 sm:h-11 w-auto max-w-full object-contain transition-transform duration-200 group-hover:scale-102"
+            class="h-10 sm:h-11 w-auto max-w-full object-contain"
           />
         </router-link>
       </div>
@@ -16,38 +16,34 @@
 
       <!-- Navigation Menu List -->
       <nav class="flex-1 px-3 py-2 space-y-1 overflow-y-auto">
-        <p class="px-3 text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">Menu Utama</p>
+        <p class="px-3 text-xs font-semibold text-slate-400 mb-2">Menu Utama</p>
         
         <router-link
           v-for="item in menuItems"
           :key="item.path"
           :to="item.path"
-          class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold transition group"
-          :class="isRouteActive(item.key) ? 'bg-blue-600 text-white shadow-sm' : 'text-gray-600 hover:bg-slate-100 hover:text-gray-900'"
+          class="interactive-btn flex items-center gap-3 px-3 py-2 rounded-lg text-xs font-medium cursor-pointer"
+          :class="isRouteActive(item.key) ? 'bg-blue-50 text-blue-700 font-semibold shadow-2xs' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'"
         >
           <div
-            class="p-1 rounded-lg transition"
-            :class="isRouteActive(item.key) ? 'bg-white/20 text-white' : 'text-gray-400 group-hover:text-blue-600'"
+            class="transition"
+            :class="isRouteActive(item.key) ? 'text-blue-600' : 'text-slate-400 group-hover:text-slate-600'"
           >
             <component :is="item.icon" class="w-4 h-4" />
           </div>
           <span class="flex-1">{{ item.label }}</span>
-          <span v-if="item.badge" class="px-2 py-0.5 text-[10px] font-black rounded-full" :class="isRouteActive(item.key) ? 'bg-white text-blue-600' : 'bg-blue-50 text-blue-600'">
-            {{ item.badge }}
-          </span>
         </router-link>
       </nav>
 
       <!-- Sidebar Footer -->
-      <div class="p-4 border-t border-gray-100 space-y-3">
-        <div class="flex items-center gap-2 px-3 py-2 bg-slate-50 border border-gray-100 rounded-xl text-xs font-medium text-gray-600">
-          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+      <div class="p-4 border-t border-gray-100 space-y-2.5">
+        <div class="px-3 py-2 bg-slate-50 border border-slate-200/80 rounded-lg text-xs font-medium text-slate-600">
           <span class="truncate">Semester Genap 24/25</span>
         </div>
         <button
           type="button"
           @click="handleLogout"
-          class="flex items-center justify-center gap-2 w-full py-2.5 px-3 rounded-xl text-xs font-bold text-rose-600 bg-rose-50/60 hover:bg-rose-100 transition cursor-pointer"
+          class="interactive-btn flex items-center justify-center gap-2 w-full py-2 px-3 rounded-lg text-xs font-medium text-slate-600 hover:text-rose-700 bg-white hover:bg-rose-50 active:bg-rose-100 border border-slate-200 cursor-pointer"
         >
           <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
@@ -95,7 +91,6 @@
         </button>
         <router-link to="/profil" class="relative">
           <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80" alt="Avatar" class="w-8 h-8 rounded-full object-cover border border-gray-200" />
-          <div class="absolute bottom-0 right-0 w-2 h-2 bg-emerald-500 rounded-full border-2 border-white"></div>
         </router-link>
       </div>
     </div>
@@ -114,8 +109,8 @@
             <img src="/logo-smk.png" alt="Logo SMK" class="w-8 h-8 object-contain" />
             <div>
               <div class="flex items-center gap-1">
-                <span class="bg-blue-600 text-white text-[9px] font-black px-1 py-0.5 rounded">BK</span>
-                <span class="font-black text-gray-900 text-lg">Prima</span>
+                <span class="bg-blue-600 text-white text-[9px] font-bold px-1 py-0.5 rounded">BK</span>
+                <span class="font-bold text-gray-900 text-lg">Prima</span>
               </div>
               <p class="text-[9px] font-bold text-gray-400">SMK PGRI 05 JEMBER</p>
             </div>
@@ -134,14 +129,11 @@
             :key="item.path"
             :to="item.path"
             @click="mobileDrawerOpen = false"
-            class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold transition"
-            :class="isRouteActive(item.key) ? 'bg-blue-600 text-white shadow-xs' : 'text-gray-700 hover:bg-gray-100'"
+            class="flex items-center gap-3 px-3 py-2 rounded-lg text-xs font-medium transition"
+            :class="isRouteActive(item.key) ? 'bg-blue-50 text-blue-700 font-semibold' : 'text-slate-700 hover:bg-slate-50'"
           >
-            <component :is="item.icon" class="w-4 h-4" />
+            <component :is="item.icon" class="w-4 h-4" :class="isRouteActive(item.key) ? 'text-blue-600' : 'text-slate-400'" />
             <span class="flex-1">{{ item.label }}</span>
-            <span v-if="item.badge" class="px-2 py-0.5 text-[10px] font-black rounded-full" :class="isRouteActive(item.key) ? 'bg-white text-blue-600' : 'bg-blue-100 text-blue-700'">
-              {{ item.badge }}
-            </span>
           </router-link>
         </nav>
 
@@ -149,7 +141,7 @@
           <button
             type="button"
             @click="mobileDrawerOpen = false; handleLogout()"
-            class="flex items-center justify-center gap-2 w-full py-2.5 px-3 rounded-xl text-xs font-bold text-rose-600 bg-rose-50 hover:bg-rose-100 transition cursor-pointer"
+            class="flex items-center justify-center gap-2 w-full py-2 px-3 rounded-lg text-xs font-medium text-rose-600 bg-rose-50 hover:bg-rose-100 transition cursor-pointer"
           >
             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
@@ -165,29 +157,27 @@
     <!-- ============================================================ -->
     <div class="flex-1 flex flex-col min-w-0">
       
-      <!-- Optional Desktop Top Minimal Bar -->
-      <header class="hidden lg:flex items-center justify-between px-8 py-4 bg-white/60 backdrop-blur-md border-b border-gray-200/50 sticky top-0 z-20">
-        <div class="flex items-center gap-2 text-xs font-bold text-gray-500">
-          <button v-if="showBack" @click="handleBack" class="p-1 text-gray-400 hover:text-gray-800 rounded cursor-pointer mr-1">
+      <!-- Desktop Top Bar -->
+      <header class="hidden lg:flex items-center justify-between px-8 py-3.5 bg-white border-b border-slate-200/80 sticky top-0 z-20">
+        <div class="flex items-center gap-2 text-xs font-medium text-slate-500">
+          <button v-if="showBack" @click="handleBack" class="p-1 text-slate-400 hover:text-slate-800 rounded cursor-pointer mr-1">
             &larr; Kembali
           </button>
-          <span class="text-gray-400">Portal BK</span>
-          <span class="text-gray-300">/</span>
-          <span class="text-blue-600 uppercase tracking-wider text-[11px]">{{ currentTitle }}</span>
+          <span class="text-slate-400">Portal BK</span>
+          <span class="text-slate-300">/</span>
+          <span class="text-blue-700 font-semibold">{{ currentTitle }}</span>
         </div>
 
         <div class="flex items-center gap-3">
-          <div class="flex items-center gap-1.5 px-3 py-1.5 bg-gray-50 border border-gray-200/80 rounded-xl text-xs text-gray-600 font-medium">
-            <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+          <div class="px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-md text-xs text-slate-600 font-medium">
             <span>HadirMu Terhubung</span>
           </div>
 
           <!-- Notification Button -->
-          <router-link to="/piket" class="p-2 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition relative cursor-pointer" title="Notifikasi Piket">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <router-link to="/piket" class="p-2 text-slate-500 hover:text-slate-800 hover:bg-slate-100 rounded-lg transition relative cursor-pointer" title="Notifikasi Piket">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">
               <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
             </svg>
-            <span class="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full ring-2 ring-white"></span>
           </router-link>
         </div>
       </header>
@@ -215,7 +205,7 @@
           <div class="w-[62px] h-[62px] rounded-full bg-white flex items-center justify-center shadow-xl shadow-blue-950/35 border-[3px] border-white -translate-y-4 transition-transform duration-200">
             <div class="w-[48px] h-[48px] rounded-full bg-blue-600 flex flex-col items-center justify-center shadow-inner">
               <component :is="bottomNavTabs[activeBottomIndex].activeIcon || bottomNavTabs[activeBottomIndex].icon" class="w-5 h-5 text-white" />
-              <span class="text-[7.5px] font-black text-white leading-none mt-0.5 tracking-tight px-0.5">
+              <span class="text-[7.5px] font-bold text-white leading-none mt-0.5 tracking-tight px-0.5">
                 {{ bottomNavTabs[activeBottomIndex].label }}
               </span>
             </div>
@@ -276,7 +266,7 @@
         <div class="mt-4 p-3 bg-slate-50 rounded-xl border border-slate-200/80 text-left text-xs">
           <div class="flex items-center justify-between">
             <span class="font-bold text-slate-800">Guru Bimbingan Konseling</span>
-            <span class="px-2 py-0.5 rounded bg-blue-50 text-blue-700 font-bold text-[10px]">Portal Pengguna</span>
+            <span class="text-xs font-medium text-slate-500">Portal Pengguna</span>
           </div>
           <p class="text-[11px] text-slate-400 mt-0.5">SMK PGRI 05 Jember &bull; Sesi Bimbingan Aktif</p>
         </div>
@@ -380,7 +370,6 @@ const menuItems = [
     key: 'absensi_bulanan',
     label: 'Rekap Bulanan (A4)',
     path: '/absensi/bulanan',
-    badge: 'Cetak',
     icon: () => h('svg', { xmlns: 'http://www.w3.org/2000/svg', class: 'h-4 w-4', fill: 'none', viewBox: '0 0 24 24', stroke: 'currentColor', 'stroke-width': '2' }, [
       h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', d: 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z' })
     ])
@@ -389,7 +378,6 @@ const menuItems = [
     key: 'pelanggaran',
     label: 'Catatan Pelanggaran',
     path: '/pelanggaran',
-    badge: 'Kasus',
     icon: () => h('svg', { xmlns: 'http://www.w3.org/2000/svg', class: 'h-4 w-4', fill: 'none', viewBox: '0 0 24 24', stroke: 'currentColor', 'stroke-width': '2' }, [
       h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', d: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z' })
     ])
@@ -398,7 +386,6 @@ const menuItems = [
     key: 'verifikasi',
     label: 'Input Pelanggaran',
     path: '/verifikasi',
-    badge: 'Form',
     icon: () => h('svg', { xmlns: 'http://www.w3.org/2000/svg', class: 'h-4 w-4', fill: 'none', viewBox: '0 0 24 24', stroke: 'currentColor', 'stroke-width': '2' }, [
       h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', d: 'M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z' })
     ])
@@ -415,7 +402,6 @@ const menuItems = [
     key: 'piket',
     label: 'Piket Harian',
     path: '/piket',
-    badge: 'Jaga',
     icon: () => h('svg', { xmlns: 'http://www.w3.org/2000/svg', class: 'h-4 w-4', fill: 'none', viewBox: '0 0 24 24', stroke: 'currentColor', 'stroke-width': '2' }, [
       h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', d: 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z' })
     ])
@@ -440,7 +426,6 @@ const menuItems = [
     key: 'tamu',
     label: 'Portal Tamu (Siswa/Wali)',
     path: '/tamu',
-    badge: 'Publik',
     icon: () => h('svg', { xmlns: 'http://www.w3.org/2000/svg', class: 'h-4 w-4', fill: 'none', viewBox: '0 0 24 24', stroke: 'currentColor', 'stroke-width': '2' }, [
       h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', d: 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z' })
     ])

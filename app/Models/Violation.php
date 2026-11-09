@@ -22,6 +22,7 @@ class Violation extends Model
         'penalty_action',
         'status',
         'notes',
+        'photo_url',
     ];
 
     public function student()

@@ -8,20 +8,17 @@
       <!-- ========================================== -->
       <!-- 1. HEADER & CONTROLS (Screen Only)         -->
       <!-- ========================================== -->
-      <div class="print:hidden bg-white rounded-3xl p-6 border border-gray-100 shadow-sm transition">
+      <div class="print:hidden bg-white rounded-xl p-5 sm:p-6 border border-slate-200 shadow-xs">
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <div class="flex items-center gap-2 mb-1">
-              <span class="px-2.5 py-0.5 rounded-full text-[11px] font-extrabold uppercase tracking-wider bg-blue-50 text-blue-600 border border-blue-100">
-                Laporan Dinas & Wali Kelas
-              </span>
-              <span class="text-xs font-semibold text-gray-400">• {{ monthName }}</span>
-            </div>
-            <h1 class="text-2xl font-black text-gray-900 tracking-tight flex items-center gap-2">
-              Rekapitulasi Presensi Bulanan
+            <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">
+              Rekapitulasi Presensi Bulanan &bull; {{ monthName }}
+            </p>
+            <h1 class="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
+              Presensi Bulanan Siswa
             </h1>
-            <p class="text-xs text-gray-500 mt-1">
-              Matriks absensi harian akumulatif per bulan (1-31) siap cetak format resmi A4 Landscape.
+            <p class="text-xs text-slate-500 mt-0.5">
+              Matriks absensi harian akumulatif per bulan siap cetak format resmi A4 Landscape.
             </p>
           </div>
 
@@ -29,9 +26,9 @@
           <div class="flex items-center gap-2 flex-wrap">
             <Link
               href="/absensi"
-              class="px-4 py-2.5 rounded-xl border border-gray-200 text-xs font-bold text-gray-700 hover:bg-slate-50 transition flex items-center gap-1.5 cursor-pointer"
+              class="px-3.5 py-2 rounded-lg border border-slate-300 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition flex items-center gap-1.5 cursor-pointer shadow-xs"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
               </svg>
               Presensi Harian
@@ -40,7 +37,7 @@
             <button
               type="button"
               @click="printDocument"
-              class="px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow-md shadow-blue-500/20 transition flex items-center gap-2 cursor-pointer active:scale-95"
+              class="px-3.5 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold shadow-xs transition flex items-center gap-2 cursor-pointer"
             >
               <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
@@ -51,19 +48,19 @@
         </div>
 
         <!-- Filter Bar -->
-        <div class="mt-6 pt-5 border-t border-gray-100 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="mt-5 pt-4 border-t border-slate-200 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
           <!-- Filter Kelas -->
           <div>
-            <label class="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5">Pilih Rombel / Kelas</label>
+            <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Pilih Rombel / Kelas</label>
             <div class="relative">
               <select
                 v-model="currentClass"
                 @change="applyFilter"
-                class="w-full bg-slate-50 border border-gray-200 text-gray-800 rounded-xl px-3.5 py-2.5 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 cursor-pointer appearance-none"
+                class="w-full bg-white border border-slate-300 text-slate-800 rounded-lg px-3 py-2 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 cursor-pointer appearance-none shadow-xs"
               >
                 <option v-for="cls in classes" :key="cls" :value="cls">{{ cls }}</option>
               </select>
-              <div class="absolute inset-y-0 right-0 flex items-center px-3 pointer-events-none text-gray-400">
+              <div class="absolute inset-y-0 right-0 flex items-center px-3 pointer-events-none text-slate-400">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                 </svg>
@@ -73,65 +70,37 @@
 
           <!-- Filter Bulan -->
           <div>
-            <label class="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5">Bulan & Tahun</label>
+            <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Bulan &amp; Tahun</label>
             <input
               type="month"
               v-model="currentMonth"
               @change="applyFilter"
-              class="w-full bg-slate-50 border border-gray-200 text-gray-800 rounded-xl px-3.5 py-2 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 cursor-pointer"
+              class="w-full bg-white border border-slate-300 text-slate-800 rounded-lg px-3 py-2 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 cursor-pointer shadow-xs"
             />
           </div>
 
           <!-- Quick Stat 1 -->
-          <div class="bg-blue-50/60 border border-blue-100 rounded-2xl p-3 flex items-center justify-between">
-            <div>
-              <p class="text-[10px] font-bold text-blue-600 uppercase tracking-wider">Total Siswa</p>
-              <p class="text-xl font-black text-gray-900 mt-0.5">{{ classStats.totalStudents }} Siswa</p>
-            </div>
-            <div class="w-9 h-9 rounded-xl bg-blue-600/10 text-blue-600 flex items-center justify-center font-bold text-xs">
-              {{ selectedClass }}
-            </div>
+          <div class="bg-slate-50 border border-slate-200 rounded-lg p-3">
+            <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider block">Total Siswa</span>
+            <span class="text-lg font-bold text-slate-900 mt-0.5 block">{{ classStats.totalStudents }} Siswa ({{ selectedClass }})</span>
           </div>
 
           <!-- Quick Stat 2 -->
-          <div class="bg-emerald-50/60 border border-emerald-100 rounded-2xl p-3 flex items-center justify-between">
-            <div>
-              <p class="text-[10px] font-bold text-emerald-600 uppercase tracking-wider">Rata-rata Hadir</p>
-              <p class="text-xl font-black text-emerald-600 mt-0.5">{{ classStats.avgPercentage }}%</p>
-            </div>
-            <div class="w-9 h-9 rounded-xl bg-emerald-600/10 text-emerald-600 flex items-center justify-center font-bold text-xs">
-              {{ classStats.effectiveDays }} Hari
-            </div>
+          <div class="bg-slate-50 border border-slate-200 rounded-lg p-3">
+            <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider block">Rata-rata Hadir</span>
+            <span class="text-lg font-bold text-slate-900 mt-0.5 block">{{ classStats.avgPercentage }}%</span>
           </div>
         </div>
 
         <!-- Legend / Keterangan Kode -->
-        <div class="mt-4 pt-3 border-t border-gray-100 flex items-center gap-3 flex-wrap text-xs text-gray-600">
-          <span class="font-bold text-gray-400 text-[11px] uppercase tracking-wider">Keterangan:</span>
-          <div class="flex items-center gap-1.5">
-            <span class="w-5 h-5 rounded-md bg-emerald-100 text-emerald-700 font-black text-[10px] flex items-center justify-center">H</span>
-            <span class="text-gray-600 font-medium">Hadir</span>
-          </div>
-          <div class="flex items-center gap-1.5">
-            <span class="w-5 h-5 rounded-md bg-amber-100 text-amber-700 font-black text-[10px] flex items-center justify-center">T</span>
-            <span class="text-gray-600 font-medium">Terlambat</span>
-          </div>
-          <div class="flex items-center gap-1.5">
-            <span class="w-5 h-5 rounded-md bg-blue-100 text-blue-700 font-black text-[10px] flex items-center justify-center">S</span>
-            <span class="text-gray-600 font-medium">Sakit</span>
-          </div>
-          <div class="flex items-center gap-1.5">
-            <span class="w-5 h-5 rounded-md bg-purple-100 text-purple-700 font-black text-[10px] flex items-center justify-center">I</span>
-            <span class="text-gray-600 font-medium">Izin</span>
-          </div>
-          <div class="flex items-center gap-1.5">
-            <span class="w-5 h-5 rounded-md bg-rose-100 text-rose-700 font-black text-[10px] flex items-center justify-center">A</span>
-            <span class="text-gray-600 font-medium">Alpa</span>
-          </div>
-          <div class="flex items-center gap-1.5">
-            <span class="w-5 h-5 rounded-md bg-slate-200 text-slate-500 font-black text-[10px] flex items-center justify-center">L</span>
-            <span class="text-gray-400 font-medium">Libur Akhir Pekan</span>
-          </div>
+        <div class="mt-4 pt-3 border-t border-slate-200 flex items-center gap-4 flex-wrap text-xs text-slate-600">
+          <span class="font-semibold text-slate-500 text-xs uppercase tracking-wider">Keterangan:</span>
+          <span class="inline-flex items-center gap-1.5"><strong class="font-bold text-slate-700">H</strong> = Hadir</span>
+          <span class="inline-flex items-center gap-1.5"><strong class="font-bold text-amber-700">T</strong> = Terlambat</span>
+          <span class="inline-flex items-center gap-1.5"><strong class="font-bold text-blue-700">S</strong> = Sakit</span>
+          <span class="inline-flex items-center gap-1.5"><strong class="font-bold text-indigo-700">I</strong> = Izin</span>
+          <span class="inline-flex items-center gap-1.5"><strong class="font-bold text-rose-700">A</strong> = Alpa</span>
+          <span class="inline-flex items-center gap-1.5"><strong class="font-normal text-slate-400">L</strong> = Libur Akhir Pekan</span>
         </div>
       </div>
 
@@ -166,109 +135,106 @@
       <!-- ========================================== -->
       <!-- 3. MATRIX TABLE (Screen & Print)           -->
       <!-- ========================================== -->
-      <div class="bg-white rounded-3xl border border-gray-200/80 shadow-sm overflow-hidden print:border-none print:shadow-none print:rounded-none">
+      <div class="bg-white rounded-xl border border-slate-200 shadow-xs overflow-hidden print:border-none print:shadow-none print:rounded-none">
         <div class="overflow-x-auto">
           <table class="w-full text-left border-collapse text-[11px] print:text-[9.5px]">
             <thead>
               <!-- Baris Header 1: Kategori Kolom -->
-              <tr class="bg-slate-100 text-gray-700 font-extrabold uppercase border-b border-gray-200 print:bg-gray-100">
-                <th rowspan="2" class="py-2.5 px-2 text-center border-r border-gray-200 w-8">No</th>
-                <th rowspan="2" class="py-2.5 px-2 border-r border-gray-200 w-24">NISN</th>
-                <th rowspan="2" class="py-2.5 px-3 border-r border-gray-200 min-w-[180px] print:min-w-[150px]">Nama Lengkap Siswa</th>
-                <th rowspan="2" class="py-2.5 px-1.5 text-center border-r border-gray-200 w-8">L/P</th>
+              <tr class="bg-slate-100 text-slate-700 font-semibold uppercase border-b border-slate-300 print:bg-gray-100">
+                <th rowspan="2" class="py-2.5 px-2 text-center border-r border-slate-200 w-8">No</th>
+                <th rowspan="2" class="py-2.5 px-2 border-r border-slate-200 w-24">NISN</th>
+                <th rowspan="2" class="py-2.5 px-3 border-r border-slate-200 min-w-[180px] print:min-w-[150px]">Nama Lengkap Siswa</th>
+                <th rowspan="2" class="py-2.5 px-1.5 text-center border-r border-slate-200 w-8">L/P</th>
                 
                 <!-- Kolom Tanggal Matriks (1 s/d 31) -->
-                <th :colspan="days.length" class="py-1 px-1 text-center border-r border-gray-200 bg-blue-50/70 text-blue-800 print:bg-gray-200">
+                <th :colspan="days.length" class="py-1 px-1 text-center border-r border-slate-200 text-slate-700 font-semibold">
                   Tanggal Presensi Bulan {{ monthName }}
                 </th>
 
                 <!-- Kolom Akumulasi Rekap -->
-                <th colspan="5" class="py-1 px-1 text-center border-r border-gray-200 bg-amber-50/70 text-amber-900 print:bg-gray-200">
+                <th colspan="5" class="py-1 px-1 text-center border-r border-slate-200 text-slate-700 font-semibold">
                   Rekapitulasi
                 </th>
-                <th rowspan="2" class="py-2.5 px-2 text-center bg-emerald-50 text-emerald-900 print:bg-gray-100 w-12 font-black">%</th>
+                <th rowspan="2" class="py-2.5 px-2 text-center text-slate-700 w-12 font-bold">%</th>
               </tr>
 
               <!-- Baris Header 2: Tanggal 1 s.d 31 & Kode H/T/S/I/A -->
-              <tr class="bg-slate-50 text-gray-600 font-bold border-b border-gray-200 text-center text-[10px] print:text-[8.5px]">
+              <tr class="bg-slate-50 text-slate-600 font-semibold border-b border-slate-200 text-center text-[10px] print:text-[8.5px]">
                 <!-- Number of days -->
                 <th
                   v-for="d in days"
                   :key="'th-day-' + d.day"
-                  class="py-1 px-0.5 border-r border-gray-200 min-w-[20px] print:min-w-[16px]"
-                  :class="d.isWeekend ? 'bg-slate-200 text-rose-600 font-black' : ''"
+                  class="py-1 px-0.5 border-r border-slate-200 min-w-[20px] print:min-w-[16px]"
+                  :class="d.isWeekend ? 'bg-slate-100 text-slate-400' : ''"
                   :title="d.dayName + ', ' + d.fullDate"
                 >
                   <div>{{ d.day }}</div>
-                  <div class="text-[7.5px] uppercase font-semibold text-gray-400 print:hidden">{{ d.dayName.slice(0, 1) }}</div>
+                  <div class="text-[7.5px] uppercase font-medium text-slate-400 print:hidden">{{ d.dayName.slice(0, 1) }}</div>
                 </th>
 
                 <!-- Rekap Titles -->
-                <th class="py-1 px-1.5 border-r border-gray-200 text-emerald-700 bg-emerald-50/40 w-7">H</th>
-                <th class="py-1 px-1.5 border-r border-gray-200 text-amber-700 bg-amber-50/40 w-7">T</th>
-                <th class="py-1 px-1.5 border-r border-gray-200 text-blue-700 bg-blue-50/40 w-7">S</th>
-                <th class="py-1 px-1.5 border-r border-gray-200 text-purple-700 bg-purple-50/40 w-7">I</th>
-                <th class="py-1 px-1.5 border-r border-gray-200 text-rose-700 bg-rose-50/40 w-7">A</th>
+                <th class="py-1 px-1.5 border-r border-slate-200 text-slate-600 font-semibold w-7">H</th>
+                <th class="py-1 px-1.5 border-r border-slate-200 text-slate-600 font-semibold w-7">T</th>
+                <th class="py-1 px-1.5 border-r border-slate-200 text-slate-600 font-semibold w-7">S</th>
+                <th class="py-1 px-1.5 border-r border-slate-200 text-slate-600 font-semibold w-7">I</th>
+                <th class="py-1 px-1.5 border-r border-slate-200 text-slate-600 font-semibold w-7">A</th>
               </tr>
             </thead>
 
-            <tbody class="divide-y divide-gray-200 font-medium">
+            <tbody class="divide-y divide-slate-200 font-medium">
               <tr
                 v-for="(st, idx) in students"
                 :key="st.id"
-                class="hover:bg-blue-50/40 transition print:hover:bg-transparent"
+                class="hover:bg-slate-50 transition print:hover:bg-transparent"
                 :class="idx % 2 === 1 ? 'bg-slate-50/40' : 'bg-white'"
               >
                 <!-- No -->
-                <td class="py-1.5 px-2 text-center text-gray-500 font-bold border-r border-gray-200">{{ idx + 1 }}</td>
+                <td class="py-1.5 px-2 text-center text-slate-400 border-r border-slate-200">{{ idx + 1 }}</td>
                 <!-- NISN -->
-                <td class="py-1.5 px-2 text-gray-600 font-mono text-[10px] border-r border-gray-200">{{ st.nisn }}</td>
+                <td class="py-1.5 px-2 text-slate-500 font-mono text-[10px] border-r border-slate-200">{{ st.nisn }}</td>
                 <!-- Nama Siswa -->
-                <td class="py-1.5 px-3 text-gray-900 font-bold border-r border-gray-200 whitespace-nowrap">
+                <td class="py-1.5 px-3 text-slate-900 font-semibold border-r border-slate-200 whitespace-nowrap">
                   {{ st.name }}
                 </td>
                 <!-- L/P -->
-                <td class="py-1.5 px-1.5 text-center text-gray-600 border-r border-gray-200">{{ st.gender }}</td>
+                <td class="py-1.5 px-1.5 text-center text-slate-500 border-r border-slate-200">{{ st.gender }}</td>
 
                 <!-- Daily Status Cells -->
                 <td
                   v-for="d in days"
                   :key="'cell-' + st.id + '-' + d.day"
-                  class="py-1 px-0.5 text-center border-r border-gray-200 text-[10px] print:text-[8px] font-black"
+                  class="py-1 px-0.5 text-center border-r border-slate-200 text-[10px] print:text-[8px]"
                   :class="getCellBg(st.daily[d.day]?.code, d.isWeekend)"
                 >
                   <span>{{ st.daily[d.day]?.code || '-' }}</span>
                 </td>
 
                 <!-- Summary Cells -->
-                <td class="py-1.5 px-1 text-center font-bold text-emerald-700 bg-emerald-50/20 border-r border-gray-200">
+                <td class="py-1.5 px-1 text-center font-medium text-slate-700 border-r border-slate-200">
                   {{ st.summary.hadir }}
                 </td>
-                <td class="py-1.5 px-1 text-center font-bold text-amber-700 bg-amber-50/20 border-r border-gray-200">
+                <td class="py-1.5 px-1 text-center font-medium text-slate-700 border-r border-slate-200">
                   {{ st.summary.terlambat }}
                 </td>
-                <td class="py-1.5 px-1 text-center font-bold text-blue-700 bg-blue-50/20 border-r border-gray-200">
+                <td class="py-1.5 px-1 text-center font-medium text-slate-700 border-r border-slate-200">
                   {{ st.summary.sakit }}
                 </td>
-                <td class="py-1.5 px-1 text-center font-bold text-purple-700 bg-purple-50/20 border-r border-gray-200">
+                <td class="py-1.5 px-1 text-center font-medium text-slate-700 border-r border-slate-200">
                   {{ st.summary.izin }}
                 </td>
-                <td class="py-1.5 px-1 text-center font-bold text-rose-700 bg-rose-50/20 border-r border-gray-200">
+                <td class="py-1.5 px-1 text-center font-semibold border-r border-slate-200" :class="st.summary.alpa > 0 ? 'text-rose-600 bg-rose-50/50' : 'text-slate-700'">
                   {{ st.summary.alpa }}
                 </td>
 
                 <!-- Percentage -->
-                <td
-                  class="py-1.5 px-2 text-center font-black"
-                  :class="st.summary.percentage >= 90 ? 'text-emerald-600 bg-emerald-50/40' : (st.summary.percentage >= 75 ? 'text-amber-600 bg-amber-50/40' : 'text-rose-600 bg-rose-50/40')"
-                >
+                <td class="py-1.5 px-2 text-center font-bold text-slate-800">
                   {{ st.summary.percentage }}%
                 </td>
               </tr>
 
               <!-- Empty State -->
               <tr v-if="students.length === 0">
-                <td :colspan="days.length + 10" class="py-10 text-center text-gray-400 font-bold">
+                <td :colspan="days.length + 10" class="py-10 text-center text-slate-400 font-medium">
                   Belum ada data siswa atau presensi untuk kelas {{ selectedClass }} pada bulan {{ monthName }}.
                 </td>
               </tr>
@@ -379,15 +345,15 @@ const printDocument = () => {
 }
 
 const getCellBg = (code, isWeekend) => {
-  if (isWeekend) return 'bg-slate-100 text-slate-400 font-normal'
+  if (isWeekend) return 'bg-slate-100 text-slate-300 font-normal'
   switch (code) {
-    case 'H': return 'text-emerald-700 bg-emerald-50/40'
-    case 'T': return 'text-amber-800 bg-amber-100/60 font-bold'
-    case 'S': return 'text-blue-700 bg-blue-100/60 font-bold'
-    case 'I': return 'text-purple-700 bg-purple-100/60 font-bold'
-    case 'A': return 'text-rose-700 bg-rose-100 font-black'
-    case 'L': return 'bg-slate-100 text-slate-400 font-normal'
-    default: return 'text-gray-400'
+    case 'H': return 'text-slate-700 font-medium'
+    case 'T': return 'text-amber-800 font-semibold bg-amber-50/70'
+    case 'S': return 'text-blue-800 font-semibold bg-blue-50/70'
+    case 'I': return 'text-indigo-800 font-semibold bg-indigo-50/70'
+    case 'A': return 'text-rose-700 font-bold bg-rose-100/80'
+    case 'L': return 'bg-slate-100 text-slate-300 font-normal'
+    default: return 'text-slate-300 font-normal'
   }
 }
 </script>

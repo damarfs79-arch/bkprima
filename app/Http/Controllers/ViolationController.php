@@ -53,6 +53,7 @@ class ViolationController extends Controller
             'reporter' => 'nullable|string',
             'penalty_action' => 'nullable|string',
             'notes' => 'nullable|string',
+            'photo_url' => 'nullable|string',
         ]);
 
         $validated['student_name'] = $cleanedName;

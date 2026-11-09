@@ -29,4 +29,9 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    public function classrooms()
+    {
+        return $this->hasMany(Classroom::class, 'guru_bk_id');
+    }
 }

@@ -13,11 +13,11 @@
     <title inertia>BK Prima - SMK PGRI 5 Jember</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     @vite(['resources/js/app.js'])
     @inertiaHead
   </head>
-  <body class="bg-slate-50 text-gray-800 antialiased selection:bg-blue-600 selection:text-white">
+  <body class="bg-slate-50 text-gray-800 antialiased font-sans selection:bg-blue-600 selection:text-white">
     @inertia
   </body>
 </html>

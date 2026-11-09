@@ -20,22 +20,28 @@
 
       <!-- Navigation Menu List -->
       <nav class="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
-        <p class="px-3 text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Menu Portal</p>
+        <p class="px-3 text-xs font-semibold text-slate-400 mb-2">Menu Portal</p>
         
         <button
           v-for="(item, idx) in navSections"
           :key="item.id"
           @click="scrollToSection(item.id, idx)"
-          class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold transition text-left cursor-pointer"
-          :class="activeNavIndex === idx ? 'bg-blue-50 text-blue-700 font-bold' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'"
+          class="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-xs font-medium transition text-left cursor-pointer"
+          :class="activeNavIndex === idx ? 'bg-blue-50 text-blue-700 font-semibold' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'"
         >
           <div
-            class="p-1 rounded-lg transition"
-            :class="activeNavIndex === idx ? 'text-blue-700' : 'text-slate-400 group-hover:text-slate-700'"
+            class="transition"
+            :class="activeNavIndex === idx ? 'text-blue-600' : 'text-slate-400 group-hover:text-slate-700'"
           >
             <component :is="item.icon" class="w-4 h-4" />
           </div>
           <span class="flex-1">{{ item.label }}</span>
+          <span
+            v-if="item.id === 'section-pelanggaran'"
+            class="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-rose-50 text-rose-700 border border-rose-200"
+          >
+            {{ violatingStudents.length }}
+          </span>
         </button>
       </nav>
 
@@ -174,13 +180,13 @@
             <!-- LEFT COLUMN: Headline, Deskripsi Santun, & Form Pencarian Terpadu -->
             <div class="lg:col-span-7 flex flex-col justify-center">
               
-              <!-- Eyebrow Text Sederhana Tanpa Batas Oval / Background Melengkung -->
-              <p class="text-xs sm:text-sm font-bold uppercase tracking-wider text-blue-700 mb-2.5">
-                Layanan Informasi Siswa Resmi • SMK PGRI 05 Jember
+              <!-- Eyebrow Text -->
+              <p class="text-xs font-semibold text-blue-700 mb-2">
+                Layanan Informasi Siswa Resmi &bull; SMK PGRI 05 Jember
               </p>
 
-              <!-- Judul Utama (Natural & Anti-Kaku) -->
-              <h1 class="text-2xl sm:text-4xl lg:text-[38px] font-extrabold text-slate-900 tracking-tight leading-[1.2]">
+              <!-- Judul Utama -->
+              <h1 class="text-2xl sm:text-3xl lg:text-4xl font-bold text-slate-900 tracking-tight leading-tight">
                 Layanan Informasi Kehadiran &amp; Kedisiplinan Siswa
               </h1>
 
@@ -200,7 +206,7 @@
                       class="w-full bg-white border border-slate-200 rounded-xl pl-10 pr-12 py-2.5 sm:py-3 text-xs sm:text-sm text-slate-900 font-medium placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition"
                       @keyup.enter="executeSearch"
                     />
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">
                       <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                     </svg>
                     <button
@@ -217,34 +223,50 @@
                   <button
                     @click="executeSearch"
                     type="button"
-                    class="px-4 sm:px-5 py-2.5 sm:py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs sm:text-sm rounded-xl transition cursor-pointer shrink-0"
+                    class="interactive-btn px-4 sm:px-5 py-2.5 sm:py-3 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-medium text-xs sm:text-sm rounded-xl shadow-xs hover:shadow transition-all cursor-pointer shrink-0"
                   >
                     Cari Siswa
                   </button>
                 </div>
 
-                <!-- Contoh Pencarian Cepat -->
+                <!-- Akses Cepat & Contoh Siswa -->
                 <div class="mt-2.5 px-1.5 flex flex-wrap items-center gap-1.5 text-xs">
-                  <span class="text-slate-400 text-[11px] font-medium">Contoh pencarian:</span>
+                  <span class="text-slate-400 text-[11px] font-medium">Contoh siswa:</span>
                   <button
                     v-for="chip in demoChips"
                     :key="chip.nisn"
                     @click="selectStudentByNisn(chip.nisn)"
                     type="button"
-                    class="px-2.5 py-1 rounded-lg bg-white hover:bg-blue-50 hover:text-blue-700 hover:border-blue-200 text-slate-600 font-medium text-[11px] border border-slate-200 transition cursor-pointer"
+                    class="interactive-badge px-2.5 py-1 rounded-lg bg-white hover:bg-blue-50 hover:text-blue-700 hover:border-blue-200 text-slate-600 font-medium text-[11px] border border-slate-200 cursor-pointer"
                   >
                     {{ chip.name }}
                   </button>
                 </div>
               </div>
 
+              <!-- Tombol Shortcut Langsung ke Siswa Melanggar -->
+              <div class="mt-4 flex flex-wrap items-center gap-2">
+                <button
+                  @click="scrollToSection('section-pelanggaran', 1)"
+                  type="button"
+                  class="interactive-btn inline-flex items-center gap-2 px-3.5 py-2 rounded-lg bg-rose-50 hover:bg-rose-100 active:bg-rose-200 text-rose-700 text-xs font-medium border border-rose-200 hover:border-rose-300 cursor-pointer"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-rose-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                  </svg>
+                  <span>Lihat Daftar Siswa Melanggar ({{ violatingStudents.length }} Siswa)</span>
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-rose-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+              </div>
+
             </div>
 
-            <!-- RIGHT COLUMN: Foto Asli Gedung & Kegiatan Sekolah (Proporsional & Seimbang) -->
+            <!-- RIGHT COLUMN: Foto Asli Gedung & Ringkasan Siswa -->
             <div class="lg:col-span-5">
               <div class="bg-slate-50 p-3 rounded-2xl border border-slate-200 shadow-xs">
                 
-                <!-- Gambar Utama Kampus & Siswa SMK PGRI 05 Jember -->
                 <div class="relative rounded-xl overflow-hidden aspect-[16/10] bg-slate-200 shadow-2xs">
                   <img
                     src="/school-campus.jpg"
@@ -252,38 +274,41 @@
                     class="w-full h-full object-cover"
                   />
                   
-                  <!-- Tag Keterangan Lokasi Elegan -->
                   <div class="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-transparent to-transparent flex items-end p-3.5">
                     <div class="text-white">
-                      <p class="text-xs font-extrabold text-white leading-tight">Kampus SMK PGRI 05 Jember</p>
+                      <p class="text-xs font-bold text-white leading-tight">Kampus SMK PGRI 05 Jember</p>
                       <p class="text-[11px] text-slate-200 mt-0.5">Pendampingan Karakter &amp; Layanan Bimbingan Konseling Siswa</p>
                     </div>
                   </div>
                 </div>
 
-                <!-- 2 Kartu Info Ringkas di Bawah Foto (Seimbang & Bermanfaat) -->
+                <!-- 2 Kartu Info Ringkas di Bawah Foto -->
                 <div class="grid grid-cols-2 gap-2 mt-3">
                   <div class="bg-white p-2.5 rounded-xl border border-slate-200/80">
                     <div class="flex items-center gap-1.5 text-blue-600 mb-1">
-                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                       </svg>
-                      <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Rombel</span>
+                      <span class="text-xs font-medium text-slate-500">Rombel</span>
                     </div>
-                    <p class="text-xs font-bold text-slate-800">36 Kelas Aktif</p>
-                    <p class="text-[10px] text-slate-500">7 Jurusan Keahlian</p>
+                    <p class="text-xs font-semibold text-slate-800">36 Kelas Aktif</p>
+                    <p class="text-[11px] text-slate-500">7 Jurusan Keahlian</p>
                   </div>
 
-                  <div class="bg-white p-2.5 rounded-xl border border-slate-200/80">
-                    <div class="flex items-center gap-1.5 text-emerald-600 mb-1">
-                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  <button
+                    @click="scrollToSection('section-pelanggaran', 1)"
+                    type="button"
+                    class="bg-white hover:bg-rose-50/60 p-2.5 rounded-xl border border-slate-200/80 hover:border-rose-200 text-left transition cursor-pointer"
+                  >
+                    <div class="flex items-center gap-1.5 text-rose-600 mb-1">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                       </svg>
-                      <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Layanan BK</span>
+                      <span class="text-xs font-medium text-slate-500">Kedisiplinan</span>
                     </div>
-                    <p class="text-xs font-bold text-slate-800">Ruang Terbuka</p>
-                    <p class="text-[10px] text-slate-500">Siswa &amp; Wali Murid</p>
-                  </div>
+                    <p class="text-xs font-semibold text-rose-700">{{ violatingStudents.length }} Siswa Melanggar</p>
+                    <p class="text-[11px] text-slate-500">Buka Daftar &rarr;</p>
+                  </button>
                 </div>
 
               </div>
@@ -295,7 +320,228 @@
       </section>
 
       <!-- ============================================================ -->
-      <!-- B. SECTION: HASIL PENCARIAN & RIWAYAT FOTO SISWA             -->
+      <!-- B. SECTION: DAFTAR SISWA MELANGGAR (CEK CEPAT & NYAMAN)      -->
+      <!-- ============================================================ -->
+      <section id="section-pelanggaran" class="bg-slate-50/75 border-b border-slate-200 px-4 sm:px-6 lg:px-8 py-10 sm:py-14">
+        <div class="max-w-6xl mx-auto">
+          
+          <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-6">
+            <div>
+              <p class="text-xs font-semibold text-rose-600 mb-1">
+                Transparansi Pembinaan &bull; Kedisiplinan Siswa
+              </p>
+              <h2 class="text-xl sm:text-2xl font-bold text-slate-900">
+                Daftar Siswa dengan Catatan Pelanggaran
+              </h2>
+              <p class="text-xs sm:text-sm text-slate-600 mt-1">
+                Data siswa yang memiliki akumulasi poin pelanggaran tata tertib dan memerlukan pendampingan bersama orang tua.
+              </p>
+            </div>
+
+            <!-- Quick Counter Summary -->
+            <div class="flex items-center gap-2 self-start md:self-auto flex-wrap">
+              <span class="px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-xs text-slate-700 font-medium shadow-2xs">
+                <span>{{ violatingStudents.length }} Siswa Tercatat</span>
+              </span>
+              <span class="px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-xs text-slate-700 font-medium shadow-2xs">
+                <span>{{ violatingStudentsWithPhotosCount }} Ada Bukti Foto</span>
+              </span>
+            </div>
+          </div>
+
+          <!-- Controls: Tabs, Level Filter, Search -->
+          <div class="bg-white p-3 sm:p-4 rounded-xl border border-slate-200 mb-6 space-y-3">
+            <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+              <!-- Filter Tabs -->
+              <div class="flex flex-wrap items-center gap-1.5 text-xs">
+                <button
+                  type="button"
+                  @click="violationFilterTab = 'semua'"
+                  class="interactive-badge px-3 py-1.5 rounded-lg font-medium cursor-pointer"
+                  :class="violationFilterTab === 'semua' ? 'bg-slate-900 text-white font-semibold' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'"
+                >
+                  Semua ({{ violatingStudents.length }})
+                </button>
+                <button
+                  type="button"
+                  @click="violationFilterTab = 'perhatian'"
+                  class="interactive-badge px-3 py-1.5 rounded-lg font-medium cursor-pointer"
+                  :class="violationFilterTab === 'perhatian' ? 'bg-rose-600 text-white font-semibold' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'"
+                >
+                  Poin &ge; 20 ({{ violatingStudentsHighPointsCount }})
+                </button>
+                <button
+                  type="button"
+                  @click="violationFilterTab = 'pembinaan'"
+                  class="interactive-badge px-3 py-1.5 rounded-lg font-medium cursor-pointer"
+                  :class="violationFilterTab === 'pembinaan' ? 'bg-amber-600 text-white font-semibold' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'"
+                >
+                  Dalam Pembinaan
+                </button>
+                <button
+                  type="button"
+                  @click="violationFilterTab = 'selesai'"
+                  class="interactive-badge px-3 py-1.5 rounded-lg font-medium cursor-pointer"
+                  :class="violationFilterTab === 'selesai' ? 'bg-emerald-600 text-white font-semibold' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'"
+                >
+                  Selesai Pembinaan
+                </button>
+                <button
+                  type="button"
+                  @click="violationFilterTab = 'foto'"
+                  class="interactive-badge px-3 py-1.5 rounded-lg font-medium cursor-pointer"
+                  :class="violationFilterTab === 'foto' ? 'bg-blue-600 text-white font-semibold' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'"
+                >
+                  Ada Bukti Foto
+                </button>
+              </div>
+
+              <!-- Filter Tingkat Kelas -->
+              <div class="flex items-center gap-2">
+                <select
+                  v-model="violationLevelFilter"
+                  class="bg-white hover:border-slate-300 border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs font-medium text-slate-700 focus:outline-none focus:border-slate-400 cursor-pointer"
+                >
+                  <option value="Semua Tingkat">Semua Tingkat</option>
+                  <option value="Kelas 10">Kelas 10 (X)</option>
+                  <option value="Kelas 11">Kelas 11 (XI)</option>
+                  <option value="Kelas 12">Kelas 12 (XII)</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Search input within violations -->
+            <div class="relative">
+              <input
+                v-model="violationSearchQuery"
+                type="text"
+                placeholder="Cari nama siswa, NISN, atau kelas siswa yang melanggar..."
+                class="w-full bg-slate-50 hover:bg-white border border-slate-200 rounded-lg pl-8 pr-4 py-2 text-xs text-slate-800 placeholder-slate-400 focus:bg-white focus:outline-none focus:border-slate-400 transition"
+              />
+              <div class="absolute inset-y-0 left-0 pl-2.5 flex items-center pointer-events-none text-slate-400">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              </div>
+            </div>
+          </div>
+
+          <!-- Grid of Violating Students Cards -->
+          <div v-if="filteredViolatingStudents.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div
+              v-for="st in filteredViolatingStudents"
+              :key="st.nisn"
+              class="interactive-card bg-white rounded-xl border border-slate-200 hover:border-slate-300 p-4 sm:p-5 flex flex-col justify-between shadow-2xs group"
+            >
+              <div>
+                <!-- Header Card: Avatar, Name, Points Badge -->
+                <div class="flex items-start justify-between gap-3 mb-3">
+                  <div class="flex items-center gap-3">
+                    <img
+                      :src="st.avatar"
+                      :alt="st.name"
+                      class="w-11 h-11 rounded-lg object-cover border border-slate-200 shrink-0"
+                    />
+                    <div>
+                      <h3 class="font-semibold text-slate-900 text-sm leading-snug line-clamp-1">{{ st.name }}</h3>
+                      <p class="text-xs text-slate-500 font-mono mt-0.5">NISN: {{ st.nisn }} &bull; {{ st.class }}</p>
+                    </div>
+                  </div>
+
+                  <!-- Poin Badge -->
+                  <span
+                    class="text-xs font-semibold shrink-0"
+                    :class="st.points >= 20 ? 'text-rose-600' : 'text-amber-600'"
+                  >
+                    {{ st.points }} Poin
+                  </span>
+                </div>
+
+                <!-- Info Wali & BK -->
+                <div class="text-[11px] text-slate-500 space-y-0.5 py-2 border-y border-slate-100 mb-3">
+                  <div class="flex justify-between">
+                    <span>Wali Kelas:</span>
+                    <span class="text-slate-700 font-medium">{{ st.waliKelas }}</span>
+                  </div>
+                  <div class="flex justify-between">
+                    <span>Guru BK:</span>
+                    <span class="text-slate-700 font-medium">{{ st.guruBK }}</span>
+                  </div>
+                </div>
+
+                <!-- Pelanggaran Terakhir / Terberat -->
+                <div class="space-y-1.5 mb-4">
+                  <span class="text-[11px] font-medium text-slate-500 block">Catatan Pelanggaran Terakhir:</span>
+                  <div class="p-2.5 rounded-lg bg-slate-50 border border-slate-200/80">
+                    <div class="flex items-center justify-between gap-2">
+                      <span class="text-xs font-medium text-slate-800 line-clamp-1">
+                        {{ st.violations && st.violations.length > 0 ? st.violations[0].title : 'Pelanggaran Tata Tertib' }}
+                      </span>
+                      <span
+                        v-if="st.violations && st.violations.length > 0"
+                        class="text-[10px] font-semibold px-1.5 py-0.2 rounded"
+                        :class="st.violations[0].status === 'Selesai Pembinaan' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'"
+                      >
+                        {{ st.violations[0].status }}
+                      </span>
+                    </div>
+                    <div class="flex items-center justify-between text-[11px] text-slate-400 mt-1">
+                      <span>{{ st.violations && st.violations.length > 0 ? st.violations[0].date : '-' }}</span>
+                      <span v-if="st.violations && st.violations.some(v => v.photoUrl)" class="inline-flex items-center gap-1 text-blue-600 font-medium">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                        </svg>
+                        <span>Foto Ada</span>
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Tombol Aksi Buka Detail -->
+              <div class="flex items-center gap-2 pt-1">
+                <button
+                  type="button"
+                  @click="openViolatingStudentDetail(st)"
+                  class="interactive-btn flex-1 py-2 px-3 bg-slate-900 hover:bg-slate-800 active:bg-black text-white rounded-lg text-xs font-medium text-center cursor-pointer flex items-center justify-center gap-1.5 shadow-2xs"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                  </svg>
+                  <span>Lihat Riwayat &amp; Foto</span>
+                </button>
+                <button
+                  type="button"
+                  @click="openConsultationForStudent(st)"
+                  class="interactive-btn p-2 bg-white hover:bg-emerald-50 active:bg-emerald-100 text-slate-600 hover:text-emerald-700 rounded-lg border border-slate-200 hover:border-emerald-200 cursor-pointer"
+                  title="Konsultasikan Siswa ke BK"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                  </svg>
+                </button>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- Empty State -->
+          <div v-else class="bg-white rounded-xl border border-slate-200 p-8 text-center max-w-md mx-auto">
+            <div class="w-10 h-10 mx-auto rounded-full bg-slate-100 flex items-center justify-center text-slate-400 mb-2">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <p class="text-xs font-semibold text-slate-800">Tidak ada data siswa yang cocok</p>
+            <p class="text-xs text-slate-500 mt-1">Coba sesuaikan kata kunci pencarian atau ganti filter kategori.</p>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- C. SECTION: HASIL PENCARIAN & RIWAYAT FOTO SISWA             -->
       <!-- ============================================================ -->
       <section id="section-cari" class="px-4 sm:px-6 lg:px-8 py-8 sm:py-12 max-w-6xl mx-auto w-full">
         
@@ -642,7 +888,7 @@
         <div class="max-w-4xl mx-auto bg-white rounded-2xl border border-slate-200 overflow-hidden">
           <div class="overflow-x-auto">
             <table class="w-full text-left text-xs sm:text-sm">
-              <thead class="bg-slate-50 text-slate-500 font-semibold border-b border-slate-200 uppercase text-[11px]">
+              <thead class="bg-slate-50/50 border-b border-slate-200 text-[11px] font-semibold uppercase tracking-wider text-slate-500">
                 <tr>
                   <th class="py-3 px-4">Jenis Pelanggaran</th>
                   <th class="py-3 px-3 text-center">Poin</th>
@@ -655,7 +901,7 @@
                     {{ rule.title }}
                   </td>
                   <td class="py-3 px-3 text-center">
-                    <span class="px-2 py-0.5 bg-rose-50 text-rose-700 font-bold rounded text-xs">
+                    <span class="text-xs font-semibold text-rose-600 font-mono">
                       +{{ rule.points }}
                     </span>
                   </td>
@@ -817,17 +1063,17 @@
     <nav class="lg:hidden fixed bottom-4 left-4 right-4 z-40 max-w-sm mx-auto">
       <div class="bg-blue-600 rounded-3xl shadow-xl shadow-blue-600/35 h-[68px] px-1 flex items-center relative select-none">
         
-        <!-- Sliding Elevated Animated Indicator (Geser & Naik ke Atas / Tidak Sejajar) -->
+        <!-- Sliding Elevated Animated Indicator -->
         <div 
-          class="absolute top-0 bottom-0 left-0 w-1/4 flex items-center justify-center pointer-events-none transition-transform duration-300 ease-[cubic-bezier(0.34,1.35,0.64,1)] z-10"
+          class="absolute top-0 bottom-0 left-0 w-1/5 flex items-center justify-center pointer-events-none transition-transform duration-300 ease-[cubic-bezier(0.34,1.35,0.64,1)] z-10"
           :style="{
             transform: `translateX(${activeBottomIndex * 100}%)`
           }"
         >
-          <div class="w-[62px] h-[62px] rounded-full bg-white flex items-center justify-center shadow-xl shadow-blue-950/35 border-[3px] border-white -translate-y-4 transition-transform duration-200">
-            <div class="w-[48px] h-[48px] rounded-full bg-blue-600 flex flex-col items-center justify-center shadow-inner">
-              <component :is="bottomNavTabs[activeBottomIndex].icon" class="w-5 h-5 text-white" />
-              <span class="text-[7.5px] font-black text-white leading-none mt-0.5 tracking-tight px-0.5">
+          <div class="w-[58px] h-[58px] rounded-full bg-white flex items-center justify-center shadow-xl shadow-blue-950/35 border-[3px] border-white -translate-y-4 transition-transform duration-200">
+            <div class="w-[46px] h-[46px] rounded-full bg-blue-600 flex flex-col items-center justify-center shadow-inner">
+              <component :is="bottomNavTabs[activeBottomIndex].icon" class="w-4 h-4 text-white" />
+              <span class="text-[7.5px] font-bold text-white leading-none mt-0.5 tracking-tight px-0.5">
                 {{ bottomNavTabs[activeBottomIndex].label }}
               </span>
             </div>
@@ -866,7 +1112,7 @@
         <!-- Modal Photo Header -->
         <div class="p-4 bg-slate-900 text-white flex items-center justify-between">
           <div class="flex items-center gap-2">
-            <span class="p-1.5 rounded-lg bg-rose-500/20 text-rose-300 font-bold text-xs">
+            <span class="text-xs font-semibold text-rose-400 font-mono">
               +{{ activePhotoModal.points }} Poin
             </span>
             <div>
@@ -986,35 +1232,49 @@
 
         <!-- Student List in Class -->
         <div class="flex-1 overflow-y-auto py-3 space-y-2">
-          <h4 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Daftar Siswa:</h4>
+          <div class="flex items-center justify-between mb-2">
+            <h4 class="text-xs font-semibold text-slate-600">Daftar Siswa di Kelas:</h4>
+            <button
+              type="button"
+              @click="classOnlyViolations = !classOnlyViolations"
+              class="text-xs px-2.5 py-1 rounded-lg border transition font-medium cursor-pointer"
+              :class="classOnlyViolations ? 'bg-rose-50 text-rose-700 border-rose-200 font-semibold' : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'"
+            >
+              {{ classOnlyViolations ? 'Menampilkan Siswa Melanggar' : 'Filter Siswa Melanggar' }}
+            </button>
+          </div>
           
           <div
-            v-for="(st, idx) in activeClassModal.students"
+            v-for="(st, idx) in filteredClassStudents"
             :key="idx"
             class="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 hover:bg-blue-50 transition border border-slate-100 text-xs"
           >
             <div class="flex items-center gap-2.5">
-              <span class="w-5 text-slate-400 font-bold text-center text-[11px]">{{ idx + 1 }}</span>
+              <span class="w-5 text-slate-400 font-medium text-center text-[11px]">{{ idx + 1 }}</span>
               <div>
-                <span class="font-bold text-slate-900 block leading-tight">{{ st.name }}</span>
-                <span class="text-[10px] text-slate-400">NISN: {{ st.nisn }}</span>
+                <span class="font-semibold text-slate-900 block leading-tight">{{ st.name }}</span>
+                <span class="text-[10px] text-slate-400 font-mono">NISN: {{ st.nisn }}</span>
               </div>
             </div>
 
             <div class="flex items-center gap-2">
               <span
-                class="px-2 py-0.5 rounded text-[10px] font-bold"
-                :class="st.points === 0 ? 'bg-emerald-50 text-emerald-700' : 'bg-rose-50 text-rose-700'"
+                class="px-2 py-0.5 rounded text-[11px] font-medium"
+                :class="st.points === 0 ? 'bg-emerald-50 text-emerald-700' : 'bg-rose-50 text-rose-700 border border-rose-200'"
               >
                 {{ st.points === 0 ? '0 Poin' : `+${st.points} Poin` }}
               </span>
               <button
                 @click="openStudentDetailFromClass(st, activeClassModal)"
-                class="px-2.5 py-1 bg-white hover:bg-slate-800 hover:text-white border border-slate-200 rounded-lg text-[10px] font-semibold transition cursor-pointer"
+                class="px-2.5 py-1 bg-white hover:bg-slate-800 hover:text-white border border-slate-200 rounded-lg text-xs font-medium transition cursor-pointer"
               >
                 Lihat Catatan
               </button>
             </div>
+          </div>
+
+          <div v-if="filteredClassStudents.length === 0" class="py-6 text-center text-xs text-slate-400 bg-slate-50 rounded-xl border border-slate-100">
+            Tidak ada siswa dengan catatan pelanggaran di kelas ini.
           </div>
         </div>
 
@@ -1082,10 +1342,9 @@
           <div class="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200 shadow-2xs">
             <div class="flex items-center justify-between pb-3 border-b border-slate-100 mb-3">
               <div class="flex items-center gap-2">
-                <span class="w-2 h-2 rounded-full bg-blue-600"></span>
                 <h4 class="text-xs font-bold uppercase tracking-wider text-slate-700">Data Rombongan Belajar (Kelas)</h4>
               </div>
-              <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200/60">
+              <span class="text-xs font-bold text-slate-700">
                 {{ activeStudentDetailModal.class }}
               </span>
             </div>
@@ -1164,7 +1423,6 @@
           <div class="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200 shadow-2xs space-y-3">
             <div class="flex items-center justify-between pb-2 border-b border-slate-100">
               <div class="flex items-center gap-2">
-                <span class="w-2 h-2 rounded-full bg-rose-500"></span>
                 <h4 class="text-xs font-bold uppercase tracking-wider text-slate-700">
                   Catatan Pelanggaran &amp; Bukti Foto Dokumentasi
                 </h4>
@@ -1200,7 +1458,7 @@
                 <!-- Header Pelanggaran -->
                 <div class="flex items-start justify-between gap-3 mb-2">
                   <div class="flex items-start gap-2.5">
-                    <span class="px-2 py-0.5 rounded-md bg-rose-100 text-rose-800 text-[11px] font-bold shrink-0 mt-0.5">
+                    <span class="text-xs font-bold text-rose-600 shrink-0 mt-0.5">
                       +{{ v.points }} Poin
                     </span>
                     <div>
@@ -1214,8 +1472,8 @@
                   </div>
 
                   <span
-                    class="px-2 py-0.5 rounded text-[10px] font-semibold shrink-0"
-                    :class="v.status === 'Selesai Pembinaan' ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'"
+                    class="text-xs font-medium shrink-0"
+                    :class="v.status === 'Selesai Pembinaan' ? 'text-emerald-700' : 'text-amber-700'"
                   >
                     {{ v.status }}
                   </span>
@@ -1237,8 +1495,8 @@
                       </svg>
                       <span>Lampiran Foto Bukti Kejadian</span>
                     </div>
-                    <span class="text-[10px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200/60 flex items-center gap-1">
-                      <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                    <span class="text-xs font-medium text-emerald-700 flex items-center gap-1">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
                       </svg>
                       <span>Bukti Terverifikasi</span>
@@ -1377,6 +1635,10 @@ const IconRules = () => h('svg', { xmlns: 'http://www.w3.org/2000/svg', fill: 'n
   h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', d: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z' })
 ])
 
+const IconAlert = () => h('svg', { xmlns: 'http://www.w3.org/2000/svg', fill: 'none', viewBox: '0 0 24 24', stroke: 'currentColor', 'stroke-width': 2 }, [
+  h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', d: 'M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z' })
+])
+
 const IconPhone = () => h('svg', { xmlns: 'http://www.w3.org/2000/svg', fill: 'none', viewBox: '0 0 24 24', stroke: 'currentColor', 'stroke-width': 2 }, [
   h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', d: 'M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z' })
 ])
@@ -1384,6 +1646,7 @@ const IconPhone = () => h('svg', { xmlns: 'http://www.w3.org/2000/svg', fill: 'n
 // Navigation Items for Desktop Sidebar
 const navSections = [
   { id: 'section-beranda', label: 'Beranda', icon: IconHome },
+  { id: 'section-pelanggaran', label: 'Siswa Melanggar', icon: IconAlert },
   { id: 'section-cari', label: 'Pencarian Siswa', icon: IconSearch },
   { id: 'section-kelas', label: 'Daftar Kelas', icon: IconClass },
   { id: 'section-tata-tertib', label: 'Tata Tertib', icon: IconRules },
@@ -1393,6 +1656,7 @@ const navSections = [
 // 4 Bottom Navigation Tabs (Floating Animated Elevated Bar)
 const bottomNavTabs = [
   { key: 'beranda', id: 'section-beranda', label: 'Beranda', icon: IconHome },
+  { key: 'pelanggaran', id: 'section-pelanggaran', label: 'Melanggar', icon: IconAlert },
   { key: 'cari', id: 'section-cari', label: 'Cari', icon: IconSearch },
   { key: 'kelas', id: 'section-kelas', label: 'Kelas', icon: IconClass },
   { key: 'tata-tertib', id: 'section-tata-tertib', label: 'Aturan', icon: IconRules }
@@ -2247,9 +2511,100 @@ const filteredClasses = computed(() => {
   })
 })
 
+// State & Filter Siswa Melanggar
+const violationFilterTab = ref('semua')
+const violationSearchQuery = ref('')
+const violationLevelFilter = ref('Semua Tingkat')
+const classOnlyViolations = ref(false)
+
+const violatingStudents = computed(() => {
+  const list = []
+  const seenNisns = new Set()
+
+  for (const s of studentsDb) {
+    if ((s.points > 0 || (s.violations && s.violations.length > 0)) && !seenNisns.has(s.nisn)) {
+      seenNisns.add(s.nisn)
+      list.push(s)
+    }
+  }
+
+  for (const c of classesDb) {
+    for (const st of c.students) {
+      if (st.points > 0 && !seenNisns.has(st.nisn)) {
+        seenNisns.add(st.nisn)
+        const fullStudent = resolveStudentData(st.nisn, c)
+        if (fullStudent) {
+          list.push(fullStudent)
+        }
+      }
+    }
+  }
+
+  return list.sort((a, b) => b.points - a.points)
+})
+
+const violatingStudentsHighPointsCount = computed(() => {
+  return violatingStudents.value.filter(s => s.points >= 20).length
+})
+
+const violatingStudentsWithPhotosCount = computed(() => {
+  return violatingStudents.value.filter(s => s.violations && s.violations.some(v => v.photoUrl)).length
+})
+
+const filteredViolatingStudents = computed(() => {
+  return violatingStudents.value.filter(s => {
+    if (violationFilterTab.value === 'perhatian' && s.points < 20) return false
+    if (violationFilterTab.value === 'pembinaan') {
+      const hasActive = s.violations && s.violations.some(v => v.status === 'Dalam Pembinaan')
+      if (!hasActive) return false
+    }
+    if (violationFilterTab.value === 'selesai') {
+      const allDone = s.violations && s.violations.every(v => v.status === 'Selesai Pembinaan')
+      if (!allDone) return false
+    }
+    if (violationFilterTab.value === 'foto') {
+      const hasPhoto = s.violations && s.violations.some(v => v.photoUrl)
+      if (!hasPhoto) return false
+    }
+
+    if (violationLevelFilter.value !== 'Semua Tingkat') {
+      if (violationLevelFilter.value.includes('10') && !s.class.startsWith('X ') && !s.class.startsWith('X-')) return false
+      if (violationLevelFilter.value.includes('11') && !s.class.startsWith('XI ') && !s.class.startsWith('XI-')) return false
+      if (violationLevelFilter.value.includes('12') && !s.class.startsWith('XII ') && !s.class.startsWith('XII-')) return false
+    }
+
+    if (violationSearchQuery.value) {
+      const q = violationSearchQuery.value.toLowerCase().trim()
+      const matchName = s.name.toLowerCase().includes(q)
+      const matchNisn = s.nisn.toLowerCase().includes(q)
+      const matchClass = s.class.toLowerCase().includes(q)
+      if (!matchName && !matchNisn && !matchClass) return false
+    }
+
+    return true
+  })
+})
+
+const openViolatingStudentDetail = (st) => {
+  activeStudentDetailModal.value = st
+  searchQuery.value = st.nisn
+}
+
+const openConsultationForStudent = (st) => {
+  consultForm.student = `${st.name} (${st.class})`
+  consultForm.topic = `Konsultasi catatan poin pelanggaran ananda (${st.points} Poin)`
+  scrollToSection('section-kontak', 5)
+}
+
+const filteredClassStudents = computed(() => {
+  if (!activeClassModal.value || !activeClassModal.value.students) return []
+  if (!classOnlyViolations.value) return activeClassModal.value.students
+  return activeClassModal.value.students.filter(s => s.points > 0)
+})
+
 const selectStudentByNisn = (nisn) => {
   searchQuery.value = nisn
-  scrollToSection('section-cari', 1)
+  scrollToSection('section-cari', 2)
 }
 
 const openStudentDetailFromClass = (st, classObj) => {
@@ -2284,6 +2639,7 @@ const checkFromModal = (nisn) => {
 }
 
 const openClassDetail = (rombel) => {
+  classOnlyViolations.value = false
   activeClassModal.value = rombel
 }
 

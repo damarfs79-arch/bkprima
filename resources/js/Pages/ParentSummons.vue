@@ -5,21 +5,12 @@
       <!-- ============================================================ -->
       <!-- 1. HEADER SECTION                                            -->
       <!-- ============================================================ -->
-      <div class="bg-white rounded-3xl p-5 sm:p-6 border border-slate-200/90 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div class="bg-white rounded-xl p-5 sm:p-6 border border-slate-200 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <div class="flex items-center gap-2 mb-1">
-            <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-rose-50 text-rose-700 border border-rose-200/70">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor">
-                <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
-                <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
-              </svg>
-              Layanan Advokasi &amp; Penanganan Kasus Siswa
-            </span>
-            <span class="inline-flex items-center gap-1 text-[11px] font-semibold text-slate-400">
-              &bull; Format Resmi Dinas
-            </span>
-          </div>
-          <h1 class="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+          <p class="text-xs font-semibold uppercase tracking-wider text-rose-600 mb-1">
+            Layanan Advokasi &amp; Penanganan Kasus Siswa
+          </p>
+          <h1 class="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
             Pemanggilan Orang Tua Siswa
           </h1>
           <p class="text-xs text-slate-500 mt-0.5">
@@ -30,7 +21,7 @@
         <div class="flex items-center gap-2.5 self-start sm:self-auto">
           <button
             @click="openNewSummonsModal"
-            class="inline-flex items-center gap-2 bg-rose-600 hover:bg-rose-700 active:scale-95 text-white font-bold px-4 py-2.5 rounded-xl text-xs shadow-md shadow-rose-600/20 transition cursor-pointer shrink-0"
+            class="inline-flex items-center gap-2 bg-rose-600 hover:bg-rose-700 text-white font-semibold px-4 py-2 rounded-lg text-xs transition cursor-pointer shrink-0"
           >
             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
@@ -45,69 +36,69 @@
       <!-- ============================================================ -->
       <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         <!-- Total Panggilan -->
-        <div class="bg-white rounded-3xl p-5 border border-slate-200/80 shadow-2xs space-y-1">
+        <div class="bg-white rounded-xl p-5 border border-slate-200 shadow-xs space-y-1">
           <div class="flex justify-between items-center mb-1">
-            <span class="text-xs font-bold text-slate-500">Total Surat Terbit</span>
-            <span class="w-7 h-7 rounded-lg bg-slate-100 text-slate-600 flex items-center justify-center">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <span class="text-xs font-semibold uppercase tracking-wider text-slate-500">Total Surat</span>
+            <span class="w-6 h-6 rounded-md bg-slate-100 text-slate-600 flex items-center justify-center">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
             </span>
           </div>
-          <div class="text-2xl sm:text-3xl font-black text-slate-900">{{ summonsList.length }}</div>
-          <p class="text-[11px] font-semibold text-slate-500">Semester Ganjil 2024/2025</p>
+          <div class="text-2xl sm:text-3xl font-bold text-slate-900">{{ summonsList.length }}</div>
+          <p class="text-xs text-slate-500 font-medium">Semester Ganjil 2024/2025</p>
         </div>
 
         <!-- Menunggu Kehadiran -->
-        <div class="bg-white rounded-3xl p-5 border border-amber-200/80 shadow-2xs space-y-1 bg-amber-50/20">
+        <div class="bg-white rounded-xl p-5 border border-slate-200 shadow-xs space-y-1">
           <div class="flex justify-between items-center mb-1">
-            <span class="text-xs font-bold text-amber-700">Menunggu Kehadiran</span>
-            <span class="w-7 h-7 rounded-lg bg-amber-100 text-amber-700 flex items-center justify-center">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <span class="text-xs font-semibold uppercase tracking-wider text-slate-500">Menunggu Kehadiran</span>
+            <span class="w-6 h-6 rounded-md bg-slate-100 text-slate-600 flex items-center justify-center">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </span>
           </div>
-          <div class="text-2xl sm:text-3xl font-black text-amber-700">{{ stats.waiting }}</div>
-          <p class="text-[11px] font-semibold text-amber-600">Jadwal sidang minggu ini</p>
+          <div class="text-2xl sm:text-3xl font-bold text-slate-900">{{ stats.waiting }}</div>
+          <p class="text-xs text-amber-700 font-medium">Jadwal sidang minggu ini</p>
         </div>
 
         <!-- Mediasi Selesai -->
-        <div class="bg-white rounded-3xl p-5 border border-emerald-200/80 shadow-2xs space-y-1 bg-emerald-50/20">
+        <div class="bg-white rounded-xl p-5 border border-slate-200 shadow-xs space-y-1">
           <div class="flex justify-between items-center mb-1">
-            <span class="text-xs font-bold text-emerald-700">Mediasi Selesai</span>
-            <span class="w-7 h-7 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <span class="text-xs font-semibold uppercase tracking-wider text-slate-500">Mediasi Selesai</span>
+            <span class="w-6 h-6 rounded-md bg-slate-100 text-slate-600 flex items-center justify-center">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </span>
           </div>
-          <div class="text-2xl sm:text-3xl font-black text-emerald-700">{{ stats.resolved }}</div>
-          <p class="text-[11px] font-semibold text-emerald-600">Ada berita acara komitmen</p>
+          <div class="text-2xl sm:text-3xl font-bold text-slate-900">{{ stats.resolved }}</div>
+          <p class="text-xs text-emerald-700 font-medium">Ada berita acara komitmen</p>
         </div>
 
         <!-- SP-3 Konferensi Kasus -->
-        <div class="bg-white rounded-3xl p-5 border border-rose-200/80 shadow-2xs space-y-1 bg-rose-50/20">
+        <div class="bg-white rounded-xl p-5 border border-slate-200 shadow-xs space-y-1">
           <div class="flex justify-between items-center mb-1">
-            <span class="text-xs font-bold text-rose-700">SP-3 / Sidang Pleno</span>
-            <span class="w-7 h-7 rounded-lg bg-rose-100 text-rose-700 flex items-center justify-center">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <span class="text-xs font-semibold uppercase tracking-wider text-rose-600">SP-3 / Sidang Pleno</span>
+            <span class="w-6 h-6 rounded-md bg-rose-50 text-rose-600 flex items-center justify-center">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
               </svg>
             </span>
           </div>
-          <div class="text-2xl sm:text-3xl font-black text-rose-700">{{ stats.sp3 }}</div>
-          <p class="text-[11px] font-semibold text-rose-600">Kasus berat / butuh waka</p>
+          <div class="text-2xl sm:text-3xl font-bold text-slate-900">{{ stats.sp3 }}</div>
+          <p class="text-xs text-rose-600 font-medium">Kasus berat / butuh waka</p>
         </div>
       </div>
 
       <!-- ============================================================ -->
       <!-- 3. MAIN TABLE & FILTER PANEL                                 -->
       <!-- ============================================================ -->
-      <div class="bg-white rounded-3xl border border-slate-200/90 shadow-xs overflow-hidden">
+      <div class="bg-white rounded-xl border border-slate-200 shadow-xs overflow-hidden">
         
         <!-- Filter Toolbar -->
-        <div class="p-4 sm:p-5 bg-slate-50/70 border-b border-slate-200/80 flex flex-col md:flex-row md:items-center justify-between gap-3">
+        <div class="p-4 sm:p-5 bg-white border-b border-slate-200 flex flex-col md:flex-row md:items-center justify-between gap-3">
           
           <!-- Category Pills -->
           <div class="flex items-center gap-1.5 overflow-x-auto scrollbar-hide py-1">
@@ -115,8 +106,8 @@
               v-for="cat in filterCategories"
               :key="cat.key"
               @click="activeCategory = cat.key"
-              class="px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer whitespace-nowrap"
-              :class="activeCategory === cat.key ? 'bg-blue-600 text-white shadow-2xs' : 'bg-white text-slate-600 hover:text-slate-900 border border-slate-200'"
+              class="px-3 py-1.5 rounded-lg text-xs font-semibold transition cursor-pointer whitespace-nowrap"
+              :class="activeCategory === cat.key ? 'bg-blue-600 text-white shadow-xs' : 'bg-white text-slate-600 hover:text-slate-900 border border-slate-200'"
             >
               {{ cat.label }}
             </button>
@@ -129,7 +120,7 @@
                 v-model="searchQuery"
                 type="text"
                 placeholder="Cari siswa, NISN, no surat..."
-                class="w-full bg-white border border-slate-200 rounded-xl pl-9 pr-4 py-2 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition"
+                class="w-full bg-white border border-slate-300 rounded-lg pl-9 pr-4 py-2 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
               />
               <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -140,7 +131,7 @@
 
             <select
               v-model="selectedClassFilter"
-              class="bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 cursor-pointer"
+              class="bg-white border border-slate-300 rounded-lg px-3 py-2 text-xs font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 cursor-pointer"
             >
               <option value="ALL">Semua Kelas</option>
               <option value="X">Kelas 10 (X)</option>
@@ -449,7 +440,6 @@
           <!-- Modal Top Toolbar -->
           <div class="p-4 border-b border-slate-200 flex items-center justify-between bg-slate-50 no-print">
             <div class="flex items-center gap-2">
-              <span class="w-2.5 h-2.5 rounded-full bg-rose-600"></span>
               <span class="font-bold text-slate-900 text-xs sm:text-sm">Pratinjau Surat Panggilan Resmi (Format Dinas)</span>
             </div>
             <div class="flex items-center gap-2">
@@ -664,7 +654,7 @@
 
 <script setup>
 import AppLayout from '../Layouts/AppLayout.vue'
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 
 const activeCategory = ref('ALL')
 const selectedClassFilter = ref('ALL')
@@ -922,6 +912,24 @@ const sendWhatsApp = (item) => {
 const printLetter = () => {
   window.print()
 }
+
+onMounted(() => {
+  const urlParams = new URLSearchParams(window.location.search)
+  const nama = urlParams.get('nama')
+  if (nama) {
+    newSummons.value.studentName = nama
+    newSummons.value.nisn = urlParams.get('nisn') || ''
+    newSummons.value.className = urlParams.get('kelas') || 'X RPL 1'
+    newSummons.value.gradeLevel = newSummons.value.className.startsWith('X ') ? 'X' : (newSummons.value.className.startsWith('XI ') ? 'XI' : 'XII')
+    newSummons.value.caseTitle = urlParams.get('alasan') || 'Alpa (Tanpa Keterangan) Selama 3 Hari dalam 1 Minggu'
+    newSummons.value.points = Number(urlParams.get('poin')) || 30
+    newSummons.value.stage = urlParams.get('stage') || 'SP-1'
+    newSummons.value.parentName = urlParams.get('wali') || `Bpk/Ibu ${nama}`
+    newSummons.value.parentPhone = urlParams.get('phone') || '+62 812-3456-7890'
+    newSummons.value.letterNumber = `421.5/0${82 + summonsList.value.length}/BK/SMK-PGRI5/X/2026`
+    showNewModal.value = true
+  }
+})
 </script>
 
 <style scoped>

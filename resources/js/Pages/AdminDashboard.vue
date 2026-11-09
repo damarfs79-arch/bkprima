@@ -11,78 +11,56 @@
       <div class="bg-white rounded-lg p-5 sm:p-6 border border-slate-200">
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <div class="flex items-center gap-2 text-xs font-semibold text-slate-500 mb-1">
-              <span class="text-blue-700 font-bold uppercase tracking-wider text-[11px]">Role Administrator Utama</span>
+            <div class="flex items-center gap-2 text-xs font-medium text-slate-500 mb-1">
+              <span class="text-blue-700 font-semibold text-xs">Role Administrator Utama</span>
               <span>&bull;</span>
-              <span class="inline-flex items-center gap-1.5 text-emerald-700 text-xs font-medium">
-                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+              <span class="text-emerald-700 text-xs font-medium">
                 Sistem Aktif
               </span>
             </div>
-            <h1 class="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">Panel Administrasi BK Prima</h1>
+            <h1 class="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">Panel Administrasi BK Prima</h1>
             <p class="text-xs sm:text-sm text-slate-500 mt-0.5">Kelola data Guru BK, Rombel Kelas, Siswa, dan pantau tren fluktuasi kehadiran 1 bulan.</p>
           </div>
 
           <!-- Quick Action Buttons -->
-          <div class="flex items-center gap-2">
+          <div class="flex items-center gap-2 flex-wrap">
             <button
               @click="openModal('guru')"
-              class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-semibold bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 transition cursor-pointer"
+              class="interactive-btn inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-medium bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 hover:border-slate-300 cursor-pointer"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4" />
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M12 4v16m8-8H4" />
               </svg>
               <span>Guru BK</span>
             </button>
             <button
               @click="openModal('kelas')"
-              class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-semibold bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 transition cursor-pointer"
+              class="interactive-btn inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-medium bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 hover:border-slate-300 cursor-pointer"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4" />
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M12 4v16m8-8H4" />
               </svg>
               <span>Kelas</span>
             </button>
             <button
               @click="openModal('import-siswa')"
-              class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-semibold bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 transition cursor-pointer"
+              class="interactive-btn inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-medium bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 hover:border-emerald-300 cursor-pointer"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
               </svg>
               <span>Import Siswa</span>
             </button>
             <button
               @click="openModal('siswa')"
-              class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white transition cursor-pointer"
+              class="interactive-btn inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-medium bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white shadow-xs hover:shadow cursor-pointer"
             >
               <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M12 4v16m8-8H4" />
               </svg>
               <span>Tambah Siswa</span>
             </button>
           </div>
-        </div>
-
-        <!-- Segmented Tab Navigation -->
-        <div class="flex items-center gap-1.5 mt-5 pt-4 border-t border-slate-100 overflow-x-auto scrollbar-hide text-xs">
-          <button
-            v-for="tab in tabs"
-            :key="tab.id"
-            @click="activeTab = tab.id"
-            class="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg font-semibold transition cursor-pointer shrink-0"
-            :class="activeTab === tab.id ? 'bg-slate-900 text-white' : 'bg-slate-100 hover:bg-slate-200 text-slate-700'"
-          >
-            <component :is="tab.icon" class="w-4 h-4" />
-            <span>{{ tab.label }}</span>
-            <span
-              v-if="tab.count !== undefined"
-              class="px-1.5 py-0.5 rounded text-[10px] font-bold"
-              :class="activeTab === tab.id ? 'bg-slate-800 text-slate-200' : 'bg-white text-slate-700 border border-slate-200'"
-            >
-              {{ tab.count }}
-            </span>
-          </button>
         </div>
       </div>
 
@@ -125,53 +103,53 @@
         <!-- 4 Metric Cards -->
         <div class="grid grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-4">
           <!-- Total Guru BK -->
-          <div class="p-4 sm:p-5 bg-white rounded-lg border border-slate-200">
+          <div class="interactive-card p-4 sm:p-5 bg-white rounded-lg border border-slate-200 hover:border-slate-300 group cursor-default">
             <div class="flex items-center justify-between text-slate-400 mb-2">
-              <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500">GURU BK AKTIF</span>
-              <div class="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
+              <span class="text-xs font-medium text-slate-500">Guru BK Aktif</span>
+              <div class="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center transition-transform duration-200 group-hover:scale-110">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
                 </svg>
               </div>
             </div>
-            <div class="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">{{ guruBkList.length }}</div>
+            <div class="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">{{ guruBkList.length }}</div>
             <p class="text-[11px] text-slate-400 font-medium mt-0.5">Semua bersertifikasi resmi</p>
           </div>
 
           <!-- Total Kelas -->
-          <div class="p-4 sm:p-5 bg-white rounded-lg border border-slate-200">
+          <div class="interactive-card p-4 sm:p-5 bg-white rounded-lg border border-slate-200 hover:border-slate-300 group cursor-default">
             <div class="flex items-center justify-between text-slate-400 mb-2">
-              <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500">TOTAL ROMBEL</span>
-              <div class="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center">
+              <span class="text-xs font-medium text-slate-500">Total Rombel</span>
+              <div class="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center transition-transform duration-200 group-hover:scale-110">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                 </svg>
               </div>
             </div>
-            <div class="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">{{ kelasList.length }}</div>
+            <div class="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">{{ kelasList.length }}</div>
             <p class="text-[11px] text-slate-400 font-medium mt-0.5">6 Jurusan terdaftar aktif</p>
           </div>
 
           <!-- Total Siswa -->
-          <div class="p-4 sm:p-5 bg-white rounded-lg border border-slate-200">
+          <div class="interactive-card p-4 sm:p-5 bg-white rounded-lg border border-slate-200 hover:border-slate-300 group cursor-default">
             <div class="flex items-center justify-between text-slate-400 mb-2">
-              <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500">TOTAL SISWA</span>
-              <div class="w-8 h-8 rounded-lg bg-sky-50 text-sky-600 flex items-center justify-center">
+              <span class="text-xs font-medium text-slate-500">Total Siswa</span>
+              <div class="w-8 h-8 rounded-lg bg-sky-50 text-sky-600 flex items-center justify-center transition-transform duration-200 group-hover:scale-110">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                 </svg>
               </div>
             </div>
-            <div class="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">{{ totalSiswaCount }}</div>
+            <div class="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">{{ totalSiswaCount }}</div>
             <p class="text-[11px] text-slate-400 font-medium mt-0.5">Sinkron Dapodik Semester Genap</p>
           </div>
 
           <!-- Kehadiran Rata-rata 1 Bulan (Card Bulat Mini Dinamis) -->
-          <div class="p-4 sm:p-5 bg-white rounded-lg border border-slate-200 relative overflow-hidden">
+          <div class="interactive-card p-4 sm:p-5 bg-white rounded-lg border border-slate-200 hover:border-slate-300 relative overflow-hidden group cursor-default">
             <div class="flex items-center justify-between text-slate-400 mb-2">
-              <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500">PRESENSI {{ currentMonthData.shortName.toUpperCase() }}</span>
+              <span class="text-xs font-medium text-slate-500">Presensi {{ currentMonthData.shortName }}</span>
               <div
-                class="w-8 h-8 rounded-lg flex items-center justify-center"
+                class="w-8 h-8 rounded-lg flex items-center justify-center transition-transform duration-200 group-hover:scale-110"
                 :class="currentMonthData.trend === 'naik' ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600'"
               >
                 <svg v-if="currentMonthData.trend === 'naik'" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -184,7 +162,7 @@
             </div>
             <div class="flex items-center justify-between">
               <div>
-                <div class="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">{{ currentCohortData.hadir.rate }}%</div>
+                <div class="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">{{ currentCohortData.hadir.rate }}%</div>
                 <div
                   class="flex items-center gap-1 text-[11px] font-bold mt-0.5"
                   :class="currentMonthData.trend === 'naik' ? 'text-emerald-600' : 'text-rose-600'"
@@ -214,7 +192,7 @@
                     transform="rotate(-90 27 27)"
                   />
                 </svg>
-                <span class="absolute text-[10px] font-black text-slate-800">{{ Math.round(currentCohortData.hadir.rate) }}%</span>
+                <span class="absolute text-[10px] font-bold text-slate-800">{{ Math.round(currentCohortData.hadir.rate) }}%</span>
               </div>
             </div>
           </div>
@@ -232,14 +210,14 @@
             <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-4 border-b border-slate-100">
               <div>
                 <!-- Eyebrow text tanpa pill badge melayang -->
-                <div class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1 flex items-center gap-1.5">
+                <div class="text-xs font-medium text-slate-500 mb-1 flex items-center gap-1.5">
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" />
                     <path stroke-linecap="round" stroke-linejoin="round" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z" />
                   </svg>
                   <span>Statistika Presensi Siswa &bull; Akumulasi 1 Bulan Penuh</span>
                 </div>
-                <h2 class="text-lg sm:text-xl font-black text-slate-900 tracking-tight">
+                <h2 class="text-lg sm:text-xl font-bold text-slate-900 tracking-tight">
                   Diagram Lingkaran Komposisi Kehadiran Siswa (1 Bulan)
                 </h2>
                 <p class="text-xs text-slate-500 mt-0.5">
@@ -336,11 +314,11 @@
                 </div>
                 <div>
                   <div class="flex items-center gap-2">
-                    <span class="text-xs font-bold uppercase tracking-wide">
+                    <span class="text-xs font-semibold">
                       {{ currentMonthData.trend === 'naik' ? 'Kenaikan Kehadiran Siswa:' : 'Penurunan Kehadiran Siswa:' }}
                     </span>
                     <span
-                      class="text-xs font-black px-2 py-0.5 rounded"
+                      class="text-xs font-bold px-2 py-0.5 rounded"
                       :class="currentMonthData.trend === 'naik' ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'"
                     >
                       {{ currentMonthData.delta }} pada {{ currentMonthData.name }}
@@ -354,14 +332,10 @@
                 </div>
               </div>
               <div
-                class="shrink-0 flex items-center gap-2 text-xs font-semibold px-3 py-1.5 rounded-lg border bg-white self-start sm:self-auto"
-                :class="currentMonthData.trend === 'naik' ? 'text-emerald-800 border-emerald-200' : 'text-rose-800 border-rose-200'"
+                class="shrink-0 text-xs font-semibold self-start sm:self-auto"
+                :class="currentMonthData.trend === 'naik' ? 'text-emerald-700' : 'text-rose-700'"
               >
-                <span
-                  class="w-2 h-2 rounded-full"
-                  :class="currentMonthData.trend === 'naik' ? 'bg-emerald-500' : 'bg-rose-500'"
-                ></span>
-                <span>{{ currentMonthData.trend === 'naik' ? 'Tren Positif / Melampaui Target' : 'Perlu Evaluasi Presensi' }}</span>
+                {{ currentMonthData.trend === 'naik' ? 'Tren Positif / Melampaui Target' : 'Perlu Evaluasi Presensi' }}
               </div>
             </div>
 
@@ -375,7 +349,7 @@
                   
                   <div class="w-full flex items-center justify-between text-xs text-slate-500 mb-2">
                     <span class="font-bold text-slate-700">Diagram Lingkaran Penuh</span>
-                    <span class="font-mono text-[11px] bg-slate-200 px-2 py-0.5 rounded font-bold">1 Bulan &bull; 100%</span>
+                    <span class="text-xs text-slate-500 font-mono">1 Bulan &bull; 100%</span>
                   </div>
 
                   <!-- SVG Solid Pie Chart -->
@@ -409,7 +383,7 @@
                               :x="slice.labelX"
                               :y="slice.labelY - 14"
                               text-anchor="middle"
-                              class="text-sm sm:text-base font-bold fill-white tracking-wide"
+                              class="text-sm sm:text-base font-bold fill-white"
                               style="text-shadow: 0 1px 3px rgba(0,0,0,0.3);"
                             >
                               {{ slice.label }}
@@ -418,7 +392,7 @@
                               :x="slice.labelX"
                               :y="slice.labelY + 20"
                               text-anchor="middle"
-                              class="text-3xl sm:text-4xl font-black fill-white"
+                              class="text-3xl sm:text-4xl font-bold fill-white"
                               style="text-shadow: 0 2px 4px rgba(0,0,0,0.35);"
                             >
                               {{ slice.rate }}%
@@ -462,7 +436,7 @@
                       v-if="hoveredPieSlice"
                       class="absolute top-2 left-1/2 -translate-x-1/2 bg-slate-900 text-white px-3.5 py-1.5 rounded-lg text-xs font-semibold border border-slate-800 pointer-events-none flex items-center gap-2 z-20 whitespace-nowrap animate-in fade-in zoom-in-95 duration-150"
                     >
-                      <span class="w-2.5 h-2.5 rounded-full shrink-0" :style="{ backgroundColor: hoveredPieSlice.color }"></span>
+                      <span class="w-2.5 h-2.5 rounded-xs shrink-0" :style="{ backgroundColor: hoveredPieSlice.color }"></span>
                       <span>{{ hoveredPieSlice.label }}: {{ hoveredPieSlice.rate }}%</span>
                       <span class="text-slate-400 font-normal">({{ hoveredPieSlice.count }} Siswa)</span>
                     </div>
@@ -479,10 +453,10 @@
                       @mouseleave="hoveredPieSlice = null"
                     >
                       <div class="flex items-center justify-center gap-1.5">
-                        <span class="w-2.5 h-2.5 rounded-full shrink-0" :style="{ backgroundColor: slice.color }"></span>
+                        <span class="w-2.5 h-2.5 rounded-xs shrink-0" :style="{ backgroundColor: slice.color }"></span>
                         <span class="font-bold text-slate-800 text-[11px]">{{ slice.label }}</span>
                       </div>
-                      <div class="font-black text-slate-900 text-xs mt-0.5">{{ slice.rate }}%</div>
+                      <div class="font-bold text-slate-900 text-xs mt-0.5">{{ slice.rate }}%</div>
                     </div>
                   </div>
 
@@ -508,11 +482,11 @@
                     >
                       <div class="flex items-center justify-between">
                         <div class="flex items-center gap-2.5">
-                          <span class="w-3.5 h-3.5 rounded-full shrink-0" :style="{ backgroundColor: slice.color }"></span>
+                          <span class="w-3 h-3 rounded-xs shrink-0" :style="{ backgroundColor: slice.color }"></span>
                           <span class="font-bold text-slate-800 text-xs sm:text-sm">{{ slice.label }}</span>
                         </div>
                         <div class="text-right">
-                          <span class="text-base sm:text-lg font-black text-slate-900">{{ slice.rate }}%</span>
+                          <span class="text-base sm:text-lg font-bold text-slate-900">{{ slice.rate }}%</span>
                         </div>
                       </div>
                       
@@ -538,11 +512,11 @@
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-blue-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                           <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                         </svg>
-                        <span class="text-xs font-bold uppercase tracking-wider text-slate-800">
+                        <span class="text-xs font-semibold text-slate-800">
                           Analisis Komparasi 1 Bulan: Hadir vs Sakit / Izin / Alpha
                         </span>
                       </div>
-                      <span class="text-[11px] font-bold text-blue-700 bg-blue-100 px-2.5 py-0.5 rounded border border-blue-200">
+                      <span class="text-xs font-medium text-slate-500">
                         Rasio {{ Math.round(currentCohortData.hadir.rate / Math.max(0.1, 100 - currentCohortData.hadir.rate)) }} : 1
                       </span>
                     </div>
@@ -550,8 +524,8 @@
                     <!-- 2-Box Metric Comparison -->
                     <div class="grid grid-cols-2 gap-3">
                       <div class="p-3.5 bg-white rounded-lg border border-slate-200">
-                        <span class="text-[10px] font-bold text-blue-600 uppercase tracking-wider block">Total Siswa Hadir</span>
-                        <div class="text-2xl sm:text-3xl font-black text-blue-700 tracking-tight mt-0.5">
+                        <span class="text-[11px] font-medium text-slate-500 block">Total Siswa Hadir</span>
+                        <div class="text-2xl sm:text-3xl font-bold text-blue-700 tracking-tight mt-0.5">
                           {{ currentCohortData.hadir.rate }}%
                         </div>
                         <p class="text-[11px] text-slate-500 font-medium mt-0.5">
@@ -560,8 +534,8 @@
                       </div>
 
                       <div class="p-3.5 bg-white rounded-lg border border-slate-200">
-                        <span class="text-[10px] font-bold text-rose-600 uppercase tracking-wider block">Total Ketidakhadiran (S+I+A)</span>
-                        <div class="text-2xl sm:text-3xl font-black text-rose-600 tracking-tight mt-0.5">
+                        <span class="text-[11px] font-medium text-slate-500 block">Total Ketidakhadiran (S+I+A)</span>
+                        <div class="text-2xl sm:text-3xl font-bold text-rose-600 tracking-tight mt-0.5">
                           {{ (100 - currentCohortData.hadir.rate).toFixed(1) }}%
                         </div>
                         <p class="text-[11px] text-slate-500 font-medium mt-0.5">
@@ -577,13 +551,12 @@
 
                     <!-- Target Status Chip -->
                     <div class="p-3 bg-white rounded-lg border border-slate-200 flex items-center justify-between text-xs">
-                      <div class="flex items-center gap-2">
-                        <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                      <div>
                         <span class="text-slate-700 font-medium">Standar Target Kehadiran Sekolah: <strong>95.0%</strong></span>
                       </div>
                       <span
-                        class="font-bold px-2.5 py-1 rounded text-[11px]"
-                        :class="currentCohortData.hadir.rate >= 95 ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-amber-50 text-amber-700 border border-amber-200'"
+                        class="text-xs font-semibold"
+                        :class="currentCohortData.hadir.rate >= 95 ? 'text-emerald-700' : 'text-amber-700'"
                       >
                         {{ currentCohortData.hadir.rate >= 95 ? 'Terpenuhi (+' + (currentCohortData.hadir.rate - 95).toFixed(1) + '%)' : 'Di Bawah Standar (' + (currentCohortData.hadir.rate - 95).toFixed(1) + '%)' }}
                       </span>
@@ -606,7 +579,7 @@
                     </h3>
                     <p class="text-[11px] text-slate-400">Pilih salah satu bulan untuk melihat diagram lingkaran presensi pada bulan tersebut</p>
                   </div>
-                  <span class="text-[11px] font-bold text-slate-500 bg-slate-100 px-3 py-1 rounded-lg self-start sm:self-auto border border-slate-200">
+                  <span class="text-xs font-medium text-slate-500 self-start sm:self-auto">
                     {{ selectedAngkatanLabel }}
                   </span>
                 </div>
@@ -625,7 +598,7 @@
                     ]"
                   >
                     <div class="flex items-center justify-between text-xs font-bold mb-1">
-                      <span :class="selectedMonth === m.id ? 'text-blue-900 font-black' : 'text-slate-700'">{{ m.shortName }}</span>
+                      <span :class="selectedMonth === m.id ? 'text-blue-900 font-bold' : 'text-slate-700'">{{ m.shortName }}</span>
                       <span
                         class="text-[10px] font-bold px-1.5 py-0.5 rounded flex items-center gap-0.5"
                         :class="m.trend === 'naik' ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'"
@@ -640,7 +613,7 @@
                       </span>
                     </div>
 
-                    <div class="text-lg font-black text-slate-900 tracking-tight">{{ m.hadirRate }}%</div>
+                    <div class="text-lg font-bold text-slate-900 tracking-tight">{{ m.hadirRate }}%</div>
                     <span class="text-[10px] text-slate-400 block mt-0.5">Hadir Siswa</span>
 
                     <!-- Mini bar progress -->
@@ -653,11 +626,6 @@
                         }"
                       ></div>
                     </div>
-
-                    <span
-                      v-if="selectedMonth === m.id"
-                      class="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-blue-600"
-                    ></span>
                   </button>
                 </div>
               </div>
@@ -676,11 +644,11 @@
                       </svg>
                     </div>
                     <div>
-                      <span class="block text-[11px] font-bold text-emerald-800 uppercase">Kenaikan Tertinggi (Peak)</span>
+                      <span class="block text-xs font-semibold text-emerald-800">Kenaikan Tertinggi</span>
                       <span class="text-xs text-emerald-700 font-medium">Tgl 14 Oktober &bull; Kegiatan Apel Akbar</span>
                     </div>
                   </div>
-                  <span class="text-base font-black text-emerald-700">98.6%</span>
+                  <span class="text-base font-bold text-emerald-700">98.6%</span>
                 </div>
 
                 <div class="p-3.5 bg-rose-50 border border-rose-200 rounded-lg flex items-center justify-between">
@@ -691,11 +659,11 @@
                       </svg>
                     </div>
                     <div>
-                      <span class="block text-[11px] font-bold text-rose-800 uppercase">Penurunan Terendah (Dip)</span>
+                      <span class="block text-xs font-semibold text-rose-800">Penurunan Terendah</span>
                       <span class="text-xs text-rose-700 font-medium">Tgl 21 Oktober &bull; Banjir Akses Jalan</span>
                     </div>
                   </div>
-                  <span class="text-base font-black text-rose-700">88.2%</span>
+                  <span class="text-base font-bold text-rose-700">88.2%</span>
                 </div>
               </div>
 
@@ -768,7 +736,7 @@
                 </h3>
                 <p class="text-xs text-slate-400">Tingkat kehadiran siswa di 5 kompetensi keahlian SMK PGRI 05 Jember</p>
               </div>
-              <span class="text-[11px] font-bold text-slate-500 bg-slate-100 px-3 py-1 rounded-lg border border-slate-200 self-start sm:self-auto">
+              <span class="text-xs font-medium text-slate-500 self-start sm:self-auto">
                 Target Standar: 95.0%
               </span>
             </div>
@@ -796,10 +764,10 @@
                       class="transition-all duration-500"
                     />
                   </svg>
-                  <span class="absolute text-xs font-black text-slate-900">{{ j.rate }}%</span>
+                  <span class="absolute text-xs font-bold text-slate-900">{{ j.rate }}%</span>
                 </div>
 
-                <div class="font-black text-slate-900 text-sm mt-1">{{ j.name }}</div>
+                <div class="font-bold text-slate-900 text-sm mt-1">{{ j.name }}</div>
                 <div class="text-[11px] text-slate-400 line-clamp-1" :title="j.fullName">{{ j.fullName }}</div>
                 <div class="mt-2 text-[10px] font-bold px-2 py-0.5 rounded border" :class="j.rate >= 95 ? 'bg-emerald-50 text-emerald-800 border-emerald-200' : 'bg-amber-50 text-amber-800 border-amber-200'">
                   {{ j.status }}
@@ -840,11 +808,11 @@
                       class="transition-all duration-500"
                     />
                   </svg>
-                  <span class="absolute text-[11px] font-black text-slate-900">{{ w.rate }}%</span>
+                  <span class="absolute text-[11px] font-bold text-slate-900">{{ w.rate }}%</span>
                 </div>
 
                 <div class="min-w-0">
-                  <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">{{ w.week }}</span>
+                  <span class="text-xs font-medium text-slate-500 block">{{ w.week }}</span>
                   <div class="text-xs font-semibold text-slate-700 truncate">{{ w.range }}</div>
                   <div class="text-[11px] font-bold mt-0.5 truncate" :class="w.rate >= 95 ? 'text-emerald-600' : 'text-slate-500'">
                     {{ w.change }}
@@ -864,7 +832,7 @@
       <div v-if="activeTab === 'guru'" class="space-y-4">
         <div class="bg-white rounded-lg p-5 sm:p-6 border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
-            <h2 class="text-lg font-black text-slate-900 tracking-tight">Data Guru Bimbingan Konseling (BK)</h2>
+            <h2 class="text-lg font-bold text-slate-900 tracking-tight">Data Guru Bimbingan Konseling (BK)</h2>
             <p class="text-xs text-slate-500 mt-0.5">Daftar tenaga konselor resmi penanggung jawab rombel SMK PGRI 05 Jember</p>
           </div>
           <button
@@ -882,59 +850,49 @@
         <div class="bg-white rounded-lg border border-slate-200 overflow-hidden p-5 sm:p-6">
           <div class="overflow-x-auto border border-slate-200 rounded-lg">
             <table class="w-full text-left text-xs whitespace-nowrap">
-              <thead class="bg-slate-50 border-b border-slate-200 text-slate-600 font-bold">
+              <thead class="bg-slate-50/50 border-b border-slate-200">
                 <tr>
-                  <th class="py-3.5 px-4 text-center w-12 text-[11px] uppercase tracking-wider">NO</th>
-                  <th class="py-3.5 px-4 text-[11px] uppercase tracking-wider">NAMA LENGKAP &amp; GELAR</th>
-                  <th class="py-3.5 px-4 text-[11px] uppercase tracking-wider">AKUN LOGIN BK</th>
-                  <th class="py-3.5 px-4 text-[11px] uppercase tracking-wider">NIP / NUPTK</th>
-                  <th class="py-3.5 px-4 text-[11px] uppercase tracking-wider">JABATAN</th>
-                  <th class="py-3.5 px-4 text-[11px] uppercase tracking-wider">ROMBEL BINAAN</th>
-                  <th class="py-3.5 px-4 text-center text-[11px] uppercase tracking-wider">STATUS AKUN</th>
-                  <th class="py-3.5 px-4 text-center text-[11px] uppercase tracking-wider">AKSI</th>
+                  <th class="py-3 px-4 text-center w-12 text-[11px] font-semibold uppercase tracking-wider text-slate-500">No</th>
+                  <th class="py-3 px-4 text-[11px] font-semibold uppercase tracking-wider text-slate-500">Nama Lengkap &amp; Gelar</th>
+                  <th class="py-3 px-4 text-[11px] font-semibold uppercase tracking-wider text-slate-500">Akun Login BK</th>
+                  <th class="py-3 px-4 text-[11px] font-semibold uppercase tracking-wider text-slate-500">NIP / NUPTK</th>
+                  <th class="py-3 px-4 text-[11px] font-semibold uppercase tracking-wider text-slate-500">Jabatan</th>
+                  <th class="py-3 px-4 text-[11px] font-semibold uppercase tracking-wider text-slate-500">Rombel Binaan</th>
+                  <th class="py-3 px-4 text-center text-[11px] font-semibold uppercase tracking-wider text-slate-500">Status Akun</th>
+                  <th class="py-3 px-4 text-center text-[11px] font-semibold uppercase tracking-wider text-slate-500">Aksi</th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-slate-100 bg-white">
                 <tr v-for="(g, idx) in guruBkList" :key="g.id" class="hover:bg-slate-50 transition">
-                  <td class="py-3.5 px-4 text-center font-bold text-slate-400">{{ idx + 1 }}</td>
+                  <td class="py-3.5 px-4 text-center font-medium text-slate-400">{{ idx + 1 }}</td>
                   <td class="py-3.5 px-4">
                     <div class="font-bold text-slate-900 text-xs sm:text-sm">{{ g.name }}</div>
-                    <div class="text-[11px] text-slate-400">{{ g.email }}</div>
+                    <div class="text-xs text-slate-500 font-normal mt-0.5">{{ g.email }}</div>
                   </td>
                   <td class="py-3.5 px-4">
-                    <div class="inline-flex items-center gap-1 font-mono text-[11px] text-blue-700 bg-blue-50 px-2 py-0.5 rounded border border-blue-200 font-bold">
-                      <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 text-blue-600" viewBox="0 0 20 20" fill="currentColor">
-                        <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
-                      </svg>
-                      <span>@{{ g.username || 'guru_bk' }}</span>
-                    </div>
+                    <span class="font-mono text-xs text-slate-600 font-medium">@{{ g.username || 'guru_bk' }}</span>
                   </td>
                   <td class="py-3.5 px-4 font-mono text-slate-700 font-medium">
                     <div>NIP: {{ g.nip }}</div>
-                    <div class="text-[10px] text-slate-400">NUPTK: {{ g.nuptk }}</div>
+                    <div class="text-xs text-slate-500 font-normal">NUPTK: {{ g.nuptk }}</div>
                   </td>
                   <td class="py-3.5 px-4 font-semibold text-slate-800">{{ g.jabatan }}</td>
                   <td class="py-3.5 px-4">
-                    <div class="flex flex-wrap gap-1 max-w-xs">
-                      <span v-for="r in g.rombel" :key="r" class="px-2 py-0.5 rounded bg-blue-50 text-blue-700 text-[10px] font-bold border border-blue-200">
-                        {{ r }}
-                      </span>
-                    </div>
+                    <span class="text-xs text-slate-600 font-medium">{{ g.rombel.join(', ') }}</span>
                   </td>
                   <td class="py-3.5 px-4 text-center">
-                    <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                      <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                      <span>Akun Aktif</span>
+                    <span class="text-xs font-medium text-emerald-700">
+                      Akun Aktif
                     </span>
                   </td>
                   <td class="py-3.5 px-4 text-center">
                     <div class="inline-flex items-center gap-1.5">
-                      <button @click="editGuru(g)" class="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-md transition cursor-pointer" title="Edit Guru BK">
+                      <button @click="editGuru(g)" class="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 active:scale-90 rounded-md transition-all duration-150 cursor-pointer" title="Edit Guru BK">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                         </svg>
                       </button>
-                      <button @click="confirmDeleteGuru(g)" class="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-md transition cursor-pointer" title="Hapus Guru">
+                      <button @click="confirmDeleteGuru(g)" class="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 active:scale-90 rounded-md transition-all duration-150 cursor-pointer" title="Hapus Guru">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                         </svg>
@@ -954,7 +912,7 @@
       <div v-if="activeTab === 'kelas'" class="space-y-4">
         <div class="bg-white rounded-lg p-5 sm:p-6 border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
-            <h2 class="text-lg font-black text-slate-900 tracking-tight">Data Rombongan Belajar (Rombel)</h2>
+            <h2 class="text-lg font-bold text-slate-900 tracking-tight">Data Rombongan Belajar (Rombel)</h2>
             <p class="text-xs text-slate-500 mt-0.5">Struktur rombel kelas per tingkat dan penugasan wali kelas</p>
           </div>
           <button
@@ -972,43 +930,43 @@
         <div class="bg-white rounded-lg border border-slate-200 overflow-hidden p-5 sm:p-6">
           <div class="overflow-x-auto border border-slate-200 rounded-lg">
             <table class="w-full text-left text-xs whitespace-nowrap">
-              <thead class="bg-slate-50 border-b border-slate-200 text-slate-600 font-bold">
+              <thead class="bg-slate-50/50 border-b border-slate-200">
                 <tr>
-                  <th class="py-3.5 px-4 text-center w-12 text-[11px] uppercase tracking-wider">NO</th>
-                  <th class="py-3.5 px-4 text-[11px] uppercase tracking-wider">NAMA ROMBEL</th>
-                  <th class="py-3.5 px-4 text-[11px] uppercase tracking-wider">TINGKAT &amp; JURUSAN</th>
-                  <th class="py-3.5 px-4 text-[11px] uppercase tracking-wider">WALI KELAS</th>
-                  <th class="py-3.5 px-4 text-[11px] uppercase tracking-wider">GURU BK PENDAMPING</th>
-                  <th class="py-3.5 px-4 text-center text-[11px] uppercase tracking-wider">JUMLAH SISWA</th>
-                  <th class="py-3.5 px-4 text-center text-[11px] uppercase tracking-wider">AKSI</th>
+                  <th class="py-3 px-4 text-center w-12 text-[11px] font-semibold uppercase tracking-wider text-slate-500">No</th>
+                  <th class="py-3 px-4 text-[11px] font-semibold uppercase tracking-wider text-slate-500">Nama Rombel</th>
+                  <th class="py-3 px-4 text-[11px] font-semibold uppercase tracking-wider text-slate-500">Tingkat &amp; Jurusan</th>
+                  <th class="py-3 px-4 text-[11px] font-semibold uppercase tracking-wider text-slate-500">Wali Kelas</th>
+                  <th class="py-3 px-4 text-[11px] font-semibold uppercase tracking-wider text-slate-500">Guru BK Pendamping</th>
+                  <th class="py-3 px-4 text-center text-[11px] font-semibold uppercase tracking-wider text-slate-500">Jumlah Siswa</th>
+                  <th class="py-3 px-4 text-center text-[11px] font-semibold uppercase tracking-wider text-slate-500">Aksi</th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-slate-100 bg-white">
                 <tr v-for="(k, idx) in kelasList" :key="k.id" class="hover:bg-slate-50 transition">
-                  <td class="py-3.5 px-4 text-center font-bold text-slate-400">{{ idx + 1 }}</td>
+                  <td class="py-3.5 px-4 text-center font-medium text-slate-400">{{ idx + 1 }}</td>
                   <td class="py-3.5 px-4">
-                    <span class="font-black text-slate-900 text-xs sm:text-sm">{{ k.name }}</span>
+                    <span class="font-bold text-slate-900 text-xs sm:text-sm">{{ k.name }}</span>
                   </td>
                   <td class="py-3.5 px-4">
-                    <span class="px-2.5 py-1 rounded bg-slate-100 text-slate-700 font-bold text-[11px] border border-slate-200">
+                    <span class="text-xs text-slate-600 font-medium">
                       {{ k.level }} &bull; {{ k.jurusan }}
                     </span>
                   </td>
                   <td class="py-3.5 px-4 font-semibold text-slate-800">{{ k.waliKelas }}</td>
                   <td class="py-3.5 px-4 text-slate-600 font-medium">{{ k.guruBK }}</td>
                   <td class="py-3.5 px-4 text-center">
-                    <span class="font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded border border-blue-200 text-xs">
+                    <span class="text-xs text-slate-700 font-medium">
                       {{ k.studentCount }} Siswa
                     </span>
                   </td>
                   <td class="py-3.5 px-4 text-center">
                     <div class="inline-flex items-center justify-center gap-1.5">
-                      <button @click="editKelas(k)" class="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-md transition cursor-pointer" title="Edit Rombel">
+                      <button @click="editKelas(k)" class="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 active:scale-90 rounded-md transition-all duration-150 cursor-pointer" title="Edit Rombel">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                         </svg>
                       </button>
-                      <button @click="confirmDeleteKelas(k)" class="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-md transition cursor-pointer" title="Hapus Kelas">
+                      <button @click="confirmDeleteKelas(k)" class="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 active:scale-90 rounded-md transition-all duration-150 cursor-pointer" title="Hapus Kelas">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                         </svg>
@@ -1028,7 +986,7 @@
       <div v-if="activeTab === 'siswa'" class="space-y-4">
         <div class="bg-white rounded-lg p-5 sm:p-6 border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
-            <h2 class="text-lg font-black text-slate-900 tracking-tight">Data Induk Siswa</h2>
+            <h2 class="text-lg font-bold text-slate-900 tracking-tight">Data Induk Siswa</h2>
             <p class="text-xs text-slate-500 mt-0.5">Pencatatan data siswa aktif dan kontak wali siswa</p>
           </div>
           <div class="flex flex-wrap items-center gap-2 self-start sm:self-auto">
@@ -1084,38 +1042,38 @@
           <!-- Table Siswa -->
           <div class="overflow-x-auto border border-slate-200 rounded-lg">
             <table class="w-full text-left text-xs whitespace-nowrap">
-              <thead class="bg-slate-50 border-b border-slate-200 text-slate-600 font-bold">
+              <thead class="bg-slate-50/50 border-b border-slate-200">
                 <tr>
-                  <th class="py-3.5 px-4 text-center w-12 text-[11px] uppercase tracking-wider">NO</th>
-                  <th class="py-3.5 px-4 text-[11px] uppercase tracking-wider">NISN</th>
-                  <th class="py-3.5 px-4 text-[11px] uppercase tracking-wider">NAMA LENGKAP SISWA</th>
-                  <th class="py-3.5 px-4 text-[11px] uppercase tracking-wider">KELAS</th>
-                  <th class="py-3.5 px-3 text-center text-[11px] uppercase tracking-wider">JK</th>
-                  <th class="py-3.5 px-4 text-[11px] uppercase tracking-wider">NO WA WALI MURID</th>
-                  <th class="py-3.5 px-4 text-center text-[11px] uppercase tracking-wider">POIN TATIB</th>
-                  <th class="py-3.5 px-4 text-center text-[11px] uppercase tracking-wider">AKSI</th>
+                  <th class="py-3 px-4 text-center w-12 text-[11px] font-semibold uppercase tracking-wider text-slate-500">No</th>
+                  <th class="py-3 px-4 text-[11px] font-semibold uppercase tracking-wider text-slate-500">NISN</th>
+                  <th class="py-3 px-4 text-[11px] font-semibold uppercase tracking-wider text-slate-500">Nama Lengkap Siswa</th>
+                  <th class="py-3 px-4 text-[11px] font-semibold uppercase tracking-wider text-slate-500">Kelas</th>
+                  <th class="py-3 px-3 text-center text-[11px] font-semibold uppercase tracking-wider text-slate-500">JK</th>
+                  <th class="py-3 px-4 text-[11px] font-semibold uppercase tracking-wider text-slate-500">No. WhatsApp Wali Murid</th>
+                  <th class="py-3 px-4 text-center text-[11px] font-semibold uppercase tracking-wider text-slate-500">Poin Tatib</th>
+                  <th class="py-3 px-4 text-center text-[11px] font-semibold uppercase tracking-wider text-slate-500">Aksi</th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-slate-100 bg-white">
                 <tr v-for="(s, idx) in filteredSiswaList" :key="s.id" class="hover:bg-slate-50 transition">
-                  <td class="py-3.5 px-4 text-center font-bold text-slate-400">{{ idx + 1 }}</td>
-                  <td class="py-3.5 px-4 font-mono font-medium text-slate-600">{{ s.nisn }}</td>
+                  <td class="py-3.5 px-4 text-center font-medium text-slate-400">{{ idx + 1 }}</td>
+                  <td class="py-3.5 px-4 font-mono font-normal text-xs text-slate-500">{{ s.nisn }}</td>
                   <td class="py-3.5 px-4">
                     <span class="font-bold text-slate-900 text-xs sm:text-sm">{{ s.name }}</span>
                   </td>
                   <td class="py-3.5 px-4">
-                    <span class="px-2 py-0.5 rounded bg-blue-50 text-blue-700 font-bold text-[11px] border border-blue-200">
+                    <span class="text-xs font-medium text-slate-700">
                       {{ s.className }}
                     </span>
                   </td>
                   <td class="py-3.5 px-3 text-center">
-                    <span class="inline-flex items-center justify-center w-6 h-6 rounded font-bold text-xs" :class="s.gender === 'L' ? 'bg-blue-50 text-blue-700' : 'bg-pink-50 text-pink-700'">
+                    <span class="text-xs font-medium text-slate-600">
                       {{ s.gender }}
                     </span>
                   </td>
                   <td class="py-3.5 px-4 font-mono text-slate-600 text-xs">{{ s.parentWa }}</td>
                   <td class="py-3.5 px-4 text-center">
-                    <span class="px-2.5 py-0.5 rounded text-xs font-bold" :class="s.poin > 20 ? 'bg-rose-100 text-rose-700' : 'bg-emerald-100 text-emerald-700'">
+                    <span class="text-xs font-medium" :class="s.poin > 20 ? 'text-rose-600 font-semibold' : 'text-slate-600'">
                       {{ s.poin }} Poin
                     </span>
                   </td>
@@ -1123,7 +1081,7 @@
                     <div class="inline-flex items-center justify-center gap-1.5">
                       <button
                         @click="editSiswa(s)"
-                        class="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-md transition cursor-pointer"
+                        class="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 active:scale-90 rounded-md transition-all duration-150 cursor-pointer"
                         title="Edit Data Siswa"
                       >
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -1132,7 +1090,7 @@
                       </button>
                       <button
                         @click="confirmDeleteSiswa(s)"
-                        class="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-md transition cursor-pointer"
+                        class="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 active:scale-90 rounded-md transition-all duration-150 cursor-pointer"
                         title="Hapus Siswa"
                       >
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -1162,9 +1120,9 @@
         <div class="bg-white rounded-lg border border-slate-200 p-5 sm:p-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <div class="flex items-center gap-2 mb-1">
-              <span class="text-xs font-bold uppercase tracking-wider text-blue-700">Inbox Layanan Konseling</span>
-              <span v-if="unreadConsultationCount > 0" class="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-200">
-                {{ unreadConsultationCount }} Perlu Tindak Lanjut
+              <span class="text-xs font-semibold text-blue-700">Inbox Layanan Konseling</span>
+              <span v-if="unreadConsultationCount > 0" class="text-xs font-medium text-rose-600">
+                &bull; {{ unreadConsultationCount }} Perlu Tindak Lanjut
               </span>
             </div>
             <h2 class="text-lg sm:text-xl font-bold text-slate-900 tracking-tight">Pesan Konsultasi Wali Murid</h2>
@@ -1217,15 +1175,15 @@
           <!-- Table of Consultation Messages -->
           <div class="overflow-x-auto border border-slate-200 rounded-lg">
             <table class="w-full text-left text-xs">
-              <thead class="bg-slate-50 border-b border-slate-200 text-slate-600 font-bold">
+              <thead class="bg-slate-50/50 border-b border-slate-200">
                 <tr>
-                  <th class="py-3.5 px-4 text-center w-12 text-[11px] uppercase tracking-wider">NO</th>
-                  <th class="py-3.5 px-4 text-[11px] uppercase tracking-wider">NAMA WALI MURID</th>
-                  <th class="py-3.5 px-4 text-[11px] uppercase tracking-wider">SISWA &amp; KELAS</th>
-                  <th class="py-3.5 px-4 text-[11px] uppercase tracking-wider min-w-[240px]">TOPIK KONSULTASI</th>
-                  <th class="py-3.5 px-4 text-[11px] uppercase tracking-wider">WAKTU MASUK</th>
-                  <th class="py-3.5 px-4 text-center text-[11px] uppercase tracking-wider">STATUS</th>
-                  <th class="py-3.5 px-4 text-center text-[11px] uppercase tracking-wider">TINDAKAN</th>
+                  <th class="py-3 px-4 text-center w-12 text-[11px] font-semibold uppercase tracking-wider text-slate-500">No</th>
+                  <th class="py-3 px-4 text-[11px] font-semibold uppercase tracking-wider text-slate-500">Nama Wali Murid</th>
+                  <th class="py-3 px-4 text-[11px] font-semibold uppercase tracking-wider text-slate-500">Siswa &amp; Kelas</th>
+                  <th class="py-3 px-4 min-w-[240px] text-[11px] font-semibold uppercase tracking-wider text-slate-500">Topik Konsultasi &amp; Pesan</th>
+                  <th class="py-3 px-4 text-[11px] font-semibold uppercase tracking-wider text-slate-500">Waktu Masuk</th>
+                  <th class="py-3 px-4 text-center text-[11px] font-semibold uppercase tracking-wider text-slate-500">Status</th>
+                  <th class="py-3 px-4 text-center text-[11px] font-semibold uppercase tracking-wider text-slate-500">Tindakan</th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-slate-100 bg-white">
@@ -1235,13 +1193,13 @@
                   class="hover:bg-slate-50 transition"
                   :class="item.status === 'unread' ? 'bg-amber-50/30 font-medium' : ''"
                 >
-                  <td class="py-3.5 px-4 text-center font-bold text-slate-400">{{ idx + 1 }}</td>
+                  <td class="py-3.5 px-4 text-center font-medium text-slate-400">{{ idx + 1 }}</td>
                   
                   <!-- Nama Wali & No Telp -->
                   <td class="py-3.5 px-4">
                     <span class="font-bold text-slate-900 block leading-tight">{{ item.parent_name }}</span>
-                    <span v-if="item.phone" class="text-[11px] text-slate-500 font-mono">{{ item.phone }}</span>
-                    <span v-else class="text-[10px] text-slate-400">Kontak via data siswa</span>
+                    <span v-if="item.phone" class="text-xs text-slate-500 font-normal block mt-0.5">{{ item.phone }}</span>
+                    <span v-else class="text-xs text-slate-400 font-normal block mt-0.5">Kontak via data siswa</span>
                   </td>
 
                   <!-- Siswa & Kelas -->
@@ -1259,11 +1217,11 @@
                     {{ formatConsultationTime(item.created_at) }}
                   </td>
 
-                  <!-- Status Badge -->
+                  <!-- Status -->
                   <td class="py-3.5 px-4 text-center whitespace-nowrap">
                     <span
-                      class="px-2.5 py-1 rounded text-[10px] font-bold inline-block"
-                      :class="item.status === 'unread' ? 'bg-amber-50 text-amber-800 border border-amber-200' : 'bg-emerald-50 text-emerald-800 border border-emerald-200'"
+                      class="text-xs font-medium"
+                      :class="item.status === 'unread' ? 'text-amber-700' : 'text-emerald-700'"
                     >
                       {{ item.status === 'unread' ? 'Perlu Dihubungi' : 'Sudah Dihubungi' }}
                     </span>
@@ -1376,7 +1334,7 @@
                   </svg>
                   Kredensial Akun Login Guru BK
                 </span>
-                <span class="text-[10px] text-blue-700 font-semibold bg-blue-50 px-2 py-0.5 rounded border border-blue-200/60">Akses Portal /login</span>
+                <span class="text-xs text-slate-500 font-medium">Akses Portal /login</span>
               </div>
 
               <div class="grid grid-cols-2 gap-3">
@@ -1714,7 +1672,7 @@
                   </svg>
                   Kredensial Akun Login Guru BK
                 </span>
-                <span class="text-[10px] text-blue-700 font-semibold bg-blue-50 px-2 py-0.5 rounded border border-blue-200/60">Akses Portal</span>
+                <span class="text-xs text-slate-500 font-medium">Akses Portal</span>
               </div>
 
               <div class="grid grid-cols-2 gap-3">
@@ -1898,7 +1856,7 @@
           <div v-if="confirmModal.targetInfo" class="mt-4 p-3 bg-slate-50 rounded-lg border border-slate-200 text-left text-xs">
             <div class="flex items-center justify-between">
               <span class="font-bold text-slate-800">{{ confirmModal.targetInfo.name }}</span>
-              <span v-if="confirmModal.targetInfo.tag" class="px-2 py-0.5 rounded-md bg-blue-50 text-blue-700 font-bold text-[10px]">
+              <span v-if="confirmModal.targetInfo.tag" class="text-xs text-slate-500 font-medium">
                 {{ confirmModal.targetInfo.tag }}
               </span>
             </div>
@@ -2057,8 +2015,7 @@
             <div>
               <label class="block font-bold text-slate-700 mb-1">Status Validasi:</label>
               <div class="flex items-center h-[38px] px-3.5 bg-slate-50 rounded-lg border border-slate-200 text-xs">
-                <span v-if="importedStudents.length > 0" class="text-emerald-700 font-bold flex items-center gap-1.5">
-                  <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                <span v-if="importedStudents.length > 0" class="text-emerald-700 font-bold">
                   {{ importedStudents.length }} Siswa siap diimpor ke sistem
                 </span>
                 <span v-else class="text-slate-400">
@@ -2071,9 +2028,8 @@
           <!-- Step 3: Table Preview Data Siswa yang Akan Diimpor -->
           <div v-if="importedStudents.length > 0" class="space-y-2">
             <div class="flex items-center justify-between">
-              <span class="text-xs font-bold text-slate-800 flex items-center gap-1.5">
-                <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-                <span>Pratinjau Data Siswa ({{ importedStudents.length }} Siswa)</span>
+              <span class="text-xs font-bold text-slate-800">
+                Pratinjau Data Siswa ({{ importedStudents.length }} Siswa)
               </span>
               <button
                 type="button"
@@ -2103,7 +2059,7 @@
                     <td class="py-1.5 px-3 font-mono font-medium text-slate-700">{{ st.nisn }}</td>
                     <td class="py-1.5 px-3 font-bold text-slate-900">{{ st.name }}</td>
                     <td class="py-1.5 px-3">
-                      <span class="px-2 py-0.5 rounded-md bg-blue-50 text-blue-700 font-bold text-[10px]">
+                      <span class="text-xs text-slate-600 font-medium">
                         {{ importTargetClass === 'AUTO' ? st.className : importTargetClass }}
                       </span>
                     </td>
@@ -2141,13 +2097,13 @@
             <button
               type="button"
               @click="processImport"
-              :disabled="importedStudents.length === 0"
+              :disabled="importedStudents.length === 0 || isSubmittingImport"
               class="px-6 py-2.5 rounded-lg bg-blue-600 hover:bg-blue-700 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold transition cursor-pointer text-xs shadow-sm flex items-center gap-1.5"
             >
               <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
               </svg>
-              <span>Simpan &amp; Import {{ importedStudents.length }} Siswa</span>
+              <span>{{ isSubmittingImport ? 'Mengimpor Data...' : `Simpan & Import ${importedStudents.length} Siswa` }}</span>
             </button>
           </div>
 
@@ -2160,7 +2116,8 @@
 
 <script setup>
 import AdminLayout from '../Layouts/AdminLayout.vue'
-import { ref, computed, onMounted, h } from 'vue'
+import { ref, computed, onMounted, watch, h } from 'vue'
+import { router } from '@inertiajs/vue3'
 
 const props = defineProps({
   stats: {
@@ -2176,6 +2133,14 @@ const props = defineProps({
     default: 0
   },
   initialGuruBkList: {
+    type: Array,
+    default: () => []
+  },
+  initialKelasList: {
+    type: Array,
+    default: () => []
+  },
+  initialSiswaList: {
     type: Array,
     default: () => []
   }
@@ -2909,7 +2874,7 @@ const deleteGuru = (idx) => {
 // ==========================================
 // 3. DATA KELAS / ROMBEL
 // ==========================================
-const kelasList = ref([
+const kelasList = ref(props.initialKelasList && props.initialKelasList.length > 0 ? [...props.initialKelasList] : [
   { id: 1, name: 'X RPL 1', level: 'Kelas 10 (X)', jurusan: 'RPL', waliKelas: 'Bpk. Kurniawan, S.Kom', guruBK: 'Dra. Hj. Nurul Hidayati, M.Pd', studentCount: 36 },
   { id: 2, name: 'X RPL 2', level: 'Kelas 10 (X)', jurusan: 'RPL', waliKelas: 'Ibu Sri Wahyuni, S.Kom', guruBK: 'Dra. Hj. Nurul Hidayati, M.Pd', studentCount: 36 },
   { id: 3, name: 'X RPL 3', level: 'Kelas 10 (X)', jurusan: 'RPL', waliKelas: 'Bpk. Bayu Hendra, M.Kom', guruBK: 'Dra. Hj. Nurul Hidayati, M.Pd', studentCount: 35 },
@@ -2920,6 +2885,12 @@ const kelasList = ref([
   { id: 8, name: 'XII RPL 1', level: 'Kelas 12 (XII)', jurusan: 'RPL', waliKelas: 'Bpk. Hendro Santoso, M.Kom', guruBK: 'Bpk. Dwi Prasetyo, M.Pd', studentCount: 36 }
 ])
 
+watch(() => props.initialKelasList, (newVal) => {
+  if (newVal && newVal.length > 0) {
+    kelasList.value = [...newVal]
+  }
+}, { deep: true })
+
 const formKelas = ref({
   level: 'Kelas 10 (X)',
   jurusan: 'RPL',
@@ -2929,16 +2900,21 @@ const formKelas = ref({
 })
 
 const saveKelas = () => {
-  kelasList.value.push({
-    id: Date.now(),
-    name: formKelas.value.name.toUpperCase(),
+  const selectedGuru = guruBkList.value.find(g => g.name === formKelas.value.guruBK)
+  router.post('/admin/kelas', {
+    name: formKelas.value.name,
     level: formKelas.value.level,
     jurusan: formKelas.value.jurusan,
     waliKelas: formKelas.value.waliKelas,
     guruBK: formKelas.value.guruBK,
-    studentCount: 36
+    guruBkId: selectedGuru ? selectedGuru.id : null,
+  }, {
+    preserveScroll: true,
+    onSuccess: () => {
+      closeModal()
+      showToast(`Rombel ${formKelas.value.name.toUpperCase()} berhasil disimpan.`)
+    }
   })
-  closeModal()
 }
 
 const formEditKelas = ref({
@@ -2969,20 +2945,21 @@ const editKelas = (k) => {
 
 const updateKelas = () => {
   if (!editingKelas.value) return
-  const idx = kelasList.value.findIndex(k => k.id === editingKelas.value.id)
-  if (idx !== -1) {
-    kelasList.value[idx] = {
-      ...kelasList.value[idx],
-      name: formEditKelas.value.name.toUpperCase(),
-      level: formEditKelas.value.level,
-      jurusan: formEditKelas.value.jurusan,
-      waliKelas: formEditKelas.value.waliKelas,
-      guruBK: formEditKelas.value.guruBK,
-      studentCount: formEditKelas.value.studentCount || 36
+  const selectedGuru = guruBkList.value.find(g => g.name === formEditKelas.value.guruBK)
+  router.put(`/admin/kelas/${editingKelas.value.id}`, {
+    name: formEditKelas.value.name,
+    level: formEditKelas.value.level,
+    jurusan: formEditKelas.value.jurusan,
+    waliKelas: formEditKelas.value.waliKelas,
+    guruBK: formEditKelas.value.guruBK,
+    guruBkId: selectedGuru ? selectedGuru.id : null,
+  }, {
+    preserveScroll: true,
+    onSuccess: () => {
+      closeModal()
+      showToast(`Data rombel ${formEditKelas.value.name} berhasil diperbarui.`)
     }
-    showToast(`Data rombel ${formEditKelas.value.name} berhasil diperbarui.`)
-  }
-  closeModal()
+  })
 }
 
 const confirmDeleteKelas = (k) => {
@@ -2999,11 +2976,12 @@ const confirmDeleteKelas = (k) => {
     confirmText: 'Ya, Hapus Kelas',
     cancelText: 'Batal',
     onConfirm: () => {
-      const idx = kelasList.value.findIndex(item => item.id === k.id)
-      if (idx !== -1) {
-        kelasList.value.splice(idx, 1)
-        showToast(`Rombel ${k.name} berhasil dihapus.`)
-      }
+      router.delete(`/admin/kelas/${k.id}`, {
+        preserveScroll: true,
+        onSuccess: () => {
+          showToast(`Rombel ${k.name} berhasil dihapus.`)
+        }
+      })
     }
   }
 }
@@ -3018,7 +2996,7 @@ const deleteKelas = (idx) => {
 // ==========================================
 // 4. DATA SISWA
 // ==========================================
-const siswaList = ref([
+const siswaList = ref(props.initialSiswaList && props.initialSiswaList.length > 0 ? [...props.initialSiswaList] : [
   { id: 1, nisn: '00729182', name: 'Ahmad Fauzi', className: 'X RPL 1', gender: 'L', parentWa: '+62 812-9988-1122', poin: 0 },
   { id: 2, nisn: '00729183', name: 'Dimas Arya Pratama', className: 'X RPL 1', gender: 'L', parentWa: '+62 813-4455-6677', poin: 5 },
   { id: 3, nisn: '00729184', name: 'Fathir Rizky Maulana', className: 'X RPL 1', gender: 'L', parentWa: '+62 856-7788-9900', poin: 10 },
@@ -3028,6 +3006,12 @@ const siswaList = ref([
   { id: 7, nisn: '22231090', name: 'Bagus Setiawan', className: 'XII DKV 1', gender: 'L', parentWa: '+62 821-5566-7788', poin: 15 },
   { id: 8, nisn: '22231092', name: 'Andi Saputra', className: 'X TSM 1', gender: 'L', parentWa: '+62 857-8899-0011', poin: 5 }
 ])
+
+watch(() => props.initialSiswaList, (newVal) => {
+  if (newVal && newVal.length > 0) {
+    siswaList.value = [...newVal]
+  }
+}, { deep: true })
 
 const totalSiswaCount = computed(() => {
   return kelasList.value.reduce((acc, k) => acc + k.studentCount, 0)
@@ -3249,27 +3233,35 @@ const removeImportedRow = (index) => {
   importedStudents.value.splice(index, 1)
 }
 
+const isSubmittingImport = ref(false)
+
 const processImport = () => {
-  if (importedStudents.value.length === 0) return
+  if (importedStudents.value.length === 0 || isSubmittingImport.value) return
   
-  const newStudents = importedStudents.value.map((st, i) => ({
-    id: Date.now() + i,
+  const payload = importedStudents.value.map(st => ({
     nisn: st.nisn,
     name: st.name,
     className: importTargetClass.value === 'AUTO' ? st.className : importTargetClass.value,
     gender: st.gender,
     parentWa: st.parentWa,
-    poin: 0
   }))
 
-  siswaList.value.push(...newStudents)
-  const count = newStudents.length
-  
-  alert(`Berhasil mengimpor ${count} data siswa baru ke database BK Prima.`)
-  importedStudents.value = []
-  importFileName.value = ''
-  closeModal()
-  activeTab.value = 'siswa'
+  isSubmittingImport.value = true
+  router.post('/admin/siswa/import', { students: payload }, {
+    preserveScroll: true,
+    onSuccess: () => {
+      isSubmittingImport.value = false
+      importedStudents.value = []
+      importFileName.value = ''
+      closeModal()
+      activeTab.value = 'siswa'
+      showToast(`Berhasil mengimpor ${payload.length} data siswa ke database BK Prima.`)
+    },
+    onError: () => {
+      isSubmittingImport.value = false
+      alert('Gagal mengimpor data siswa. Silakan periksa kembali data spreadsheet.')
+    }
+  })
 }
 
 // Modal Handlers

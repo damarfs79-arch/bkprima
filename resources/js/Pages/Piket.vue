@@ -3,12 +3,11 @@
     <div class="max-w-5xl mx-auto space-y-6">
 
       <!-- Semester Subheader Bar & Clock -->
-      <div class="bg-white rounded-2xl p-4 border border-gray-100 shadow-xs flex flex-wrap items-center justify-between gap-3 text-xs">
-        <div class="flex items-center gap-2 text-gray-700 font-semibold">
-          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-          <span>Semester Genap 2026/2027 • Pekan ke-8</span>
+      <div class="bg-white rounded-xl p-4 border border-slate-200 shadow-xs flex flex-wrap items-center justify-between gap-3 text-xs">
+        <div class="flex items-center gap-2 text-slate-700 font-medium">
+          <span>Semester Genap 2026/2027 &bull; Pekan ke-8</span>
         </div>
-        <div class="flex items-center gap-1.5 px-3 py-1 bg-blue-50 text-blue-700 rounded-xl font-mono font-bold">
+        <div class="flex items-center gap-1.5 px-2.5 py-1 bg-slate-100 text-slate-700 rounded-md font-mono font-medium">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
@@ -22,77 +21,71 @@
           v-for="day in weekDays"
           :key="day.date"
           @click="selectedDay = day.date"
-          class="flex flex-col items-center py-2.5 sm:py-3 rounded-2xl border transition text-xs cursor-pointer shadow-2xs"
-          :class="selectedDay === day.date ? 'bg-blue-600 text-white border-blue-600 font-bold shadow-md scale-102' : 'bg-white text-gray-600 border-gray-100 hover:border-gray-300 hover:bg-gray-50'"
+          class="flex flex-col items-center py-2.5 sm:py-3 rounded-lg border transition text-xs cursor-pointer shadow-xs"
+          :class="selectedDay === day.date ? 'bg-blue-600 text-white border-blue-600 font-semibold' : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'"
         >
           <span class="text-[10px] tracking-wider uppercase opacity-80">{{ day.day }}</span>
-          <span class="text-base sm:text-lg font-black my-0.5">{{ day.date }}</span>
+          <span class="text-base sm:text-lg font-bold my-0.5">{{ day.date }}</span>
           <span class="w-1.5 h-1.5 rounded-full" :class="selectedDay === day.date ? 'bg-white' : (day.hasDuty ? 'bg-blue-500' : 'bg-transparent')"></span>
         </button>
       </div>
 
       <!-- Hero Card: Tugas Jaga Anda Hari Ini -->
-      <div class="bg-gradient-to-br from-blue-900 via-blue-800 to-indigo-900 rounded-3xl p-6 text-white shadow-lg relative overflow-hidden">
-        <!-- Background glow -->
-        <div class="absolute -right-10 -bottom-10 w-48 h-48 bg-blue-500/20 rounded-full blur-2xl"></div>
-
-        <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-3">
+      <div class="bg-slate-900 rounded-xl p-6 text-white shadow-xs border border-slate-800">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div class="space-y-3">
-            <div class="flex items-center gap-2">
-            </div>
-
             <div>
-              <h2 class="text-xl sm:text-2xl font-black tracking-tight text-white">Dra. Hj. Nurul Hidayati, M.Pd</h2>
-              <p class="text-xs text-blue-200">Koordinator Bimbingan Konseling & Disiplin</p>
+              <p class="text-xs uppercase tracking-wider text-slate-400 font-semibold mb-1">Tugas Jaga Anda Hari Ini</p>
+              <h2 class="text-xl sm:text-2xl font-bold tracking-tight text-white">Dra. Hj. Nurul Hidayati, M.Pd</h2>
+              <p class="text-xs text-slate-400">Koordinator Bimbingan Konseling &amp; Disiplin</p>
             </div>
 
-            <div class="bg-white/10 backdrop-blur-md rounded-2xl p-3.5 border border-white/10 flex items-start gap-3 max-w-lg">
-              <div class="p-2 bg-blue-500/30 rounded-xl text-blue-200">
+            <div class="bg-slate-800/80 rounded-lg p-3.5 border border-slate-700/80 flex items-start gap-3 max-w-lg">
+              <div class="p-2 bg-slate-700 rounded-lg text-slate-300">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                 </svg>
               </div>
               <div class="text-xs">
-                <p class="text-[10px] uppercase font-bold text-blue-300 tracking-wider">POS PENJAGAAN</p>
+                <p class="text-[10px] uppercase font-semibold text-slate-400 tracking-wider">POS PENJAGAAN</p>
                 <p class="font-bold text-white text-sm">Gerbang Utama</p>
-                <p class="text-blue-200 text-[11px]">Pintu Masuk Siswa & Parkir Kendaraan Roda 2</p>
+                <p class="text-slate-300 text-[11px]">Pintu Masuk Siswa &amp; Parkir Kendaraan Roda 2</p>
                 <div class="flex items-center gap-2 mt-2">
-                  <span class="text-xs font-bold text-amber-300 flex items-center gap-1">
+                  <span class="text-xs font-semibold text-amber-300 flex items-center gap-1">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-amber-300 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                       <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
-                    <span>06.30 – 07.30 WIB</span>
+                    <span>06.30 &ndash; 07.30 WIB</span>
                   </span>
-                  <span class="text-[10px] bg-white/20 px-2 py-0.5 rounded-md text-white font-medium">Piket Pagi Masuk</span>
+                  <span class="text-[10px] bg-slate-700 px-2 py-0.5 rounded text-slate-300 font-medium">Piket Pagi Masuk</span>
                 </div>
               </div>
             </div>
 
-            <div class="flex items-center gap-2 text-xs font-semibold text-emerald-300 bg-emerald-950/40 border border-emerald-500/30 px-3.5 py-2 rounded-xl max-w-md">
+            <div class="flex items-center gap-2 text-xs font-medium text-emerald-300 bg-emerald-950/40 border border-emerald-500/30 px-3.5 py-2 rounded-lg max-w-md">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 shrink-0 text-emerald-400" viewBox="0 0 20 20" fill="currentColor">
                 <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
               </svg>
-              <span>Sudah Presensi Piket (06.24 WIB • GPS Valid)</span>
+              <span>Sudah Presensi Piket (06.24 WIB &bull; GPS Valid)</span>
             </div>
           </div>
 
           <!-- Quick Action CTA -->
-          <div class="flex flex-col gap-3 self-stretch md:self-center">
+          <div class="flex flex-col gap-2.5 self-stretch md:self-center">
             <router-link
               to="/verifikasi"
-              class="bg-blue-500 hover:bg-blue-400 text-white font-bold py-3.5 px-6 rounded-2xl shadow-lg transition text-xs sm:text-sm flex items-center justify-center gap-2 text-center cursor-pointer border border-blue-300/30"
+              class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-5 rounded-lg transition text-xs sm:text-sm flex items-center justify-center gap-2 text-center cursor-pointer"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
               </svg>
-              <span>+ Catat Siswa Terlambat / Tertibkan</span>
+              <span>Catat Pelanggaran Piket</span>
             </router-link>
             <router-link
               to="/panduan"
-              class="bg-white/10 hover:bg-white/20 text-blue-100 font-bold py-2.5 px-4 rounded-xl text-xs flex items-center justify-center gap-2 transition text-center"
+              class="bg-slate-800 hover:bg-slate-700 text-slate-200 font-medium py-2 px-4 rounded-lg text-xs flex items-center justify-center gap-2 transition text-center border border-slate-700"
             >
-              <span>Buku Pedoman Sanksi & Poin</span>
-              <span>&rarr;</span>
+              <span>Buku Pedoman Sanksi &amp; Poin &rarr;</span>
             </router-link>
           </div>
         </div>
@@ -100,37 +93,37 @@
 
       <!-- 3 Summary Metric Cards -->
       <div class="grid grid-cols-3 gap-3 sm:gap-4">
-        <div class="bg-white rounded-2xl p-4 border border-gray-100 shadow-xs flex flex-col items-center text-center">
-          <div class="w-8 h-8 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center mb-1">
+        <div class="bg-white rounded-xl p-4 border border-slate-200 shadow-xs flex flex-col items-center text-center">
+          <div class="w-7 h-7 rounded-md bg-slate-100 text-slate-600 flex items-center justify-center mb-1">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
             </svg>
           </div>
-          <span class="text-2xl font-black text-gray-900">6</span>
-          <span class="text-[11px] font-bold text-gray-700">Guru Terjadwal</span>
-          <span class="text-[10px] text-emerald-600 font-semibold mt-0.5">4 Hadir • 1 Izin</span>
+          <span class="text-2xl font-bold text-slate-900">6</span>
+          <span class="text-xs font-semibold text-slate-700">Guru Terjadwal</span>
+          <span class="text-[11px] text-emerald-600 font-medium mt-0.5">4 Hadir &bull; 1 Izin</span>
         </div>
 
-        <div class="bg-white rounded-2xl p-4 border border-gray-100 shadow-xs flex flex-col items-center text-center">
-          <div class="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center mb-1">
+        <div class="bg-white rounded-xl p-4 border border-slate-200 shadow-xs flex flex-col items-center text-center">
+          <div class="w-7 h-7 rounded-md bg-slate-100 text-slate-600 flex items-center justify-center mb-1">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
             </svg>
           </div>
-          <span class="text-2xl font-black text-gray-900">3</span>
-          <span class="text-[11px] font-bold text-gray-700">Titik Pos Jaga</span>
-          <span class="text-[10px] text-emerald-600 font-semibold mt-0.5">100% Terisi</span>
+          <span class="text-2xl font-bold text-slate-900">3</span>
+          <span class="text-xs font-semibold text-slate-700">Titik Pos Jaga</span>
+          <span class="text-[11px] text-emerald-600 font-medium mt-0.5">100% Terisi</span>
         </div>
 
-        <div class="bg-white rounded-2xl p-4 border border-gray-100 shadow-xs flex flex-col items-center text-center">
-          <div class="w-8 h-8 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center mb-1">
+        <div class="bg-white rounded-xl p-4 border border-slate-200 shadow-xs flex flex-col items-center text-center">
+          <div class="w-7 h-7 rounded-md bg-rose-50 text-rose-600 flex items-center justify-center mb-1">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
             </svg>
           </div>
-          <span class="text-2xl font-black text-rose-600">18</span>
-          <span class="text-[11px] font-bold text-gray-700">Siswa Ditertibkan</span>
-          <span class="text-[10px] text-gray-500 font-medium mt-0.5">Sanksi Edukatif</span>
+          <span class="text-2xl font-bold text-rose-600">18</span>
+          <span class="text-xs font-semibold text-slate-700">Siswa Ditertibkan</span>
+          <span class="text-[11px] text-slate-500 font-medium mt-0.5">Sanksi Edukatif</span>
         </div>
       </div>
 

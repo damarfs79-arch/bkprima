@@ -1,60 +1,58 @@
 <template>
-  <div class="bg-white rounded-3xl p-5 sm:p-7 border border-gray-200 shadow-sm space-y-7">
-    <!-- Header with Clear Title & Action Controls (Dirancang Khusus Mudah Dibaca Guru) -->
-    <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-5 border-b border-gray-200">
+  <div class="bg-white rounded-xl p-5 sm:p-6 border border-slate-200 shadow-xs space-y-6">
+    <!-- Header with Clear Title & Action Controls -->
+    <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-5 border-b border-slate-200">
       <div>
-        <div class="flex items-center gap-2 mb-1.5">
-          <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black bg-blue-100 text-blue-800 border border-blue-300">
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 text-blue-700" viewBox="0 0 20 20" fill="currentColor">
-              <path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z" />
-            </svg>
+        <div class="flex items-center gap-2 mb-1">
+          <span class="text-xs font-semibold text-blue-600 uppercase tracking-wider">
             Laporan Evaluasi Presensi Siswa
           </span>
-          <span class="text-xs sm:text-sm text-slate-600 font-bold">• Khusus Guru BK &amp; Wali Kelas</span>
+          <span class="text-xs text-slate-400">•</span>
+          <span class="text-xs text-slate-500 font-medium">Khusus Guru BK &amp; Wali Kelas</span>
         </div>
-        <h2 class="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+        <h2 class="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
           Grafik Perkembangan Kehadiran Siswa
         </h2>
-        <p class="text-sm sm:text-base text-slate-700 mt-1.5 max-w-2xl leading-relaxed font-medium">
-          Perbandingan kehadiran siswa per bulan antara tahun 2025 dan 2026. Huruf dan angka diperbesar agar mudah dibaca oleh Bapak/Ibu Guru.
+        <p class="text-xs sm:text-sm text-slate-500 mt-1 max-w-2xl leading-relaxed">
+          Perbandingan kehadiran siswa per bulan antara tahun 2025 dan 2026.
         </p>
       </div>
 
-      <!-- Quick Dataset & View Selectors (Tombol Besar & Jelas) -->
-      <div class="flex flex-wrap items-center gap-2.5">
+      <!-- Quick Dataset & View Selectors -->
+      <div class="flex flex-wrap items-center gap-2">
         <!-- Toggle Dataset -->
-        <div class="bg-slate-100 p-1 rounded-2xl flex text-xs sm:text-sm font-bold border border-slate-200">
+        <div class="bg-slate-100 p-1 rounded-lg flex text-xs font-semibold border border-slate-200">
           <button
             type="button"
             @click="activeDataset = 'kehadiran'"
-            class="px-4 py-2 rounded-xl transition cursor-pointer"
-            :class="activeDataset === 'kehadiran' ? 'bg-white text-blue-700 shadow-sm font-black' : 'text-slate-600 hover:text-slate-900'"
+            class="px-3 py-1.5 rounded-md transition cursor-pointer"
+            :class="activeDataset === 'kehadiran' ? 'bg-white text-blue-600 shadow-xs font-bold' : 'text-slate-600 hover:text-slate-900'"
           >
             Persentase Hadir (%)
           </button>
           <button
             type="button"
             @click="activeDataset = 'kasus'"
-            class="px-4 py-2 rounded-xl transition cursor-pointer"
-            :class="activeDataset === 'kasus' ? 'bg-white text-blue-700 shadow-sm font-black' : 'text-slate-600 hover:text-slate-900'"
+            class="px-3 py-1.5 rounded-md transition cursor-pointer"
+            :class="activeDataset === 'kasus' ? 'bg-white text-blue-600 shadow-xs font-bold' : 'text-slate-600 hover:text-slate-900'"
           >
             Kasus Ketidakhadiran
           </button>
         </div>
 
-        <!-- Toggle Angka di Titik (Sangat membantu guru tanpa perlu hover) -->
+        <!-- Toggle Angka di Titik -->
         <button
           type="button"
           @click="showDataLabels = !showDataLabels"
-          class="px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold border transition cursor-pointer flex items-center gap-1.5"
-          :class="showDataLabels ? 'bg-blue-50 border-blue-300 text-blue-800' : 'bg-white border-slate-300 text-slate-700 hover:bg-slate-50'"
+          class="px-3 py-1.5 rounded-lg text-xs font-semibold border transition cursor-pointer flex items-center gap-1.5"
+          :class="showDataLabels ? 'bg-blue-50 border-blue-200 text-blue-700' : 'bg-white border-slate-300 text-slate-700 hover:bg-slate-50'"
           title="Tampilkan atau sembunyikan angka di atas setiap titik grafik"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
           </svg>
-          <span>{{ showDataLabels ? 'Angka Grafik: Terlihat' : 'Tampilkan Angka Grafik' }}</span>
+          <span>{{ showDataLabels ? 'Label: Aktif' : 'Tampilkan Angka' }}</span>
         </button>
 
         <!-- Scale Toggle Button -->
@@ -62,10 +60,10 @@
           v-if="activeDataset === 'kehadiran'"
           type="button"
           @click="toggleScale"
-          class="px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold border border-slate-300 text-slate-700 hover:bg-slate-50 transition cursor-pointer flex items-center gap-1.5"
+          class="px-3 py-1.5 rounded-lg text-xs font-semibold border border-slate-300 text-slate-700 hover:bg-slate-50 transition cursor-pointer flex items-center gap-1.5"
           :title="zoomScale ? 'Ganti ke skala penuh 0-100%' : 'Fokuskan rentang fluktuasi'"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
           </svg>
           <span>{{ zoomScale ? 'Skala: 60% – 100%' : 'Skala: 0% – 100%' }}</span>
@@ -73,79 +71,79 @@
       </div>
     </div>
 
-    <!-- Quick Insight Metrics Cards (Dibuat Besar, Tegas & Tidak Terpotong) -->
+    <!-- Quick Insight Metrics Cards -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
       <!-- Card 1: Rata-rata 2026 -->
-      <div class="bg-blue-50 border-2 border-blue-200 rounded-2xl p-5 shadow-xs">
-        <div class="flex items-center justify-between mb-2">
-          <span class="text-xs sm:text-sm font-black text-blue-900 uppercase tracking-wide">RATA-RATA TAHUN 2026</span>
-          <div class="w-8 h-8 rounded-xl bg-blue-600 text-white flex items-center justify-center shadow-xs">
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
+      <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-xs">
+        <div class="flex items-center justify-between mb-1">
+          <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider">RATA-RATA 2026</span>
+          <div class="w-6 h-6 rounded-md bg-slate-100 text-slate-600 flex items-center justify-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 20 20" fill="currentColor">
               <path fill-rule="evenodd" d="M12 7a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0V8.414l-4.293 4.293a1 1 0 01-1.414 0L8 10.414l-4.293 4.293a1 1 0 01-1.414-1.414l5-5a1 1 0 011.414 0L11 10.586 14.586 7H12z" clip-rule="evenodd" />
             </svg>
           </div>
         </div>
         <div class="flex items-baseline gap-2">
-          <span class="text-3xl sm:text-4xl font-black text-slate-900">{{ avg2026 }}%</span>
-          <span class="text-sm font-black text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-md flex items-center gap-1">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor">
+          <span class="text-2xl sm:text-3xl font-bold text-slate-900">{{ avg2026 }}%</span>
+          <span class="text-xs font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded flex items-center gap-1">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
               <path fill-rule="evenodd" d="M12 7a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0V8.414l-4.293 4.293a1 1 0 01-1.414 0L8 10.414l-4.293 4.293a1 1 0 01-1.414-1.414l5-5a1 1 0 011.414 0L11 10.586 14.586 7H12z" clip-rule="evenodd" />
             </svg>
             <span>+{{ (avg2026 - avg2025).toFixed(1) }}%</span>
           </span>
         </div>
-        <p class="text-xs sm:text-sm text-slate-600 font-bold mt-1.5">Tahun Berjalan (Meningkat)</p>
+        <p class="text-xs text-slate-500 font-medium mt-1">Tahun Berjalan (Meningkat)</p>
       </div>
 
       <!-- Card 2: Rata-rata 2025 -->
-      <div class="bg-amber-50 border-2 border-amber-200 rounded-2xl p-5 shadow-xs">
-        <div class="flex items-center justify-between mb-2">
-          <span class="text-xs sm:text-sm font-black text-amber-900 uppercase tracking-wide">RATA-RATA TAHUN 2025</span>
-          <div class="w-8 h-8 rounded-xl bg-amber-500 text-white flex items-center justify-center shadow-xs">
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
+      <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-xs">
+        <div class="flex items-center justify-between mb-1">
+          <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider">RATA-RATA 2025</span>
+          <div class="w-6 h-6 rounded-md bg-slate-100 text-slate-600 flex items-center justify-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 20 20" fill="currentColor">
               <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd" />
             </svg>
           </div>
         </div>
         <div class="flex items-baseline gap-2">
-          <span class="text-3xl sm:text-4xl font-black text-slate-900">{{ avg2025 }}%</span>
-          <span class="text-xs sm:text-sm text-slate-600 font-bold bg-amber-100 px-2 py-0.5 rounded-md">Tahun Lalu</span>
+          <span class="text-2xl sm:text-3xl font-bold text-slate-900">{{ avg2025 }}%</span>
+          <span class="text-xs text-slate-500 font-medium">Tahun Lalu</span>
         </div>
-        <p class="text-xs sm:text-sm text-slate-600 font-bold mt-1.5">Sebagai Data Pembanding</p>
+        <p class="text-xs text-slate-500 font-medium mt-1">Sebagai Data Pembanding</p>
       </div>
 
       <!-- Card 3: Bulan Puncak -->
-      <div class="bg-emerald-50 border-2 border-emerald-200 rounded-2xl p-5 shadow-xs">
-        <div class="flex items-center justify-between mb-2">
-          <span class="text-xs sm:text-sm font-black text-emerald-900 uppercase tracking-wide">BULAN TERBAIK</span>
-          <div class="w-8 h-8 rounded-xl bg-emerald-600 text-white flex items-center justify-center shadow-xs">
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
+      <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-xs">
+        <div class="flex items-center justify-between mb-1">
+          <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider">BULAN TERBAIK</span>
+          <div class="w-6 h-6 rounded-md bg-slate-100 text-slate-600 flex items-center justify-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 20 20" fill="currentColor">
               <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
             </svg>
           </div>
         </div>
         <div class="flex items-baseline gap-2">
-          <span class="text-2xl sm:text-3xl font-black text-slate-900">{{ bestMonth.monthName }}</span>
-          <span class="text-sm font-black text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-md">{{ bestMonth.val2026 }}%</span>
+          <span class="text-2xl sm:text-3xl font-bold text-slate-900">{{ bestMonth.monthName }}</span>
+          <span class="text-xs font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded">{{ bestMonth.val2026 }}%</span>
         </div>
-        <p class="text-xs sm:text-sm text-slate-600 font-bold mt-1.5">Tingkat Disiplin Paling Tinggi</p>
+        <p class="text-xs text-slate-500 font-medium mt-1">Tingkat Disiplin Tertinggi</p>
       </div>
 
       <!-- Card 4: Titik Perhatian -->
-      <div class="bg-rose-50 border-2 border-rose-200 rounded-2xl p-5 shadow-xs">
-        <div class="flex items-center justify-between mb-2">
-          <span class="text-xs sm:text-sm font-black text-rose-900 uppercase tracking-wide">PERLU ATENSI BK</span>
-          <div class="w-8 h-8 rounded-xl bg-rose-600 text-white flex items-center justify-center shadow-xs">
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
+      <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-xs">
+        <div class="flex items-center justify-between mb-1">
+          <span class="text-xs font-semibold uppercase tracking-wider text-rose-600">PERLU ATENSI BK</span>
+          <div class="w-6 h-6 rounded-md bg-rose-50 text-rose-600 flex items-center justify-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 20 20" fill="currentColor">
               <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
             </svg>
           </div>
         </div>
         <div class="flex items-baseline gap-2">
-          <span class="text-2xl sm:text-3xl font-black text-slate-900">{{ lowestMonth.monthName }}</span>
-          <span class="text-sm font-black text-rose-700 bg-rose-100 px-2 py-0.5 rounded-md">{{ lowestMonth.val2026 }}%</span>
+          <span class="text-2xl sm:text-3xl font-bold text-slate-900">{{ lowestMonth.monthName }}</span>
+          <span class="text-xs font-semibold text-rose-600 bg-rose-50 px-2 py-0.5 rounded">{{ lowestMonth.val2026 }}%</span>
         </div>
-        <p class="text-xs sm:text-sm text-slate-600 font-bold mt-1.5">Masa Ujian / Pasca Kelulusan</p>
+        <p class="text-xs text-rose-600 font-medium mt-1">Masa Ujian / Pasca Kelulusan</p>
       </div>
     </div>
 
@@ -167,10 +165,9 @@
           <button
             type="button"
             @click="toggleSeries('2026')"
-            class="flex items-center gap-2 px-3 py-1.5 rounded-xl transition cursor-pointer font-black text-xs sm:text-sm"
+            class="flex items-center gap-2 px-3 py-1.5 rounded-lg transition cursor-pointer font-bold text-xs sm:text-sm"
             :class="(!isFiltered || activeSeries === '2026') ? 'bg-blue-600 text-white shadow-xs' : 'bg-slate-200 text-slate-600 hover:bg-slate-300'"
           >
-            <span class="w-3.5 h-3.5 rounded-full bg-white border-2 border-blue-600"></span>
             <span>2026 (Tahun Berjalan)</span>
           </button>
 
@@ -178,10 +175,9 @@
           <button
             type="button"
             @click="toggleSeries('2025')"
-            class="flex items-center gap-2 px-3 py-1.5 rounded-xl transition cursor-pointer font-black text-xs sm:text-sm"
+            class="flex items-center gap-2 px-3 py-1.5 rounded-lg transition cursor-pointer font-bold text-xs sm:text-sm"
             :class="(!isFiltered || activeSeries === '2025') ? 'bg-amber-500 text-white shadow-xs' : 'bg-slate-200 text-slate-600 hover:bg-slate-300'"
           >
-            <span class="w-3.5 h-3.5 rounded-full bg-white border-2 border-amber-500"></span>
             <span>2025 (Tahun Lalu)</span>
           </button>
 
@@ -435,20 +431,20 @@
         <div class="flex flex-wrap items-center gap-6 text-sm">
           <!-- 2025 Value -->
           <div class="flex flex-col">
-            <span class="text-amber-300 font-black text-base flex items-center gap-1.5">
-              <span class="w-3 h-3 rounded-full bg-amber-400"></span>
+            <span class="text-amber-300 font-bold text-base flex items-center gap-1.5">
+              <span class="w-2.5 h-2.5 rounded-xs bg-amber-400"></span>
               2025: {{ formatValue(currentHoverItem.val2025) }}
             </span>
-            <span class="text-xs text-slate-400 font-bold">Tahun Sebelumnya</span>
+            <span class="text-xs text-slate-400 font-medium">Tahun Sebelumnya</span>
           </div>
 
           <!-- 2026 Value -->
           <div class="flex flex-col">
-            <span class="text-blue-300 font-black text-base flex items-center gap-1.5">
-              <span class="w-3 h-3 rounded-full bg-blue-400"></span>
+            <span class="text-blue-300 font-bold text-base flex items-center gap-1.5">
+              <span class="w-2.5 h-2.5 rounded-xs bg-blue-400"></span>
               2026: {{ formatValue(currentHoverItem.val2026) }}
             </span>
-            <span class="text-xs text-slate-400 font-bold">Tahun Berjalan</span>
+            <span class="text-xs text-slate-400 font-medium">Tahun Berjalan</span>
           </div>
 
           <!-- Delta / Difference -->
@@ -497,9 +493,8 @@
     <div class="bg-white rounded-3xl p-5 sm:p-6 border border-slate-200 shadow-sm space-y-4">
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-200">
         <div>
-          <h3 class="text-lg sm:text-xl font-black text-slate-900 flex items-center gap-2">
-            <span class="w-3 h-3 rounded-full bg-blue-600"></span>
-            <span>Tabel Rincian Kehadiran Siswa Per Bulan</span>
+          <h3 class="text-lg sm:text-xl font-bold text-slate-900">
+            Tabel Rincian Kehadiran Siswa Per Bulan
           </h3>
           <p class="text-xs sm:text-sm text-slate-600 font-medium mt-0.5">
             Daftar angka pasti tiap bulan, bisa dibaca langsung tanpa harus mengarahkan kursor mouse ke grafik.
