@@ -27,6 +27,7 @@ Route::get('/absensi/bulanan', [AttendanceController::class, 'monthly'])->name('
 Route::get('/statistik', [AttendanceController::class, 'stats'])->name('attendance.stats');
 Route::post('/absensi/sync', [AttendanceController::class, 'sync'])->name('attendance.sync');
 Route::post('/absensi/status', [AttendanceController::class, 'updateStatus'])->name('attendance.updateStatus');
+Route::post('/absensi/import', [AttendanceController::class, 'importStudents'])->name('attendance.import');
 Route::post('/siswa', [AttendanceController::class, 'storeStudent'])->name('students.store');
 Route::put('/siswa/{id}', [AttendanceController::class, 'updateStudent'])->name('students.update');
 Route::delete('/siswa/{id}', [AttendanceController::class, 'deleteStudent'])->name('students.delete');

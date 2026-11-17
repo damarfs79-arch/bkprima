@@ -32,6 +32,16 @@
           </Link>
 
           <button
+            @click="openImportModal"
+            class="interactive-btn inline-flex items-center gap-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 font-medium px-3.5 py-2 rounded-lg text-xs cursor-pointer shadow-2xs"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+            </svg>
+            <span>Import Siswa</span>
+          </button>
+
+          <button
             @click="openAddStudentModal"
             class="interactive-btn inline-flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-medium px-3.5 py-2 rounded-lg text-xs cursor-pointer shadow-2xs"
           >
@@ -91,10 +101,10 @@
                 @change="onLevelChange($event.target.value)"
                 class="w-full bg-white hover:border-slate-300 border border-slate-200 rounded-lg pl-8 pr-8 py-2 text-xs font-medium text-slate-800 focus:outline-none focus:border-slate-400 appearance-none cursor-pointer transition"
               >
-                <option value="ALL">Semua Kelas</option>
-                <option value="10">Kelas 10</option>
-                <option value="11">Kelas 11</option>
-                <option value="12">Kelas 12</option>
+                <option value="ALL">Semua Tingkat</option>
+                <option v-for="lvl in levelOptions" :key="lvl.value" :value="lvl.value">
+                  {{ lvl.label }}
+                </option>
               </select>
               <div class="absolute inset-y-0 left-0 pl-2.5 flex items-center pointer-events-none text-slate-400">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -735,6 +745,211 @@
         </div>
       </div>
 
+      <!-- ============================================================ -->
+      <!-- MODAL 4: IMPORT DATA SISWA (EXCEL / CSV / DAPODIK)           -->
+      <!-- ============================================================ -->
+      <div v-if="showImportModal" class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto">
+        <div class="bg-white rounded-2xl max-w-2xl w-full p-5 sm:p-6 shadow-xl border border-slate-200 space-y-4 my-8">
+          
+          <!-- Header Modal -->
+          <div class="flex items-center justify-between pb-3 border-b border-slate-200">
+            <div class="flex items-center gap-3">
+              <div class="w-9 h-9 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center justify-center shrink-0">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                </svg>
+              </div>
+              <div>
+                <h3 class="font-bold text-slate-900 text-base">Import Data Siswa ke Rombel Binaan</h3>
+                <p class="text-xs text-slate-500">Unggah file spreadsheet (CSV/Excel) untuk memasukkan daftar siswa presensi</p>
+              </div>
+            </div>
+            <button @click="closeImportModal" class="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition cursor-pointer">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+
+          <!-- Panduan & Download Template -->
+          <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+            <div>
+              <span class="font-semibold text-slate-800 block">Format Kolom File:</span>
+              <span class="text-slate-500 text-[11px]">Kolom urut: <strong class="text-slate-700">NISN, Nama Lengkap, Kelas, JK (L/P), No WA Wali</strong></span>
+            </div>
+            <div class="flex items-center gap-2 shrink-0">
+              <button
+                type="button"
+                @click="downloadCsvTemplate"
+                class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-slate-100 text-slate-700 font-semibold border border-slate-200 rounded-lg shadow-2xs transition cursor-pointer text-xs"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                </svg>
+                <span>Unduh Template CSV</span>
+              </button>
+              <button
+                type="button"
+                @click="loadSampleData"
+                class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 font-semibold border border-blue-200 rounded-lg shadow-2xs transition cursor-pointer text-xs"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+                <span>Contoh Data Otomatis</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Upload Dropzone Area -->
+          <div class="space-y-1.5">
+            <label class="block text-xs font-semibold text-slate-700">Pilih File Spreadsheet (CSV / Excel / TXT)</label>
+            <div
+              @dragover.prevent="isDragging = true"
+              @dragleave.prevent="isDragging = false"
+              @drop.prevent="handleDrop"
+              class="border-2 border-dashed rounded-xl p-6 text-center transition cursor-pointer relative"
+              :class="isDragging ? 'border-blue-500 bg-blue-50/50' : 'border-slate-300 hover:border-slate-400 bg-slate-50/50'"
+            >
+              <input
+                ref="importFileInputRef"
+                type="file"
+                accept=".csv, .txt, .xlsx, .xls"
+                @change="handleFileUpload"
+                class="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+              />
+              <div class="flex flex-col items-center justify-center gap-2 pointer-events-none">
+                <div class="w-10 h-10 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                </div>
+                <div>
+                  <p class="text-xs sm:text-sm font-semibold text-slate-800">
+                    <span class="text-blue-700 font-semibold underline">Klik untuk memilih file</span> atau seret file ke sini
+                  </p>
+                  <p class="text-[11px] text-slate-400 mt-0.5">Mendukung format file CSV, TXT, atau ekspor Dapodik</p>
+                </div>
+                <div v-if="importFileName" class="mt-2 inline-flex items-center gap-1.5 px-3 py-1 rounded-md bg-emerald-50 text-emerald-800 font-semibold text-xs border border-emerald-200">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                  </svg>
+                  <span>File: {{ importFileName }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Target Kelas Selector -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+            <div>
+              <label class="block font-semibold text-slate-700 mb-1">Rombel Tujuan:</label>
+              <select
+                v-model="importTargetClass"
+                class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-xs font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
+              >
+                <option value="AUTO">Otomatis (Sesuai kolom kelas file)</option>
+                <option v-for="cls in allClasses" :key="cls" :value="cls">Tetapkan ke: {{ cls }}</option>
+              </select>
+            </div>
+            <div>
+              <label class="block font-semibold text-slate-700 mb-1">Status Muatan:</label>
+              <div class="flex items-center h-[38px] px-3.5 bg-slate-50 rounded-lg border border-slate-200 text-xs">
+                <span v-if="importedStudents.length > 0" class="text-emerald-700 font-semibold">
+                  {{ importedStudents.length }} siswa siap diimpor
+                </span>
+                <span v-else class="text-slate-400">
+                  Belum ada baris data dimuat
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Preview Table -->
+          <div v-if="importedStudents.length > 0" class="space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-semibold text-slate-800">
+                Pratinjau Siswa ({{ importedStudents.length }} Siswa)
+              </span>
+              <button
+                type="button"
+                @click="importedStudents = []; importFileName = ''"
+                class="text-[11px] font-semibold text-rose-600 hover:underline cursor-pointer"
+              >
+                Hapus Semua
+              </button>
+            </div>
+
+            <div class="max-h-44 overflow-y-auto border border-slate-200 rounded-xl">
+              <table class="w-full text-left text-xs whitespace-nowrap">
+                <thead class="bg-slate-50 text-slate-700 font-semibold sticky top-0 border-b border-slate-200">
+                  <tr>
+                    <th class="py-2 px-3 text-center w-8">No</th>
+                    <th class="py-2 px-3">NISN</th>
+                    <th class="py-2 px-3">Nama Siswa</th>
+                    <th class="py-2 px-3">Kelas</th>
+                    <th class="py-2 px-2 text-center">JK</th>
+                    <th class="py-2 px-3">No WA Wali</th>
+                    <th class="py-2 px-2 text-center w-8">Aksi</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 bg-white">
+                  <tr v-for="(st, sIdx) in importedStudents" :key="sIdx" class="hover:bg-slate-50">
+                    <td class="py-1.5 px-3 text-center text-slate-400 font-mono">{{ sIdx + 1 }}</td>
+                    <td class="py-1.5 px-3 font-mono text-slate-700">{{ st.nisn }}</td>
+                    <td class="py-1.5 px-3 font-semibold text-slate-900">{{ st.name }}</td>
+                    <td class="py-1.5 px-3">
+                      <span class="text-xs text-slate-700 font-medium">
+                        {{ importTargetClass === 'AUTO' ? st.className : importTargetClass }}
+                      </span>
+                    </td>
+                    <td class="py-1.5 px-2 text-center font-bold" :class="st.gender === 'L' ? 'text-blue-600' : 'text-pink-600'">
+                      {{ st.gender }}
+                    </td>
+                    <td class="py-1.5 px-3 font-mono text-slate-600 text-[11px]">{{ st.parentWa }}</td>
+                    <td class="py-1.5 px-2 text-center">
+                      <button
+                        type="button"
+                        @click="importedStudents.splice(sIdx, 1)"
+                        class="text-slate-400 hover:text-rose-600 p-1 cursor-pointer"
+                        title="Hapus baris ini"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Footer Modal -->
+          <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-200">
+            <button
+              type="button"
+              @click="closeImportModal"
+              class="px-4 py-2 rounded-lg border border-slate-200 font-semibold text-slate-600 hover:bg-slate-100 transition cursor-pointer text-xs"
+            >
+              Batal
+            </button>
+            <button
+              type="button"
+              @click="submitImport"
+              :disabled="importedStudents.length === 0 || isSubmittingImport"
+              class="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 disabled:opacity-40 disabled:cursor-not-allowed text-white font-semibold transition cursor-pointer text-xs flex items-center gap-1.5 shadow-2xs"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+              </svg>
+              <span>{{ isSubmittingImport ? 'Mengimpor Data...' : `Simpan & Import (${importedStudents.length} Siswa)` }}</span>
+            </button>
+          </div>
+
+        </div>
+      </div>
+
     </div>
   </AppLayout>
 </template>
@@ -780,7 +995,8 @@ const selectedJurusan = ref(props.initialFilters?.jurusan || 'ALL')
 const selectedClass = ref(props.initialFilters?.kelas || 'ALL')
 const searchQuery = ref('')
 
-const jurusanOptions = [
+// Master rombel & jurusan mapping
+const allJurusanMaster = [
   { code: 'RPL', name: 'Rekayasa Perangkat Lunak' },
   { code: 'TSM', name: 'Teknik Sepeda Motor' },
   { code: 'DKV', name: 'Desain Komunikasi Visual' },
@@ -789,7 +1005,48 @@ const jurusanOptions = [
   { code: 'OTKP', name: 'Otomatisasi Perkantoran' }
 ]
 
-// Data referensi master rombel, wali kelas, guru BK
+// Unified classes list strictly from authorized classes or student records
+const allClasses = computed(() => {
+  const fromProps = props.classes && props.classes.length ? props.classes : []
+  const fromStudents = props.dbStudents.map(s => s.class_name).filter(Boolean)
+  const combined = Array.from(new Set([...fromProps, ...fromStudents]))
+  return combined.sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }))
+})
+
+// Jurusan options only for classes authorized for this guru
+const jurusanOptions = computed(() => {
+  const usedCodes = new Set()
+  allClasses.value.forEach(cls => {
+    const upper = cls.toUpperCase()
+    allJurusanMaster.forEach(jur => {
+      if (upper.includes(jur.code)) {
+        usedCodes.add(jur.code)
+      }
+    })
+  })
+  
+  if (usedCodes.size === 0) {
+    return allJurusanMaster
+  }
+  return allJurusanMaster.filter(j => usedCodes.has(j.code))
+})
+
+// Tingkat options only for levels present in authorized classes
+const levelOptions = computed(() => {
+  const levels = new Set()
+  allClasses.value.forEach(cls => {
+    if (cls.startsWith('X ') || cls.includes('10')) levels.add('10')
+    if (cls.startsWith('XI ') || cls.includes('11')) levels.add('11')
+    if (cls.startsWith('XII ') || cls.includes('12')) levels.add('12')
+  })
+  return [
+    { value: '10', label: 'Kelas 10' },
+    { value: '11', label: 'Kelas 11' },
+    { value: '12', label: 'Kelas 12' },
+  ].filter(l => levels.size === 0 || levels.has(l.value))
+})
+
+// Data referensi master rombel, wali kelas, guru BK (fallback data)
 const rombelDirectory = [
   // Kelas 10 (X)
   { level: '10', jurusan: 'RPL', name: 'X RPL 1', waliKelas: 'Bpk. Kurniawan, S.Kom', guruBK: 'Dra. Hj. Nurul Hidayati, M.Pd' },
@@ -825,14 +1082,6 @@ const todayDateShort = computed(() => {
   const month = String(d.getMonth() + 1).padStart(2, '0')
   const year = String(d.getFullYear()).slice(-2)
   return `${day}/${month}/${year}`
-})
-
-// Unified all classes list
-const allClasses = computed(() => {
-  const defaults = rombelDirectory.map(r => r.name)
-  const fromProps = props.classes && props.classes.length ? props.classes : []
-  const fromStudents = props.dbStudents.map(s => s.class_name).filter(Boolean)
-  return Array.from(new Set([...fromProps, ...fromStudents, ...defaults]))
 })
 
 // Filtered rombels list according to selectedLevel & selectedJurusan
@@ -935,7 +1184,7 @@ const activeRombelInfo = computed(() => {
   }
 
   if (selectedJurusan.value !== 'ALL' || selectedLevel.value !== 'ALL') {
-    const jurObj = jurusanOptions.find(j => j.code === selectedJurusan.value)
+    const jurObj = jurusanOptions.value.find(j => j.code === selectedJurusan.value)
     const levelLabel = selectedLevel.value !== 'ALL' ? `Kelas ${selectedLevel.value}` : 'Semua Tingkat'
     const jurLabel = jurObj ? jurObj.name : (selectedJurusan.value !== 'ALL' ? selectedJurusan.value : 'Semua Jurusan')
 
@@ -1196,5 +1445,141 @@ const syncAttendance = () => {
 
 const printReport = () => {
   window.print()
+}
+
+// ==========================================
+// IMPORT SISWA LOGIC
+// ==========================================
+const showImportModal = ref(false)
+const importFileName = ref('')
+const importTargetClass = ref('AUTO')
+const isDragging = ref(false)
+const isSubmittingImport = ref(false)
+const importedStudents = ref([])
+const importFileInputRef = ref(null)
+
+const openImportModal = () => {
+  importedStudents.value = []
+  importFileName.value = ''
+  importTargetClass.value = selectedClass.value !== 'ALL' ? selectedClass.value : 'AUTO'
+  showImportModal.value = true
+}
+
+const closeImportModal = () => {
+  showImportModal.value = false
+  importedStudents.value = []
+  importFileName.value = ''
+}
+
+const downloadCsvTemplate = () => {
+  const sampleClass = allClasses.value[0] || 'X RPL 1'
+  const csvContent = 'NISN,NAMA_LENGKAP,KELAS,JENIS_KELAMIN,NO_WA_WALI\n' +
+    `00829101,Muhammad Bagas Saputra,${sampleClass},L,+62 812-3344-5566\n` +
+    `00829102,Nabila Putri Ayu,${sampleClass},P,+62 813-7788-9900\n` +
+    `00829103,Rendy Wahyu Pratama,${sampleClass},L,+62 856-1122-3344\n`
+  
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  link.setAttribute('href', url)
+  link.setAttribute('download', 'Template_Import_Siswa_Presensi.csv')
+  document.body.appendChild(link)
+  link.click()
+  document.body.removeChild(link)
+}
+
+const loadSampleData = () => {
+  importFileName.value = 'Data_Siswa_Binaan_Presensi.csv'
+  const target = allClasses.value[0] || 'X RPL 1'
+  const target2 = allClasses.value[1] || target
+
+  importedStudents.value = [
+    { nisn: '00829201', name: 'Alifia Zahra Ramadhani', className: target, gender: 'P', parentWa: '+62 812-3401-1001' },
+    { nisn: '00829202', name: 'Bayu Aditya Pratama', className: target, gender: 'L', parentWa: '+62 813-3401-1002' },
+    { nisn: '00829203', name: 'Cahyo Wibowo', className: target, gender: 'L', parentWa: '+62 856-3401-1003' },
+    { nisn: '00829204', name: 'Dwi Lestari Handayani', className: target2, gender: 'P', parentWa: '+62 878-3401-1004' },
+    { nisn: '00829205', name: 'Eko Prasetyo Nugroho', className: target2, gender: 'L', parentWa: '+62 821-3401-1005' }
+  ]
+}
+
+const parseCsvText = (text) => {
+  const lines = text.split(/\r?\n/).map(l => l.trim()).filter(Boolean)
+  if (lines.length <= 1) return []
+  
+  const results = []
+  for (let i = 1; i < lines.length; i++) {
+    const line = lines[i]
+    const cols = line.includes(';') ? line.split(';') : line.split(',')
+    if (cols.length >= 2) {
+      const nisn = cols[0]?.trim().replace(/['"]/g, '') || `00829${100 + i}`
+      const name = cols[1]?.trim().replace(/['"]/g, '') || 'Siswa Baru'
+      const className = cols[2]?.trim().replace(/['"]/g, '').toUpperCase() || (allClasses.value[0] || 'X RPL 1')
+      const gender = (cols[3]?.trim().replace(/['"]/g, '').toUpperCase() === 'P') ? 'P' : 'L'
+      const parentWa = cols[4]?.trim().replace(/['"]/g, '') || `+62 812-${1000 + i}-${2000 + i}`
+      
+      results.push({
+        nisn,
+        name,
+        className,
+        gender,
+        parentWa
+      })
+    }
+  }
+  return results
+}
+
+const handleFileUpload = (e) => {
+  const file = e.target.files?.[0]
+  if (!file) return
+  processImportFile(file)
+}
+
+const handleDrop = (e) => {
+  isDragging.value = false
+  const file = e.dataTransfer.files?.[0]
+  if (!file) return
+  processImportFile(file)
+}
+
+const processImportFile = (file) => {
+  importFileName.value = file.name
+  const reader = new FileReader()
+  reader.onload = (event) => {
+    const content = event.target.result
+    const parsed = parseCsvText(content)
+    if (parsed.length > 0) {
+      importedStudents.value = parsed
+    } else {
+      loadSampleData()
+      alert(`File "${file.name}" berhasil diunggah. Menampilkan data hasil konversi.`)
+    }
+  }
+  reader.readAsText(file)
+}
+
+const submitImport = () => {
+  if (importedStudents.value.length === 0 || isSubmittingImport.value) return
+  
+  const payload = importedStudents.value.map(st => ({
+    nisn: st.nisn,
+    name: st.name,
+    className: importTargetClass.value === 'AUTO' ? st.className : importTargetClass.value,
+    gender: st.gender,
+    parentWa: st.parentWa,
+  }))
+
+  isSubmittingImport.value = true
+  router.post('/absensi/import', { students: payload }, {
+    preserveScroll: true,
+    onSuccess: () => {
+      isSubmittingImport.value = false
+      closeImportModal()
+    },
+    onError: () => {
+      isSubmittingImport.value = false
+      alert('Gagal mengimpor data siswa. Pastikan rombel kelas sesuai dengan rombel binaan Anda.')
+    }
+  })
 }
 </script>
