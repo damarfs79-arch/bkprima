@@ -59,12 +59,21 @@
       <div class="bg-white rounded-xl p-5 border border-slate-200 shadow-xs relative overflow-hidden">
         <h3 class="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">POIN PELANGGARAN INI</h3>
         <div class="flex justify-between items-end mb-3">
-          <div class="flex items-baseline gap-1">
-            <span class="text-4xl sm:text-5xl font-bold text-rose-600 tracking-tight">{{ studentPoints }}</span>
-            <span class="text-xs sm:text-sm font-medium text-slate-500">Poin Pelanggaran</span>
+          <div class="flex items-baseline gap-1.5">
+            <template v-if="studentPoints !== null">
+              <span class="text-4xl sm:text-5xl font-bold text-rose-600 tracking-tight">{{ studentPoints }}</span>
+              <span class="text-xs sm:text-sm font-medium text-slate-500">Poin Pelanggaran</span>
+            </template>
+            <template v-else>
+              <span class="text-2xl sm:text-3xl font-bold text-slate-700 tracking-tight">Tanpa Poin</span>
+              <span class="text-xs sm:text-sm font-medium text-slate-500">(Pembinaan / Teguran Lisan)</span>
+            </template>
           </div>
-          <div class="bg-rose-50 text-rose-700 px-2.5 py-1 rounded-md text-xs font-semibold border border-rose-200">
-            {{ studentPoints >= 25 ? 'Kasus Berat / SP' : (studentPoints >= 10 ? 'Kasus Sedang' : 'Kasus Ringan') }}
+          <div 
+            class="px-2.5 py-1 rounded-md text-xs font-semibold border"
+            :class="studentPoints === null ? 'bg-slate-100 text-slate-700 border-slate-200' : (studentPoints >= 25 ? 'bg-rose-50 text-rose-700 border-rose-200' : (studentPoints >= 10 ? 'bg-amber-50 text-amber-700 border-amber-200' : 'bg-blue-50 text-blue-700 border-blue-200'))"
+          >
+            {{ studentPoints === null ? 'Kasus Pembinaan Langsung' : (studentPoints >= 25 ? 'Kasus Berat / SP' : (studentPoints >= 10 ? 'Kasus Sedang' : 'Kasus Ringan')) }}
           </div>
         </div>
 
@@ -325,11 +334,15 @@ const props = defineProps({
   }
 })
 
-const photoUrl = computed(() => props.violation?.photo_url || null)
+const photoUrl = computed(() => props.violation?.foto_url || props.violation?.photo_url || null)
 
 const studentName = computed(() => props.violation?.student_name || 'Muhammad Rizky Pratama')
 const studentClass = computed(() => props.violation?.student_class || 'XI RPL 2')
-const studentPoints = computed(() => props.violation?.points || 10)
+const studentPoints = computed(() => {
+  if (!props.violation) return 10
+  if (props.violation.points === null || props.violation.points === undefined) return null
+  return props.violation.points
+})
 const studentNisn = computed(() => props.violation?.student?.nisn || '22231084')
 
 const goBack = () => {

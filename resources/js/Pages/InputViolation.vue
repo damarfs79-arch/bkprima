@@ -226,12 +226,68 @@
           </div>
         </div>
 
-        <!-- 3. Bukti Foto Pelanggaran -->
+        <!-- 3. Poin Pelanggaran (Opsional) -->
         <div class="space-y-3 pt-2">
           <div class="flex items-center justify-between">
             <label class="flex items-center gap-2 text-xs sm:text-sm font-semibold text-slate-800">
               <span class="w-5 h-5 rounded-md bg-slate-100 text-slate-700 text-xs font-bold flex items-center justify-center">3</span>
-              <span>Bukti Foto Pelanggaran</span>
+              <span>Poin Pelanggaran (Opsional)</span>
+            </label>
+            <span class="text-[11px] font-medium text-slate-500">
+              {{ (form.points === null || form.points === '') ? 'Status: Kasus Pembinaan (Tanpa Poin)' : `Poin Terakumulasi: +${form.points} Poin` }}
+            </span>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div class="sm:col-span-1">
+              <div class="relative">
+                <input
+                  v-model="form.points"
+                  type="number"
+                  min="0"
+                  max="100"
+                  placeholder="Kosongkan jika pembinaan..."
+                  class="w-full bg-white border border-slate-300 rounded-lg px-3 py-2.5 text-xs sm:text-sm font-medium text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+                />
+              </div>
+            </div>
+            <div class="sm:col-span-2 flex items-center">
+              <p class="text-[11px] text-slate-500 leading-relaxed">
+                Poin bersifat opsional. Kosongkan nilai jika kasus berupa teguran lisan, konseling awal, atau pembinaan langsung tanpa sanksi poin.
+              </p>
+            </div>
+          </div>
+
+          <!-- Quick Points Selector -->
+          <div class="flex flex-wrap items-center gap-1.5 pt-0.5 text-[11px]">
+            <span class="text-slate-400">Pilihan cepat:</span>
+            <button
+              type="button"
+              @click="form.points = null"
+              class="px-2 py-0.5 rounded-md border text-xs font-medium transition cursor-pointer"
+              :class="(form.points === null || form.points === '') ? 'bg-blue-50 border-blue-300 text-blue-700 font-bold' : 'bg-slate-100 border-slate-200 text-slate-600 hover:bg-slate-200'"
+            >
+              Tanpa Poin (Pembinaan)
+            </button>
+            <button
+              v-for="pt in [5, 10, 15, 20, 25, 30, 50]"
+              :key="pt"
+              type="button"
+              @click="form.points = pt"
+              class="px-2 py-0.5 rounded-md border text-xs font-medium transition cursor-pointer"
+              :class="form.points === pt ? 'bg-blue-50 border-blue-300 text-blue-700 font-bold' : 'bg-slate-100 border-slate-200 text-slate-600 hover:bg-slate-200'"
+            >
+              +{{ pt }} Poin
+            </button>
+          </div>
+        </div>
+
+        <!-- 4. Bukti Foto Pelanggaran -->
+        <div class="space-y-3 pt-2">
+          <div class="flex items-center justify-between">
+            <label class="flex items-center gap-2 text-xs sm:text-sm font-semibold text-slate-800">
+              <span class="w-5 h-5 rounded-md bg-slate-100 text-slate-700 text-xs font-bold flex items-center justify-center">4</span>
+              <span>Bukti Foto Pelanggaran (Opsional)</span>
             </label>
             <span 
               v-if="form.photoUrl" 
@@ -522,6 +578,7 @@ const props = defineProps({
 const showSuccessToast = ref(false)
 const isSubmitting = ref(false)
 const fileUpload = ref(null)
+const photoFile = ref(null)
 
 // Camera State
 const isCameraModalOpen = ref(false)
@@ -591,6 +648,7 @@ const form = ref({
   studentClass: '',
   category: '',
   description: '',
+  points: null,
   photoUrl: null,
   photoTimestamp: ''
 })
@@ -711,6 +769,7 @@ const retakeSnapshot = () => {
 const useCapturedSnapshot = () => {
   if (snapshotPreview.value) {
     form.value.photoUrl = snapshotPreview.value
+    photoFile.value = null
     const now = new Date()
     const dateFormatted = now.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })
     const timeFormatted = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })
@@ -746,13 +805,19 @@ const triggerUpload = () => {
 const onPhotoChange = (e) => {
   const file = e.target.files?.[0]
   if (file) {
+    if (file.size > 2097152) {
+      alert('Ukuran berkas foto bukti maksimal adalah 2 MB (2048 KB).')
+      if (e.target) e.target.value = ''
+      return
+    }
+    photoFile.value = file
     const reader = new FileReader()
     reader.onload = (event) => {
       form.value.photoUrl = event.target.result
       const now = new Date()
       const dateFormatted = now.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })
       const timeFormatted = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })
-      form.value.photoTimestamp = `Diunggah: ${dateFormatted}, ${timeFormatted} WIB • Galeri Perangkat`
+      form.value.photoTimestamp = `Diunggah: ${dateFormatted}, ${timeFormatted} WIB • ${file.name}`
     }
     reader.readAsDataURL(file)
   }
@@ -766,6 +831,7 @@ const onPhotoChange = (e) => {
 const removePhoto = () => {
   form.value.photoUrl = null
   form.value.photoTimestamp = ''
+  photoFile.value = null
 }
 
 // Submit Form
@@ -780,29 +846,38 @@ const handleSubmit = () => {
   }
 
   isSubmitting.value = true
-  router.post('/pelanggaran', {
+  const pointsVal = (form.value.points !== null && form.value.points !== '') ? Number(form.value.points) : null
+
+  const payload = {
     student_id: form.value.studentId,
     student_name: form.value.studentName,
     student_class: form.value.studentClass,
     category: form.value.category,
     violation_name: form.value.category,
     notes: form.value.description,
-    photo_url: form.value.photoUrl,
-    points: 10,
+    points: pointsVal,
+    poin: pointsVal,
+    foto_bukti: photoFile.value,
+    photo_url: photoFile.value ? null : form.value.photoUrl,
     date: new Date().toISOString().slice(0, 10),
     time: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }),
     reporter: 'Guru Piket & BK',
-    penalty_action: 'Teguran lisan & pencatatan kedisiplinan',
-  }, {
+    penalty_action: pointsVal === null ? 'Pembinaan & teguran lisan' : 'Teguran tertulis & pencatatan kedisiplinan',
+  }
+
+  router.post('/pelanggaran', payload, {
+    forceFormData: true,
     onSuccess: () => {
       showSuccessToast.value = true
       resetStudentSelection()
+      photoFile.value = null
       form.value = {
         studentId: null,
         studentName: '',
         studentClass: '',
         category: '',
         description: '',
+        points: null,
         photoUrl: null,
         photoTimestamp: ''
       }

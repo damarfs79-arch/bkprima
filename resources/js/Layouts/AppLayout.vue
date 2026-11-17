@@ -160,8 +160,11 @@
       <!-- Desktop Top Bar -->
       <header class="hidden lg:flex items-center justify-between px-8 py-3.5 bg-white border-b border-slate-200/80 sticky top-0 z-20">
         <div class="flex items-center gap-2 text-xs font-medium text-slate-500">
-          <button v-if="showBack" @click="handleBack" class="p-1 text-slate-400 hover:text-slate-800 rounded cursor-pointer mr-1">
-            &larr; Kembali
+          <button v-if="showBack" @click="handleBack" class="inline-flex items-center gap-1 p-1 text-slate-500 hover:text-slate-800 rounded cursor-pointer mr-1">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+            <span>Kembali</span>
           </button>
           <span class="text-slate-400">Portal BK</span>
           <span class="text-slate-300">/</span>

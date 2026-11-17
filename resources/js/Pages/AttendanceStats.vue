@@ -407,8 +407,11 @@
 
         <div class="p-3 bg-slate-50 border-t border-slate-200 text-slate-500 text-[11px] flex items-center justify-between">
           <span>* Berdasarkan SK Kesiswaan: Alpa 3 hari dalam seminggu diterbitkan SP-1, alpa &ge; 4 hari diterbitkan SP-2 / Sidang BK.</span>
-          <Link href="/pemanggilan" class="text-blue-600 hover:underline font-semibold">
-            Buka Modul Pemanggilan Orang Tua &rarr;
+          <Link href="/pemanggilan" class="text-blue-600 hover:underline font-semibold inline-flex items-center gap-1">
+            <span>Buka Modul Pemanggilan Orang Tua</span>
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+            </svg>
           </Link>
         </div>
       </div>
@@ -565,9 +568,12 @@
               <button
                 type="button"
                 @click="goToFullSummonsPage"
-                class="text-xs font-semibold text-rose-700 hover:underline cursor-pointer"
+                class="text-xs font-semibold text-rose-700 hover:underline cursor-pointer inline-flex items-center gap-1"
               >
-                Buka di Modul Pemanggilan Penuh &rarr;
+                <span>Buka di Modul Pemanggilan Penuh</span>
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                </svg>
               </button>
 
               <div class="flex items-center gap-2">

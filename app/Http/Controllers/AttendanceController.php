@@ -464,6 +464,8 @@ class AttendanceController extends Controller
                 : 0,
         ];
 
+        $classroomObj = Classroom::where('name', $selectedClass)->first();
+
         return Inertia::render('AttendanceMonthly', [
             'students' => $studentMatrix,
             'days' => $days,
@@ -476,8 +478,8 @@ class AttendanceController extends Controller
                 'name' => 'SMK PGRI 05 JEMBER',
                 'npsn' => '20523821',
                 'address' => 'Jl. Krakatau No. 54 Tanggul, Kab. Jember - Jawa Timur',
-                'waliKelas' => 'Bpk. Ahmad Fauzi, S.Kom',
-                'guruBk' => 'Dra. Hj. Nurul Hidayati, M.Pd',
+                'waliKelas' => $classroomObj?->wali_kelas ?? 'Bpk. Ahmad Fauzi, S.Kom',
+                'guruBk' => $classroomObj?->guru_bk_name ?? 'Dra. Hj. Nurul Hidayati, M.Pd',
                 'kepalaSekolah' => 'Drs. H. Saiful Bahri, M.Pd',
             ]
         ]);

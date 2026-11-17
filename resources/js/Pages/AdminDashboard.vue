@@ -22,45 +22,7 @@
             <p class="text-xs sm:text-sm text-slate-500 mt-0.5">Kelola data Guru BK, Rombel Kelas, Siswa, dan pantau tren fluktuasi kehadiran 1 bulan.</p>
           </div>
 
-          <!-- Quick Action Buttons -->
-          <div class="flex items-center gap-2 flex-wrap">
-            <button
-              @click="openModal('guru')"
-              class="interactive-btn inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-medium bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 hover:border-slate-300 cursor-pointer"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M12 4v16m8-8H4" />
-              </svg>
-              <span>Guru BK</span>
-            </button>
-            <button
-              @click="openModal('kelas')"
-              class="interactive-btn inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-medium bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 hover:border-slate-300 cursor-pointer"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M12 4v16m8-8H4" />
-              </svg>
-              <span>Kelas</span>
-            </button>
-            <button
-              @click="openModal('import-siswa')"
-              class="interactive-btn inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-medium bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 hover:border-emerald-300 cursor-pointer"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
-              </svg>
-              <span>Import Siswa</span>
-            </button>
-            <button
-              @click="openModal('siswa')"
-              class="interactive-btn inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-medium bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white shadow-xs hover:shadow cursor-pointer"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M12 4v16m8-8H4" />
-              </svg>
-              <span>Tambah Siswa</span>
-            </button>
-          </div>
+
         </div>
       </div>
 
@@ -915,15 +877,26 @@
             <h2 class="text-lg font-bold text-slate-900 tracking-tight">Data Rombongan Belajar (Rombel)</h2>
             <p class="text-xs text-slate-500 mt-0.5">Struktur rombel kelas per tingkat dan penugasan wali kelas</p>
           </div>
-          <button
-            @click="openModal('kelas')"
-            class="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs transition cursor-pointer self-start sm:self-auto"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4" />
-            </svg>
-            <span>Tambah Kelas Baru</span>
-          </button>
+          <div class="flex items-center gap-2 flex-wrap self-start sm:self-auto">
+            <button
+              @click="openModal('jurusan')"
+              class="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-lg bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 hover:border-slate-300 font-semibold text-xs transition cursor-pointer"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+              </svg>
+              <span>Tambah Jurusan</span>
+            </button>
+            <button
+              @click="openModal('kelas')"
+              class="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs transition cursor-pointer"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4" />
+              </svg>
+              <span>Tambah Kelas Baru</span>
+            </button>
+          </div>
         </div>
 
         <!-- Table Kelas -->
@@ -1101,8 +1074,33 @@
                   </td>
                 </tr>
                 <tr v-if="filteredSiswaList.length === 0">
-                  <td colspan="8" class="py-8 text-center text-slate-400 text-xs">
-                    Tidak ada siswa yang sesuai dengan filter pencarian.
+                  <td colspan="8" class="py-10 text-center">
+                    <div class="flex flex-col items-center justify-center gap-2">
+                      <div class="w-10 h-10 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                        </svg>
+                      </div>
+                      <p class="text-xs font-semibold text-slate-700">
+                        {{ selectedFilterKelas !== 'Semua' ? `Belum ada data siswa untuk rombel ${selectedFilterKelas}` : 'Tidak ada data siswa yang cocok dengan pencarian' }}
+                      </p>
+                      <div class="flex items-center gap-2 mt-1">
+                        <button
+                          v-if="selectedFilterKelas !== 'Semua'"
+                          @click="selectedFilterKelas = 'Semua'"
+                          class="text-xs font-medium text-slate-500 hover:text-slate-800 underline cursor-pointer"
+                        >
+                          Lihat Semua Kelas
+                        </button>
+                        <span v-if="selectedFilterKelas !== 'Semua'" class="text-slate-300">•</span>
+                        <button
+                          @click="openModal('import-siswa')"
+                          class="text-xs font-bold text-blue-600 hover:text-blue-700 underline cursor-pointer"
+                        >
+                          Import Siswa untuk {{ selectedFilterKelas !== 'Semua' ? selectedFilterKelas : 'Rombel Ini' }}
+                        </button>
+                      </div>
+                    </div>
                   </td>
                 </tr>
               </tbody>
@@ -1312,17 +1310,17 @@
             </div>
             <div class="grid grid-cols-2 gap-3">
               <div>
-                <label class="block font-bold text-slate-700 mb-1">NIP Pegawai</label>
-                <input v-model="formGuru.nip" placeholder="19820512 2008..." class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3.5 py-2.5 font-mono text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white" />
+                <label class="block font-bold text-slate-700 mb-1">NIP Pegawai (Opsional / Boleh '-')</label>
+                <input v-model="formGuru.nip" placeholder="Contoh: 19820512 2008... atau -" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3.5 py-2.5 font-mono text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white" />
               </div>
               <div>
-                <label class="block font-bold text-slate-700 mb-1">NUPTK</label>
-                <input v-model="formGuru.nuptk" placeholder="8452 7566..." class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3.5 py-2.5 font-mono text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white" />
+                <label class="block font-bold text-slate-700 mb-1">NUPTK (Opsional / Boleh '-')</label>
+                <input v-model="formGuru.nuptk" placeholder="Contoh: 8452 7566... atau -" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3.5 py-2.5 font-mono text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white" />
               </div>
             </div>
             <div>
-              <label class="block font-bold text-slate-700 mb-1">Jabatan / Penugasan Khusus *</label>
-              <input v-model="formGuru.jabatan" required placeholder="Contoh: Guru Pembimbing BK Kelas X" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3.5 py-2.5 font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white" />
+              <label class="block font-bold text-slate-700 mb-1">Jabatan / Penugasan Khusus (Opsional)</label>
+              <input v-model="formGuru.jabatan" placeholder="Contoh: Guru Pembimbing BK Kelas X (Default: Guru BK)" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3.5 py-2.5 font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white" />
             </div>
 
             <!-- KREDENSIAL AKUN LOGIN BK (USERNAME & PASSWORD) -->
@@ -1339,26 +1337,24 @@
 
               <div class="grid grid-cols-2 gap-3">
                 <div>
-                  <label class="block font-bold text-slate-700 mb-1">Username Akun *</label>
+                  <label class="block font-bold text-slate-700 mb-1">Username Akun (Opsional)</label>
                   <div class="relative">
                     <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-mono font-bold text-xs select-none">@</span>
                     <input
                       v-model="formGuru.username"
-                      required
-                      placeholder="nurul_bk"
+                      placeholder="Otomatis dari nama jika kosong"
                       class="w-full bg-white border border-slate-200 rounded-lg pl-7 pr-3 py-2 font-mono text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label class="block font-bold text-slate-700 mb-1">Kata Sandi (Password) *</label>
+                  <label class="block font-bold text-slate-700 mb-1">Kata Sandi (Password, Opsional)</label>
                   <div class="relative">
                     <input
                       :type="showGuruPassword ? 'text' : 'password'"
                       v-model="formGuru.password"
-                      required
-                      placeholder="Min. 6 karakter..."
+                      placeholder="Default: 123456"
                       class="w-full bg-white border border-slate-200 rounded-lg px-3.5 py-2 pr-9 text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono"
                     />
                     <button
@@ -1378,22 +1374,22 @@
                   </div>
                 </div>
               </div>
-              <p class="text-[10px] text-slate-500">Kredensial ini digunakan Guru BK untuk masuk dan mengelola presensi siswa di halaman login.</p>
+              <p class="text-[10px] text-slate-500">Jika dikosongkan, username dibuat otomatis dan sandi awal adalah: 123456</p>
             </div>
 
             <div class="grid grid-cols-2 gap-3">
               <div>
-                <label class="block font-bold text-slate-700 mb-1">WhatsApp Aktif</label>
-                <input v-model="formGuru.wa" placeholder="+62 812..." class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3.5 py-2.5 text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white" />
+                <label class="block font-bold text-slate-700 mb-1">WhatsApp Aktif (Boleh '-')</label>
+                <input v-model="formGuru.wa" placeholder="Contoh: +62 812... atau -" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3.5 py-2.5 text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white" />
               </div>
               <div>
-                <label class="block font-bold text-slate-700 mb-1">Email Belajar.id</label>
-                <input v-model="formGuru.email" type="email" placeholder="nama@guru.belajar.id" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3.5 py-2.5 text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white" />
+                <label class="block font-bold text-slate-700 mb-1">Email Belajar.id (Boleh '-')</label>
+                <input v-model="formGuru.email" type="text" placeholder="Contoh: nama@guru.belajar.id atau -" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3.5 py-2.5 text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white" />
               </div>
             </div>
             <div>
-              <label class="block font-bold text-slate-700 mb-1">Rombel Binaan (Pisahkan dengan koma)</label>
-              <input v-model="formGuru.rombelText" placeholder="Contoh: X RPL 1, X RPL 2, X TSM 1" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3.5 py-2.5 text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white" />
+              <label class="block font-bold text-slate-700 mb-1">Rombel Binaan (Boleh '-')</label>
+              <input v-model="formGuru.rombelText" placeholder="Contoh: X RPL 1, X RPL 2 atau -" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3.5 py-2.5 text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white" />
             </div>
 
             <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-200">
@@ -1408,7 +1404,7 @@
       <!-- MODAL: TAMBAH KELAS / ROMBEL                                  -->
       <!-- ============================================================ -->
       <div v-if="modalType === 'kelas'" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50">
-        <div class="bg-white rounded-xl max-w-md w-full p-6 shadow-xl border border-slate-200 space-y-4 animate-in fade-in zoom-in-95">
+        <div class="bg-white rounded-xl max-w-lg w-full p-6 shadow-xl border border-slate-200 space-y-4 animate-in fade-in zoom-in-95">
           <div class="flex items-center justify-between pb-3 border-b border-slate-200">
             <div class="flex items-center gap-2">
               <div class="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 border border-blue-200/50 flex items-center justify-center">
@@ -1416,7 +1412,10 @@
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                 </svg>
               </div>
-              <h3 class="font-bold text-slate-900 text-sm sm:text-base">Tambah Rombel Kelas Baru</h3>
+              <div>
+                <h3 class="font-bold text-slate-900 text-sm sm:text-base">Tambah Rombel Kelas Baru</h3>
+                <p class="text-[11px] text-slate-500 font-normal">Buat rombel kelas dan tentukan jurusan serta Guru BK pendamping</p>
+              </div>
             </div>
             <button @click="closeModal" class="p-1.5 text-slate-400 hover:text-slate-600 rounded-lg cursor-pointer">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -1426,48 +1425,236 @@
           </div>
 
           <form @submit.prevent="saveKelas" class="space-y-3.5 text-xs">
-            <div class="grid grid-cols-2 gap-3">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <label class="block font-bold text-slate-700 mb-1">Tingkat Kelas *</label>
-                <select v-model="formKelas.level" required class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3.5 py-2.5 font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer">
+                <select v-model="formKelas.level" @change="autoGenerateClassName" required class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3.5 py-2.5 font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer">
                   <option value="Kelas 10 (X)">Kelas 10 (X)</option>
                   <option value="Kelas 11 (XI)">Kelas 11 (XI)</option>
                   <option value="Kelas 12 (XII)">Kelas 12 (XII)</option>
                 </select>
               </div>
               <div>
-                <label class="block font-bold text-slate-700 mb-1">Bidang Keahlian / Jurusan *</label>
-                <select v-model="formKelas.jurusan" required class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3.5 py-2.5 font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer">
-                  <option value="RPL">RPL</option>
-                  <option value="TSM">TSM</option>
-                  <option value="DKV">DKV</option>
-                  <option value="TKJ">TKJ</option>
-                  <option value="AKL">AKL</option>
-                  <option value="OTKP">OTKP</option>
-                </select>
+                <div class="flex items-center justify-between mb-1">
+                  <label class="block font-bold text-slate-700">Jurusan *</label>
+                  <button type="button" @click="openModal('jurusan')" class="text-[10px] text-blue-600 hover:text-blue-700 font-bold cursor-pointer">
+                    + Kelola Jurusan
+                  </button>
+                </div>
+                <input
+                  v-model="formKelas.jurusan"
+                  list="jurusan-datalist"
+                  required
+                  placeholder="Ketik atau pilih kode..."
+                  class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3.5 py-2.5 font-bold text-slate-800 uppercase focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white"
+                  @input="formKelas.jurusan = formKelas.jurusan.toUpperCase(); autoGenerateClassName()"
+                />
+                <datalist id="jurusan-datalist">
+                  <option v-for="j in jurusanList" :key="j.code" :value="j.code">
+                    {{ j.code }} - {{ j.name }}
+                  </option>
+                </datalist>
+              </div>
+            </div>
+
+            <!-- Quick Choice Badges untuk Jurusan -->
+            <div class="pt-0.5">
+              <span class="text-[10px] text-slate-400 font-medium block mb-1">Pilihan Cepat Jurusan:</span>
+              <div class="flex flex-wrap gap-1.5">
+                <button
+                  v-for="j in jurusanList"
+                  :key="j.code"
+                  type="button"
+                  @click="formKelas.jurusan = j.code; autoGenerateClassName()"
+                  class="px-2.5 py-1 rounded-md text-[11px] font-bold border transition cursor-pointer"
+                  :class="formKelas.jurusan === j.code ? 'bg-blue-600 text-white border-blue-600 shadow-xs' : 'bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-200'"
+                >
+                  {{ j.code }}
+                </button>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+              <div>
+                <label class="block font-bold text-slate-700 mb-1">Nama Rombel *</label>
+                <input
+                  v-model="formKelas.name"
+                  required
+                  placeholder="Contoh: X RPL 1"
+                  class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3.5 py-2.5 font-bold text-slate-800 uppercase focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white"
+                />
+              </div>
+              <div>
+                <label class="block font-bold text-slate-700 mb-1">Nama Wali Kelas *</label>
+                <input
+                  v-model="formKelas.waliKelas"
+                  required
+                  placeholder="Contoh: Bpk. Kurniawan, S.Kom"
+                  class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3.5 py-2.5 font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white"
+                />
               </div>
             </div>
 
             <div>
-              <label class="block font-bold text-slate-700 mb-1">Nama Rombel *</label>
-              <input v-model="formKelas.name" required placeholder="Contoh: X RPL 4 atau XI DKV 3" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3.5 py-2.5 font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white" />
-            </div>
-
-            <div>
-              <label class="block font-bold text-slate-700 mb-1">Nama Wali Kelas *</label>
-              <input v-model="formKelas.waliKelas" required placeholder="Contoh: Bpk. Kurniawan, S.Kom" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3.5 py-2.5 font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white" />
-            </div>
-
-            <div>
-              <label class="block font-bold text-slate-700 mb-1">Guru BK Pendamping</label>
+              <div class="flex items-center justify-between mb-1">
+                <label class="block font-bold text-slate-700">Guru BK Pendamping</label>
+                <button type="button" @click="openModal('guru')" class="text-[10px] text-blue-600 hover:text-blue-700 font-bold cursor-pointer">
+                  + Tambah Guru BK Baru
+                </button>
+              </div>
               <select v-model="formKelas.guruBK" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3.5 py-2.5 font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer">
                 <option v-for="g in guruBkList" :key="g.id" :value="g.name">{{ g.name }}</option>
               </select>
+              <p class="text-[10px] text-slate-400 mt-1">Daftar Guru BK bersumber dari menu Kelola Guru BK.</p>
             </div>
 
             <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-200">
               <button type="button" @click="closeModal" class="px-4 py-2.5 rounded-lg border border-slate-200 font-bold text-slate-600 hover:bg-slate-100 transition cursor-pointer">Batal</button>
               <button type="submit" class="px-5 py-2.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-bold transition cursor-pointer shadow-sm">Simpan Kelas</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- ============================================================ -->
+      <!-- MODAL: TAMBAH / KELOLA JURUSAN                                -->
+      <!-- ============================================================ -->
+      <div v-if="modalType === 'jurusan'" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50">
+        <div class="bg-white rounded-xl max-w-lg w-full p-6 shadow-xl border border-slate-200 space-y-4 animate-in fade-in zoom-in-95">
+          <div class="flex items-center justify-between pb-3 border-b border-slate-200">
+            <div class="flex items-center gap-2">
+              <div class="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 border border-blue-200/50 flex items-center justify-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                </svg>
+              </div>
+              <div>
+                <h3 class="font-bold text-slate-900 text-sm sm:text-base">
+                  {{ editingJurusan ? 'Edit Jurusan / Bidang Keahlian' : 'Tambah Jurusan / Bidang Keahlian' }}
+                </h3>
+                <p class="text-[11px] text-slate-500 font-normal">
+                  {{ editingJurusan ? 'Perbarui informasi program keahlian' : 'Daftarkan program keahlian baru untuk pengelompokan rombel kelas' }}
+                </p>
+              </div>
+            </div>
+            <button @click="closeModal" class="p-1.5 text-slate-400 hover:text-slate-600 rounded-lg cursor-pointer">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+
+          <!-- Alert Error Validasi -->
+          <div v-if="errorMessageJurusan" class="p-3 rounded-lg bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-center justify-between">
+            <span class="font-medium">{{ errorMessageJurusan }}</span>
+            <button type="button" @click="errorMessageJurusan = ''" class="text-rose-500 hover:text-rose-700 ml-2 p-1 rounded-md transition cursor-pointer" title="Tutup">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+
+          <form @submit.prevent="saveJurusan" class="space-y-3.5 text-xs">
+            <div class="grid grid-cols-3 gap-3">
+              <div>
+                <label class="block font-bold text-slate-700 mb-1">Kode Jurusan *</label>
+                <input
+                  v-model="formJurusan.code"
+                  required
+                  placeholder="Contoh: RPL"
+                  class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3.5 py-2.5 font-bold text-slate-800 uppercase focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white"
+                />
+              </div>
+              <div class="col-span-2">
+                <label class="block font-bold text-slate-700 mb-1">Nama Lengkap Jurusan *</label>
+                <input
+                  v-model="formJurusan.name"
+                  required
+                  placeholder="Contoh: Rekayasa Perangkat Lunak"
+                  class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3.5 py-2.5 font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label class="block font-bold text-slate-700 mb-1">Deskripsi Singkat (Opsional)</label>
+              <textarea
+                v-model="formJurusan.description"
+                rows="2"
+                placeholder="Fokus bidang keahlian, teknologi yang dipelajari, dsb..."
+                class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white"
+              ></textarea>
+            </div>
+
+            <!-- List Jurusan yang Tersedia -->
+            <div class="pt-2 border-t border-slate-100">
+              <span class="text-[11px] font-bold uppercase text-slate-500 block mb-1.5">Jurusan Terdaftar Saat Ini ({{ jurusanList.length }}):</span>
+              <div class="flex flex-wrap gap-1.5 max-h-32 overflow-y-auto p-1 bg-slate-50/50 rounded-lg border border-slate-100">
+                <div
+                  v-for="j in jurusanList"
+                  :key="j.code"
+                  class="inline-flex items-center gap-1.5 pl-2.5 pr-1 py-1 rounded-md text-[11px] font-medium border transition"
+                  :class="editingJurusan && editingJurusan.id === j.id ? 'bg-blue-50 text-blue-900 border-blue-300 ring-1 ring-blue-300' : 'bg-white text-slate-800 border-slate-200 hover:border-slate-300'"
+                >
+                  <strong class="font-bold text-slate-900">{{ j.code }}</strong>
+                  <span class="text-slate-500 text-[10px] truncate max-w-[140px]">&bull; {{ j.name }}</span>
+                  <div class="inline-flex items-center gap-0.5 ml-1">
+                    <button
+                      type="button"
+                      @click="editJurusanItem(j)"
+                      class="p-1 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded transition cursor-pointer"
+                      title="Edit Jurusan"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                      </svg>
+                    </button>
+                    <button
+                      type="button"
+                      @click="confirmDeleteJurusan(j)"
+                      class="p-1 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded transition cursor-pointer"
+                      title="Hapus Jurusan"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-200 flex-wrap">
+              <button
+                v-if="editingJurusan"
+                type="button"
+                @click="cancelEditJurusan"
+                class="px-3.5 py-2 rounded-lg border border-slate-200 font-semibold text-slate-600 hover:bg-slate-100 transition cursor-pointer"
+              >
+                Batal Edit
+              </button>
+              <button type="button" @click="closeModal" class="px-4 py-2.5 rounded-lg border border-slate-200 font-bold text-slate-600 hover:bg-slate-100 transition cursor-pointer">
+                Batal
+              </button>
+              <button
+                type="submit"
+                :disabled="isSubmittingJurusan"
+                class="px-4 py-2.5 rounded-lg bg-slate-700 hover:bg-slate-800 text-white font-bold transition cursor-pointer shadow-sm disabled:opacity-50"
+              >
+                {{ isSubmittingJurusan ? 'Menyimpan...' : (editingJurusan ? 'Perbarui Jurusan' : 'Simpan Jurusan') }}
+              </button>
+              <button
+                v-if="!editingJurusan"
+                type="button"
+                @click="saveJurusan(true)"
+                :disabled="isSubmittingJurusan"
+                class="px-4 py-2.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-bold transition cursor-pointer shadow-sm disabled:opacity-50 inline-flex items-center gap-1.5"
+              >
+                <span>Simpan &amp; Lanjut Buat Rombel</span>
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                </svg>
+              </button>
             </div>
           </form>
         </div>
@@ -1643,23 +1830,23 @@
 
             <div class="grid grid-cols-2 gap-3">
               <div>
-                <label class="block font-bold text-slate-700 mb-1">NIP *</label>
-                <input v-model="formEditGuru.nip" required class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3.5 py-2.5 font-mono text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white" />
+                <label class="block font-bold text-slate-700 mb-1">NIP (Boleh '-')</label>
+                <input v-model="formEditGuru.nip" placeholder="Contoh: 19820512... atau -" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3.5 py-2.5 font-mono text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white" />
               </div>
               <div>
-                <label class="block font-bold text-slate-700 mb-1">NUPTK</label>
-                <input v-model="formEditGuru.nuptk" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3.5 py-2.5 font-mono text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white" />
+                <label class="block font-bold text-slate-700 mb-1">NUPTK (Boleh '-')</label>
+                <input v-model="formEditGuru.nuptk" placeholder="Contoh: 8452... atau -" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3.5 py-2.5 font-mono text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white" />
               </div>
             </div>
 
             <div class="grid grid-cols-2 gap-3">
               <div>
-                <label class="block font-bold text-slate-700 mb-1">Jabatan *</label>
-                <input v-model="formEditGuru.jabatan" required class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3.5 py-2.5 text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white" />
+                <label class="block font-bold text-slate-700 mb-1">Jabatan (Boleh '-')</label>
+                <input v-model="formEditGuru.jabatan" placeholder="Contoh: Guru BK atau -" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3.5 py-2.5 text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white" />
               </div>
               <div>
-                <label class="block font-bold text-slate-700 mb-1">Email Resmi *</label>
-                <input v-model="formEditGuru.email" type="email" required class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3.5 py-2.5 text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white" />
+                <label class="block font-bold text-slate-700 mb-1">Email Resmi (Boleh '-')</label>
+                <input v-model="formEditGuru.email" type="text" placeholder="nama@guru.belajar.id atau -" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3.5 py-2.5 text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white" />
               </div>
             </div>
 
@@ -1772,11 +1959,7 @@
               <div>
                 <label class="block font-bold text-slate-700 mb-1">Jurusan *</label>
                 <select v-model="formEditKelas.jurusan" required class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3.5 py-2.5 font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer">
-                  <option value="RPL">RPL</option>
-                  <option value="DKV">DKV</option>
-                  <option value="TSM">TSM</option>
-                  <option value="TKJ">TKJ</option>
-                  <option value="AKL">AKL</option>
+                  <option v-for="j in jurusanList" :key="j.code" :value="j.code">{{ j.code }} - {{ j.name }}</option>
                 </select>
               </div>
             </div>
@@ -1977,8 +2160,9 @@
                 accept=".csv, .txt, .xlsx, .xls"
                 @change="handleFileUpload"
                 class="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+                :disabled="isUploadingFile"
               />
-              <div class="flex flex-col items-center justify-center gap-2 pointer-events-none">
+              <div v-if="!isUploadingFile" class="flex flex-col items-center justify-center gap-2 pointer-events-none">
                 <div class="w-10 h-10 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center">
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -1988,7 +2172,7 @@
                   <p class="text-xs sm:text-sm font-bold text-slate-800">
                     <span class="text-blue-700 underline font-semibold">Klik untuk memilih file</span> atau seret file ke sini
                   </p>
-                  <p class="text-[11px] text-slate-500 mt-0.5">Mendukung format .CSV, .TXT, dan file ekspor Dapodik</p>
+                  <p class="text-[11px] text-slate-500 mt-0.5">Mendukung format .XLSX (Excel), .CSV, .TXT, dan file ekspor Dapodik</p>
                 </div>
                 <div v-if="importFileName" class="mt-2 inline-flex items-center gap-1.5 px-3 py-1 rounded-md bg-emerald-50 text-emerald-800 font-bold text-xs border border-emerald-200">
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor">
@@ -1997,6 +2181,13 @@
                   <span>File Terpilih: {{ importFileName }}</span>
                 </div>
               </div>
+              <div v-else class="flex flex-col items-center justify-center gap-2 py-4 pointer-events-none">
+                <div class="w-8 h-8 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+                <p class="text-xs font-bold text-blue-700">Membaca dan memvalidasi file spreadsheet...</p>
+              </div>
+            </div>
+            <div v-if="uploadError" class="p-2.5 rounded-lg bg-rose-50 border border-rose-200 text-rose-700 text-xs font-medium">
+              {{ uploadError }}
             </div>
           </div>
 
@@ -2143,10 +2334,35 @@ const props = defineProps({
   initialSiswaList: {
     type: Array,
     default: () => []
+  },
+  initialJurusanList: {
+    type: Array,
+    default: () => []
   }
 })
 
-const activeTab = ref('dashboard')
+const getSavedTab = () => {
+  if (typeof window !== 'undefined') {
+    const params = new URLSearchParams(window.location.search)
+    const tabParam = params.get('tab')
+    if (tabParam && ['dashboard', 'guru', 'kelas', 'siswa', 'konsultasi'].includes(tabParam)) {
+      return tabParam
+    }
+    const saved = localStorage.getItem('bkprima_admin_active_tab')
+    if (saved && ['dashboard', 'guru', 'kelas', 'siswa', 'konsultasi'].includes(saved)) {
+      return saved
+    }
+  }
+  return 'dashboard'
+}
+
+const activeTab = ref(getSavedTab())
+
+watch(activeTab, (val) => {
+  if (typeof window !== 'undefined') {
+    localStorage.setItem('bkprima_admin_active_tab', val)
+  }
+})
 const modalType = ref(null)
 const searchSiswa = ref('')
 const selectedFilterKelas = ref('Semua')
@@ -2687,22 +2903,27 @@ const formGuru = ref({
 })
 
 const saveGuru = async () => {
-  const rArray = formGuru.value.rombelText
-    ? formGuru.value.rombelText.split(',').map(s => s.trim().toUpperCase()).filter(Boolean)
-    : ['X RPL 1']
+  if (!formGuru.value.name || !formGuru.value.name.trim()) return
 
-  const cleanUsername = (formGuru.value.username || formGuru.value.name.toLowerCase().replace(/[^a-z0-9]/g, '_')).trim().toLowerCase()
+  const cleanName = formGuru.value.name.trim()
+  const cleanUsername = (formGuru.value.username && formGuru.value.username.trim() && formGuru.value.username.trim() !== '-')
+    ? formGuru.value.username.trim().toLowerCase().replace(/[^a-z0-9_]/g, '')
+    : cleanName.toLowerCase().replace(/[^a-z0-9]/g, '_').replace(/_+/g, '_').replace(/^_|_$/g, '').slice(0, 30) || 'guru_bk'
+
+  const rArray = (formGuru.value.rombelText && formGuru.value.rombelText.trim() && formGuru.value.rombelText.trim() !== '-')
+    ? formGuru.value.rombelText.split(',').map(s => s.trim().toUpperCase()).filter(Boolean)
+    : []
 
   const payload = {
-    name: formGuru.value.name,
+    name: cleanName,
     username: cleanUsername,
-    password: formGuru.value.password || 'password123',
-    nip: formGuru.value.nip || '-',
-    nuptk: formGuru.value.nuptk || '-',
-    jabatan: formGuru.value.jabatan,
-    email: formGuru.value.email || `${cleanUsername}@guru.smk.belajar.id`,
-    wa: formGuru.value.wa || '+62 8...',
-    rombelText: formGuru.value.rombelText || 'X RPL 1'
+    password: formGuru.value.password || '123456',
+    nip: formGuru.value.nip && formGuru.value.nip.trim() ? formGuru.value.nip.trim() : '-',
+    nuptk: formGuru.value.nuptk && formGuru.value.nuptk.trim() ? formGuru.value.nuptk.trim() : '-',
+    jabatan: formGuru.value.jabatan && formGuru.value.jabatan.trim() && formGuru.value.jabatan.trim() !== '-' ? formGuru.value.jabatan.trim() : 'Guru BK',
+    email: formGuru.value.email && formGuru.value.email.trim() && formGuru.value.email.trim() !== '-' ? formGuru.value.email.trim() : `${cleanUsername}@guru.smk.belajar.id`,
+    wa: formGuru.value.wa && formGuru.value.wa.trim() ? formGuru.value.wa.trim() : '-',
+    rombelText: formGuru.value.rombelText && formGuru.value.rombelText.trim() ? formGuru.value.rombelText.trim() : '-'
   }
 
   try {
@@ -2730,7 +2951,7 @@ const saveGuru = async () => {
     guruBkList.value.push({ id: Date.now(), ...payload, rombel: rArray })
   }
 
-  showToast(`Akun login Guru BK ${formGuru.value.name} (@${cleanUsername}) berhasil dibuat!`)
+  showToast(`Akun login Guru BK ${cleanName} (@${cleanUsername}) berhasil dibuat!`)
   
   // Reset form
   formGuru.value = {
@@ -2795,12 +3016,12 @@ const updateGuru = async () => {
       name: formEditGuru.value.name,
       username: cleanUsername,
       password: formEditGuru.value.password || undefined,
-      nip: formEditGuru.value.nip || '-',
-      nuptk: formEditGuru.value.nuptk || '-',
-      jabatan: formEditGuru.value.jabatan,
-      email: formEditGuru.value.email,
-      wa: formEditGuru.value.wa,
-      rombelText: formEditGuru.value.rombelText
+      nip: formEditGuru.value.nip && formEditGuru.value.nip.trim() ? formEditGuru.value.nip.trim() : '-',
+      nuptk: formEditGuru.value.nuptk && formEditGuru.value.nuptk.trim() ? formEditGuru.value.nuptk.trim() : '-',
+      jabatan: formEditGuru.value.jabatan && formEditGuru.value.jabatan.trim() && formEditGuru.value.jabatan.trim() !== '-' ? formEditGuru.value.jabatan.trim() : 'Guru BK',
+      email: formEditGuru.value.email && formEditGuru.value.email.trim() && formEditGuru.value.email.trim() !== '-' ? formEditGuru.value.email.trim() : `${cleanUsername}@guru.smk.belajar.id`,
+      wa: formEditGuru.value.wa && formEditGuru.value.wa.trim() ? formEditGuru.value.wa.trim() : '-',
+      rombelText: formEditGuru.value.rombelText && formEditGuru.value.rombelText.trim() ? formEditGuru.value.rombelText.trim() : '-'
     }
 
     try {
@@ -2872,6 +3093,135 @@ const deleteGuru = (idx) => {
 }
 
 // ==========================================
+// 2.5. DATA JURUSAN / BIDANG KEAHLIAN
+// ==========================================
+const jurusanList = ref(props.initialJurusanList && props.initialJurusanList.length > 0 ? [...props.initialJurusanList] : [
+  { id: 1, code: 'RPL', name: 'Rekayasa Perangkat Lunak / PPLG', description: 'Pengembangan software & web' },
+  { id: 2, code: 'TSM', name: 'Teknik Sepeda Motor', description: 'Teknik otomotif kendaraan roda dua' },
+  { id: 3, code: 'DKV', name: 'Desain Komunikasi Visual', description: 'Kreatif grafis & multimedia' },
+  { id: 4, code: 'TKJ', name: 'Teknik Komputer & Jaringan', description: 'Infrastruktur & jaringan' },
+  { id: 5, code: 'AKL', name: 'Akuntansi & Keuangan Lembaga', description: 'Keuangan & perpajakan' },
+  { id: 6, code: 'OTKP', name: 'Otomatisasi & Tata Kelola Perkantoran', description: 'Administrasi perkantoran' }
+])
+
+watch(() => props.initialJurusanList, (newVal) => {
+  if (newVal && newVal.length > 0) {
+    jurusanList.value = [...newVal]
+  }
+}, { deep: true, immediate: true })
+
+const formJurusan = ref({
+  code: '',
+  name: '',
+  description: ''
+})
+
+const editingJurusan = ref(null)
+const isSubmittingJurusan = ref(false)
+const errorMessageJurusan = ref('')
+
+const editJurusanItem = (j) => {
+  editingJurusan.value = j
+  errorMessageJurusan.value = ''
+  formJurusan.value = {
+    code: j.code,
+    name: j.name,
+    description: j.description || ''
+  }
+}
+
+const cancelEditJurusan = () => {
+  editingJurusan.value = null
+  errorMessageJurusan.value = ''
+  formJurusan.value = { code: '', name: '', description: '' }
+}
+
+const saveJurusan = (andCreateClass = false) => {
+  if (!formJurusan.value.code || !formJurusan.value.name) {
+    errorMessageJurusan.value = 'Kode jurusan dan nama lengkap jurusan wajib diisi.'
+    return
+  }
+
+  isSubmittingJurusan.value = true
+  errorMessageJurusan.value = ''
+
+  const savedCode = formJurusan.value.code.trim().toUpperCase()
+  const isEdit = !!editingJurusan.value
+  const targetUrl = isEdit ? `/admin/jurusan/${editingJurusan.value.id}` : '/admin/jurusan'
+  const method = isEdit ? 'put' : 'post'
+
+  router[method](targetUrl, {
+    code: savedCode,
+    name: formJurusan.value.name.trim(),
+    description: formJurusan.value.description
+  }, {
+    preserveScroll: true,
+    preserveState: true,
+    onSuccess: (page) => {
+      isSubmittingJurusan.value = false
+      if (page.props.flash?.error) {
+        errorMessageJurusan.value = page.props.flash.error
+        return
+      }
+      showToast(`Jurusan ${savedCode} berhasil ${isEdit ? 'diperbarui' : 'ditambahkan'}!`)
+      closeModal()
+      if (andCreateClass) {
+        setTimeout(() => {
+          openModal('kelas')
+          formKelas.value.jurusan = savedCode
+          autoGenerateClassName()
+        }, 120)
+      }
+    },
+    onError: (errors) => {
+      isSubmittingJurusan.value = false
+      if (errors.code) {
+        errorMessageJurusan.value = errors.code
+      } else if (errors.name) {
+        errorMessageJurusan.value = errors.name
+      } else {
+        errorMessageJurusan.value = 'Gagal menyimpan jurusan. Silakan periksa formulir.'
+      }
+    }
+  })
+}
+
+const confirmDeleteJurusan = (j) => {
+  confirmModal.value = {
+    show: true,
+    type: 'delete',
+    title: 'Hapus Jurusan',
+    message: `Apakah Anda yakin ingin menghapus data jurusan "${j.name}" (${j.code})?`,
+    targetInfo: {
+      name: j.name,
+      tag: j.code,
+      sub: j.description || 'Program Keahlian'
+    },
+    confirmText: 'Ya, Hapus Jurusan',
+    cancelText: 'Batal',
+    onConfirm: () => {
+      router.delete(`/admin/jurusan/${j.id}`, {
+        preserveScroll: true,
+        preserveState: true,
+        onSuccess: (page) => {
+          if (page.props.flash?.error) {
+            showToast(page.props.flash.error)
+          } else {
+            showToast(`Jurusan ${j.code} berhasil dihapus.`)
+            if (editingJurusan.value && editingJurusan.value.id === j.id) {
+              cancelEditJurusan()
+            }
+          }
+        },
+        onError: () => {
+          showToast('Gagal menghapus jurusan.')
+        }
+      })
+    }
+  }
+}
+
+// ==========================================
 // 3. DATA KELAS / ROMBEL
 // ==========================================
 const kelasList = ref(props.initialKelasList && props.initialKelasList.length > 0 ? [...props.initialKelasList] : [
@@ -2899,6 +3249,25 @@ const formKelas = ref({
   guruBK: 'Dra. Hj. Nurul Hidayati, M.Pd'
 })
 
+const autoGenerateClassName = () => {
+  const levelText = formKelas.value.level || 'Kelas 10 (X)'
+  const levelNum = levelText.includes('12') ? 'XII' : (levelText.includes('11') ? 'XI' : 'X')
+  const jur = (formKelas.value.jurusan || 'RPL').trim().toUpperCase()
+  const prefix = `${levelNum} ${jur}`
+
+  const existingMatches = kelasList.value
+    .filter(k => k.name && k.name.toUpperCase().startsWith(prefix))
+    .map(k => {
+      const parts = k.name.trim().split(/\s+/)
+      const lastPart = parts[parts.length - 1]
+      const num = parseInt(lastPart, 10)
+      return isNaN(num) ? 0 : num
+    })
+
+  const nextNum = existingMatches.length > 0 ? Math.max(...existingMatches) + 1 : 1
+  formKelas.value.name = `${prefix} ${nextNum}`
+}
+
 const saveKelas = () => {
   const selectedGuru = guruBkList.value.find(g => g.name === formKelas.value.guruBK)
   router.post('/admin/kelas', {
@@ -2910,6 +3279,7 @@ const saveKelas = () => {
     guruBkId: selectedGuru ? selectedGuru.id : null,
   }, {
     preserveScroll: true,
+    preserveState: true,
     onSuccess: () => {
       closeModal()
       showToast(`Rombel ${formKelas.value.name.toUpperCase()} berhasil disimpan.`)
@@ -2955,6 +3325,7 @@ const updateKelas = () => {
     guruBkId: selectedGuru ? selectedGuru.id : null,
   }, {
     preserveScroll: true,
+    preserveState: true,
     onSuccess: () => {
       closeModal()
       showToast(`Data rombel ${formEditKelas.value.name} berhasil diperbarui.`)
@@ -2978,6 +3349,7 @@ const confirmDeleteKelas = (k) => {
     onConfirm: () => {
       router.delete(`/admin/kelas/${k.id}`, {
         preserveScroll: true,
+        preserveState: true,
         onSuccess: () => {
           showToast(`Rombel ${k.name} berhasil dihapus.`)
         }
@@ -2996,19 +3368,10 @@ const deleteKelas = (idx) => {
 // ==========================================
 // 4. DATA SISWA
 // ==========================================
-const siswaList = ref(props.initialSiswaList && props.initialSiswaList.length > 0 ? [...props.initialSiswaList] : [
-  { id: 1, nisn: '00729182', name: 'Ahmad Fauzi', className: 'X RPL 1', gender: 'L', parentWa: '+62 812-9988-1122', poin: 0 },
-  { id: 2, nisn: '00729183', name: 'Dimas Arya Pratama', className: 'X RPL 1', gender: 'L', parentWa: '+62 813-4455-6677', poin: 5 },
-  { id: 3, nisn: '00729184', name: 'Fathir Rizky Maulana', className: 'X RPL 1', gender: 'L', parentWa: '+62 856-7788-9900', poin: 10 },
-  { id: 4, nisn: '00729185', name: 'Rania Zahra Putri', className: 'X RPL 1', gender: 'P', parentWa: '+62 878-1122-3344', poin: 10 },
-  { id: 5, nisn: '00729186', name: 'Siti Nurhaliza', className: 'X RPL 1', gender: 'P', parentWa: '+62 812-3344-5566', poin: 0 },
-  { id: 6, nisn: '22231084', name: 'Muhammad Rizky Pratama', className: 'XI RPL 2', gender: 'L', parentWa: '+62 819-2233-4455', poin: 35 },
-  { id: 7, nisn: '22231090', name: 'Bagus Setiawan', className: 'XII DKV 1', gender: 'L', parentWa: '+62 821-5566-7788', poin: 15 },
-  { id: 8, nisn: '22231092', name: 'Andi Saputra', className: 'X TSM 1', gender: 'L', parentWa: '+62 857-8899-0011', poin: 5 }
-])
+const siswaList = ref(props.initialSiswaList ? [...props.initialSiswaList] : [])
 
 watch(() => props.initialSiswaList, (newVal) => {
-  if (newVal && newVal.length > 0) {
+  if (newVal) {
     siswaList.value = [...newVal]
   }
 }, { deep: true })
@@ -3037,17 +3400,26 @@ const formSiswa = ref({
   parentWa: ''
 })
 
+const isSubmittingSiswa = ref(false)
+
 const saveSiswa = () => {
-  siswaList.value.push({
-    id: Date.now(),
-    nisn: formSiswa.value.nisn,
-    name: formSiswa.value.name,
-    className: formSiswa.value.className,
-    gender: formSiswa.value.gender,
-    parentWa: formSiswa.value.parentWa,
-    poin: 0
+  if (isSubmittingSiswa.value) return
+  isSubmittingSiswa.value = true
+
+  router.post('/admin/siswa', formSiswa.value, {
+    preserveScroll: true,
+    preserveState: true,
+    onSuccess: () => {
+      isSubmittingSiswa.value = false
+      selectedFilterKelas.value = formSiswa.value.className || 'Semua'
+      closeModal()
+      showToast(`Data siswa ${formSiswa.value.name} berhasil disimpan ke database.`)
+    },
+    onError: (errs) => {
+      isSubmittingSiswa.value = false
+      alert(Object.values(errs)[0] || 'Gagal menyimpan data siswa.')
+    }
   })
-  closeModal()
 }
 
 const formEditSiswa = ref({
@@ -3077,21 +3449,22 @@ const editSiswa = (s) => {
 }
 
 const updateSiswa = () => {
-  if (!editingSiswa.value) return
-  const idx = siswaList.value.findIndex(s => s.id === editingSiswa.value.id)
-  if (idx !== -1) {
-    siswaList.value[idx] = {
-      ...siswaList.value[idx],
-      nisn: formEditSiswa.value.nisn,
-      name: formEditSiswa.value.name,
-      className: formEditSiswa.value.className,
-      gender: formEditSiswa.value.gender,
-      parentWa: formEditSiswa.value.parentWa,
-      poin: formEditSiswa.value.poin
+  if (!editingSiswa.value || isSubmittingSiswa.value) return
+  isSubmittingSiswa.value = true
+
+  router.put('/admin/siswa/' + editingSiswa.value.id, formEditSiswa.value, {
+    preserveScroll: true,
+    preserveState: true,
+    onSuccess: () => {
+      isSubmittingSiswa.value = false
+      closeModal()
+      showToast(`Data siswa ${formEditSiswa.value.name} berhasil diperbarui.`)
+    },
+    onError: (errs) => {
+      isSubmittingSiswa.value = false
+      alert(Object.values(errs)[0] || 'Gagal memperbarui data siswa.')
     }
-    showToast(`Data siswa ${formEditSiswa.value.name} berhasil diperbarui.`)
-  }
-  closeModal()
+  })
 }
 
 const confirmDeleteSiswa = (s) => {
@@ -3103,16 +3476,21 @@ const confirmDeleteSiswa = (s) => {
     targetInfo: {
       name: s.name,
       tag: s.className,
-      sub: `NISN: ${s.nisn} • Poin Pelanggaran: ${s.poin} Poin`
+      sub: `NISN: ${s.nisn} • Poin Tatib: ${s.poin || 0} Poin`
     },
     confirmText: 'Ya, Hapus Siswa',
     cancelText: 'Batal',
     onConfirm: () => {
-      const idx = siswaList.value.findIndex(item => item.id === s.id)
-      if (idx !== -1) {
-        siswaList.value.splice(idx, 1)
-        showToast(`Data siswa ${s.name} berhasil dihapus.`)
-      }
+      router.delete('/admin/siswa/' + s.id, {
+        preserveScroll: true,
+        preserveState: true,
+        onSuccess: () => {
+          showToast(`Data siswa ${s.name} berhasil dihapus dari sistem.`)
+        },
+        onError: () => {
+          alert('Gagal menghapus data siswa.')
+        }
+      })
     }
   }
 }
@@ -3132,44 +3510,49 @@ const importFileName = ref('')
 const importTargetClass = ref('AUTO')
 const isDragging = ref(false)
 const fileInputRef = ref(null)
+const isUploadingFile = ref(false)
+const uploadError = ref('')
 
 const downloadCsvTemplate = () => {
+  const sampleClass = selectedFilterKelas.value !== 'Semua' ? selectedFilterKelas.value : 'XI TKKR 2'
   const csvContent = 'NISN,NAMA_LENGKAP,KELAS,JENIS_KELAMIN,NO_WA_WALI\n' +
-    '00729188,Muhammad Bagas Saputra,X RPL 1,L,+62 812-3344-5566\n' +
-    '00729189,Nabila Putri Ayu,X RPL 1,P,+62 813-7788-9900\n' +
-    '00729190,Rendy Wahyu Pratama,X TSM 1,L,+62 856-1122-3344\n' +
-    '00729191,Salsabila Dewi Lestari,X DKV 1,P,+62 878-4455-6677\n' +
-    '00729192,Yoga Dwi Kurniawan,X TKJ 1,L,+62 821-9900-1122\n' +
-    '00729193,Zaskia Gotik Maharani,X AKL 1,P,+62 852-3344-7788'
+    `00729188,Muhammad Bagas Saputra,${sampleClass},L,+62 812-3344-5566\n` +
+    `00729189,Nabila Putri Ayu,${sampleClass},P,+62 813-7788-9900\n` +
+    `00729190,Rendy Wahyu Pratama,${sampleClass},L,+62 856-1122-3344\n` +
+    `00729191,Salsabila Dewi Lestari,${sampleClass},P,+62 878-4455-6677\n` +
+    `00729192,Yoga Dwi Kurniawan,${sampleClass},L,+62 821-9900-1122\n` +
+    `00729193,Zaskia Gotik Maharani,${sampleClass},P,+62 852-3344-7788`
   
   const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
   const url = URL.createObjectURL(blob)
   const link = document.createElement('a')
   link.setAttribute('href', url)
-  link.setAttribute('download', 'Template_Import_Siswa_BK_Prima.csv')
+  link.setAttribute('download', `Template_Import_Siswa_${sampleClass.replace(/\s+/g, '_')}.csv`)
   document.body.appendChild(link)
   link.click()
   document.body.removeChild(link)
 }
 
 const loadSampleDapodikData = () => {
-  importFileName.value = 'Data_Siswa_Dapodik_SMK_PGRI_05.csv'
+  const target = selectedFilterKelas.value !== 'Semua' ? selectedFilterKelas.value : 'XI TKKR 2'
+  importFileName.value = `Data_Siswa_Dapodik_${target.replace(/\s+/g, '_')}.csv`
+  importTargetClass.value = target
   importedStudents.value = [
-    { nisn: '00829101', name: 'Alifia Zahra Ramadhani', className: 'X RPL 1', gender: 'P', parentWa: '+62 812-3401-1001' },
-    { nisn: '00829102', name: 'Bayu Aditya Pratama', className: 'X RPL 1', gender: 'L', parentWa: '+62 813-3401-1002' },
-    { nisn: '00829103', name: 'Cahyo Wibowo', className: 'X RPL 1', gender: 'L', parentWa: '+62 856-3401-1003' },
-    { nisn: '00829104', name: 'Dwi Lestari Handayani', className: 'X RPL 2', gender: 'P', parentWa: '+62 878-3401-1004' },
-    { nisn: '00829105', name: 'Eko Prasetyo Nugroho', className: 'X RPL 2', gender: 'L', parentWa: '+62 821-3401-1005' },
-    { nisn: '00829106', name: 'Fani Oktaviana', className: 'X RPL 2', gender: 'P', parentWa: '+62 852-3401-1006' },
-    { nisn: '00829107', name: 'Guruh Arya Perkasa', className: 'X TSM 1', gender: 'L', parentWa: '+62 812-3401-1007' },
-    { nisn: '00829108', name: 'Hendri Kurniawan', className: 'X TSM 1', gender: 'L', parentWa: '+62 813-3401-1008' },
-    { nisn: '00829109', name: 'Indah Permata Sari', className: 'X DKV 1', gender: 'P', parentWa: '+62 856-3401-1009' },
-    { nisn: '00829110', name: 'Jovan Ardiansyah', className: 'X DKV 1', gender: 'L', parentWa: '+62 878-3401-1010' },
-    { nisn: '00829111', name: 'Kania Putri Jelita', className: 'X TKJ 1', gender: 'P', parentWa: '+62 821-3401-1011' },
-    { nisn: '00829112', name: 'Lukman Hakim', className: 'X TKJ 1', gender: 'L', parentWa: '+62 852-3401-1012' },
-    { nisn: '00829113', name: 'Muhammad Faizal Akbar', className: 'XI RPL 1', gender: 'L', parentWa: '+62 812-3401-1013' },
-    { nisn: '00829114', name: 'Nadia Safitri', className: 'XI RPL 1', gender: 'P', parentWa: '+62 813-3401-1014' },
-    { nisn: '00829115', name: 'Oky Firmansyah', className: 'XI DKV 1', gender: 'L', parentWa: '+62 856-3401-1015' }
+    { nisn: '00829101', name: 'Alifia Zahra Ramadhani', className: target, gender: 'P', parentWa: '+62 812-3401-1001' },
+    { nisn: '00829102', name: 'Bayu Aditya Pratama', className: target, gender: 'L', parentWa: '+62 813-3401-1002' },
+    { nisn: '00829103', name: 'Cahyo Wibowo', className: target, gender: 'L', parentWa: '+62 856-3401-1003' },
+    { nisn: '00829104', name: 'Dwi Lestari Handayani', className: target, gender: 'P', parentWa: '+62 878-3401-1004' },
+    { nisn: '00829105', name: 'Eko Prasetyo Nugroho', className: target, gender: 'L', parentWa: '+62 821-3401-1005' },
+    { nisn: '00829106', name: 'Fani Oktaviana', className: target, gender: 'P', parentWa: '+62 852-3401-1006' },
+    { nisn: '00829107', name: 'Guruh Arya Perkasa', className: target, gender: 'L', parentWa: '+62 812-3401-1007' },
+    { nisn: '00829108', name: 'Hendri Kurniawan', className: target, gender: 'L', parentWa: '+62 813-3401-1008' },
+    { nisn: '00829109', name: 'Indah Permata Sari', className: target, gender: 'P', parentWa: '+62 856-3401-1009' },
+    { nisn: '00829110', name: 'Jovan Ardiansyah', className: target, gender: 'L', parentWa: '+62 878-3401-1010' },
+    { nisn: '00829111', name: 'Kania Putri Jelita', className: target, gender: 'P', parentWa: '+62 821-3401-1011' },
+    { nisn: '00829112', name: 'Lukman Hakim', className: target, gender: 'L', parentWa: '+62 852-3401-1012' },
+    { nisn: '00829113', name: 'Muhammad Faizal Akbar', className: target, gender: 'L', parentWa: '+62 812-3401-1013' },
+    { nisn: '00829114', name: 'Nadia Safitri', className: target, gender: 'P', parentWa: '+62 813-3401-1014' },
+    { nisn: '00829115', name: 'Oky Firmansyah', className: target, gender: 'L', parentWa: '+62 856-3401-1015' }
   ]
 }
 
@@ -3213,20 +3596,49 @@ const handleDrop = (e) => {
   processFile(file)
 }
 
-const processFile = (file) => {
+const processFile = async (file) => {
   importFileName.value = file.name
-  const reader = new FileReader()
-  reader.onload = (event) => {
-    const content = event.target.result
-    const parsed = parseCsvText(content)
-    if (parsed.length > 0) {
-      importedStudents.value = parsed
-    } else {
-      loadSampleDapodikData()
-      alert(`File "${file.name}" berhasil diunggah. Menampilkan data hasil konversi Dapodik.`)
+  uploadError.value = ''
+  isUploadingFile.value = true
+
+  try {
+    const formData = new FormData()
+    formData.append('file', file)
+    if (importTargetClass.value && importTargetClass.value !== 'AUTO') {
+      formData.append('targetClass', importTargetClass.value)
     }
+
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+    const response = await fetch('/admin/siswa/preview-import', {
+      method: 'POST',
+      body: formData,
+      headers: {
+        'X-CSRF-TOKEN': csrfToken,
+        'X-Requested-With': 'XMLHttpRequest',
+        'Accept': 'application/json'
+      }
+    })
+
+    const data = await response.json()
+    if (response.ok && data.success) {
+      if (data.students && data.students.length > 0) {
+        importedStudents.value = data.students
+        if (data.detectedClass && importTargetClass.value === 'AUTO') {
+          importTargetClass.value = data.detectedClass
+        }
+        showToast(`Berhasil membaca ${data.students.length} data siswa dari file.`)
+      } else {
+        uploadError.value = 'Tidak ada baris siswa yang terdeteksi di dalam file spreadsheet.'
+      }
+    } else {
+      uploadError.value = data.message || 'Gagal membaca isi file spreadsheet.'
+    }
+  } catch (err) {
+    console.error('Import preview error:', err)
+    uploadError.value = 'Terjadi kesalahan saat memproses file di server.'
+  } finally {
+    isUploadingFile.value = false
   }
-  reader.readAsText(file)
 }
 
 const removeImportedRow = (index) => {
@@ -3246,15 +3658,24 @@ const processImport = () => {
     parentWa: st.parentWa,
   }))
 
+  const targetClassToFocus = importTargetClass.value !== 'AUTO' ? importTargetClass.value : (payload[0]?.className || 'Semua')
+
   isSubmittingImport.value = true
-  router.post('/admin/siswa/import', { students: payload }, {
+  router.post('/admin/siswa/import', {
+    students: payload,
+    targetClass: importTargetClass.value
+  }, {
     preserveScroll: true,
+    preserveState: true,
     onSuccess: () => {
       isSubmittingImport.value = false
       importedStudents.value = []
       importFileName.value = ''
       closeModal()
       activeTab.value = 'siswa'
+      if (targetClassToFocus && targetClassToFocus !== 'AUTO') {
+        selectedFilterKelas.value = targetClassToFocus
+      }
       showToast(`Berhasil mengimpor ${payload.length} data siswa ke database BK Prima.`)
     },
     onError: () => {
@@ -3270,13 +3691,33 @@ const openModal = (type) => {
   if (type === 'guru') {
     formGuru.value = { name: '', nip: '', nuptk: '', jabatan: '', email: '', wa: '', rombelText: '' }
   } else if (type === 'kelas') {
-    formKelas.value = { level: 'Kelas 10 (X)', jurusan: 'RPL', name: '', waliKelas: '', guruBK: guruBkList.value[0]?.name || '' }
+    const defaultJur = jurusanList.value[0]?.code || 'RPL'
+    formKelas.value = {
+      level: 'Kelas 10 (X)',
+      jurusan: defaultJur,
+      name: '',
+      waliKelas: '',
+      guruBK: guruBkList.value[0]?.name || ''
+    }
+    autoGenerateClassName()
+  } else if (type === 'jurusan') {
+    formJurusan.value = { code: '', name: '', description: '' }
+    editingJurusan.value = null
+    errorMessageJurusan.value = ''
   } else if (type === 'siswa') {
-    formSiswa.value = { nisn: '', name: '', className: kelasList.value[0]?.name || 'X RPL 1', gender: 'L', parentWa: '' }
+    formSiswa.value = {
+      nisn: '',
+      name: '',
+      className: (selectedFilterKelas.value !== 'Semua' ? selectedFilterKelas.value : (kelasList.value[0]?.name || 'X RPL 1')),
+      gender: 'L',
+      parentWa: ''
+    }
   } else if (type === 'import-siswa') {
     importedStudents.value = []
     importFileName.value = ''
-    importTargetClass.value = 'AUTO'
+    uploadError.value = ''
+    isUploadingFile.value = false
+    importTargetClass.value = selectedFilterKelas.value !== 'Semua' ? selectedFilterKelas.value : 'AUTO'
   }
 }
 
@@ -3287,6 +3728,9 @@ const closeModal = () => {
   editingSiswa.value = null
   editingGuru.value = null
   editingKelas.value = null
+  editingJurusan.value = null
+  errorMessageJurusan.value = ''
+  formJurusan.value = { code: '', name: '', description: '' }
 }
 
 // ==========================================

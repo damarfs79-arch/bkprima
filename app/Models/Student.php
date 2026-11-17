@@ -28,6 +28,11 @@ class Student extends Model
         return $this->hasMany(Violation::class);
     }
 
+    public function pelanggaran()
+    {
+        return $this->violations();
+    }
+
     public function attendances()
     {
         return $this->hasMany(Attendance::class);
@@ -45,8 +50,8 @@ class Student extends Model
 
     public function recalculatePoints()
     {
-        $totalViolations = $this->violations()->sum('points');
-        $totalDeductions = $this->pointDeductions()->sum('points_deducted');
+        $totalViolations = (int) $this->violations()->whereNotNull('points')->sum('points');
+        $totalDeductions = (int) $this->pointDeductions()->sum('points_deducted');
         $net = max(0, $totalViolations - $totalDeductions);
 
         $status = 'Aman';

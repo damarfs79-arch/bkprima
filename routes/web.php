@@ -35,6 +35,8 @@ Route::delete('/siswa/{id}', [AttendanceController::class, 'deleteStudent'])->na
 Route::get('/pelanggaran', [ViolationController::class, 'index'])->name('violation.index');
 Route::get('/verifikasi', [ViolationController::class, 'create'])->name('violation.create');
 Route::post('/pelanggaran', [ViolationController::class, 'store'])->name('violation.store');
+Route::put('/pelanggaran/{id}', [ViolationController::class, 'update'])->name('violation.update');
+Route::delete('/pelanggaran/{id}', [ViolationController::class, 'destroy'])->name('violation.destroy');
 Route::get('/pelanggaran/detail', [ViolationController::class, 'show'])->name('violation.detail');
 Route::get('/pemanggilan', [ViolationController::class, 'summons'])->name('violation.summons');
 
@@ -61,6 +63,13 @@ Route::delete('/admin/guru/{id}', [AdminController::class, 'deleteGuru'])->name(
 Route::post('/admin/kelas', [AdminController::class, 'storeKelas'])->name('admin.kelas.store');
 Route::put('/admin/kelas/{id}', [AdminController::class, 'updateKelas'])->name('admin.kelas.update');
 Route::delete('/admin/kelas/{id}', [AdminController::class, 'deleteKelas'])->name('admin.kelas.delete');
+Route::post('/admin/jurusan', [AdminController::class, 'storeJurusan'])->name('admin.jurusan.store');
+Route::put('/admin/jurusan/{id}', [AdminController::class, 'updateJurusan'])->name('admin.jurusan.update');
+Route::delete('/admin/jurusan/{id}', [AdminController::class, 'deleteJurusan'])->name('admin.jurusan.delete');
+Route::post('/admin/siswa', [AdminController::class, 'storeStudent'])->name('admin.siswa.store');
+Route::put('/admin/siswa/{id}', [AdminController::class, 'updateStudent'])->name('admin.siswa.update');
+Route::delete('/admin/siswa/{id}', [AdminController::class, 'deleteStudent'])->name('admin.siswa.delete');
+Route::post('/admin/siswa/preview-import', [AdminController::class, 'previewImport'])->name('admin.siswa.previewImport');
 Route::post('/admin/siswa/import', [AdminController::class, 'importStudents'])->name('admin.siswa.import');
 Route::patch('/admin/konsultasi/{id}', [AdminController::class, 'updateConsultationStatus'])->name('admin.consultation.update');
 Route::delete('/admin/konsultasi/{id}', [AdminController::class, 'deleteConsultation'])->name('admin.consultation.delete');

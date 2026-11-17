@@ -95,8 +95,11 @@
               <span class="text-xs font-medium text-rose-600 font-mono">&ge; 30 Poin</span>
             </div>
             <div class="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">{{ summonsList.length }}</div>
-            <span class="text-xs text-rose-600 font-medium">
-              Buka Layanan Surat SP &rarr;
+            <span class="text-xs text-rose-600 font-medium inline-flex items-center gap-1">
+              <span>Buka Layanan Surat SP</span>
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+              </svg>
             </span>
           </div>
         </div>
@@ -224,10 +227,18 @@
                     </td>
                     <td class="py-3.5 px-4 text-center">
                       <span 
+                        v-if="item.points !== null && item.points !== undefined && item.points !== ''"
                         class="px-2.5 py-1 rounded-full text-xs font-black inline-block shadow-2xs"
                         :class="item.points >= 25 ? 'bg-rose-100 text-rose-700 border border-rose-200' : (item.points >= 15 ? 'bg-amber-100 text-amber-700 border border-amber-200' : 'bg-blue-100 text-blue-700 border border-blue-200')"
                       >
                         +{{ item.points }} Poin
+                      </span>
+                      <span 
+                        v-else
+                        class="px-2 py-0.5 rounded-full text-[11px] font-semibold inline-block bg-slate-100 text-slate-600 border border-slate-200"
+                        title="Kasus pembinaan dan teguran lisan tanpa pengurangan poin tatib"
+                      >
+                        Pembinaan
                       </span>
                     </td>
                     <td class="py-3.5 px-4 text-center">
@@ -917,9 +928,9 @@ onMounted(() => {
       className: v.student_class,
       category: v.category,
       note: v.notes || v.violation_name,
-      photoUrl: v.photo_url || null,
+      photoUrl: v.foto_url || v.photo_url || null,
       points: v.points,
-      status: v.points >= 25 ? 'Panggilan Ortu' : (v.points >= 10 ? 'Dalam Pembinaan' : 'Selesai Dibina')
+      status: (v.points === null || v.points === undefined) ? 'Selesai Dibina' : (v.points >= 25 ? 'Panggilan Ortu' : (v.points >= 10 ? 'Dalam Pembinaan' : 'Selesai Dibina'))
     }))
     // Merge new database violations ahead of defaults without duplicates
     const existingIds = new Set(fromDb.map(d => d.id))
