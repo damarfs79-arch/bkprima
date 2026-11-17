@@ -18,7 +18,17 @@ class AttendanceController extends Controller
             $fromClassrooms = Classroom::where('guru_bk_id', $user->id)
                 ->orWhere('guru_bk_name', $user->name)
                 ->pluck('name')->toArray();
-            $fromUserRombel = !empty($user->rombel) ? array_map('trim', explode(',', $user->rombel)) : [];
+            
+            $fromUserRombel = [];
+            if (!empty($user->rombel)) {
+                $decoded = json_decode($user->rombel, true);
+                if (is_array($decoded)) {
+                    $fromUserRombel = $decoded;
+                } else {
+                    $fromUserRombel = array_map('trim', explode(',', $user->rombel));
+                }
+            }
+
             $guruRombels = array_values(array_unique(array_filter(array_merge($fromClassrooms, $fromUserRombel))));
             if (!empty($guruRombels)) {
                 return $guruRombels;
@@ -102,6 +112,90 @@ class AttendanceController extends Controller
         );
 
         return redirect()->back()->with('success', 'Status presensi siswa berhasil diperbarui!');
+    }
+
+    public function importStudents(Request $request)
+    {
+        $studentsData = $request->input('students');
+
+        if (empty($studentsData) || !is_array($studentsData)) {
+            return redirect()->back()->with('error', 'Tidak ada data siswa yang valid untuk diimpor.');
+        }
+
+        $user = Auth::user();
+        $authorizedClasses = $this->getAuthorizedClasses();
+
+        $importedCount = 0;
+        foreach ($studentsData as $item) {
+            if (empty($item['name'])) {
+                continue;
+            }
+
+            $className = !empty($item['className']) ? strtoupper(trim($item['className'])) : (!empty($authorizedClasses) ? $authorizedClasses[0] : 'X RPL 1');
+            
+            // Jika guru, pastikan kelas termasuk kelas binaannya
+            if ($user && $user->role === 'guru' && !empty($authorizedClasses)) {
+                if (!in_array($className, $authorizedClasses)) {
+                    continue; // Skip siswa di luar rombel binaan guru
+                }
+            }
+
+            $nisn = !empty($item['nisn']) ? trim((string)$item['nisn']) : '00' . rand(10000000, 99999999);
+            
+            $parts = explode(' ', $className);
+            $level = '10';
+            if (!empty($parts[0])) {
+                $upper = strtoupper($parts[0]);
+                if ($upper === 'X') $level = '10';
+                elseif ($upper === 'XI') $level = '11';
+                elseif ($upper === 'XII') $level = '12';
+                elseif (is_numeric($parts[0])) $level = $parts[0];
+            }
+            $major = $parts[1] ?? 'RPL';
+
+            // Pastikan Classroom ada
+            Classroom::firstOrCreate(
+                ['name' => $className],
+                [
+                    'level' => "Kelas {$level} ({$parts[0]})",
+                    'major' => $major,
+                    'wali_kelas' => 'Wali Kelas ' . $className,
+                    'guru_bk_id' => $user ? $user->id : null,
+                    'guru_bk_name' => $user ? $user->name : null,
+                ]
+            );
+
+            $student = Student::updateOrCreate(
+                ['nisn' => $nisn],
+                [
+                    'name' => trim($item['name']),
+                    'class_name' => $className,
+                    'level' => $level,
+                    'major' => $major,
+                    'gender' => in_array(strtoupper($item['gender'] ?? 'L'), ['L', 'P']) ? strtoupper($item['gender']) : 'L',
+                    'parent_phone' => $item['parentWa'] ?? ($item['parent_phone'] ?? null),
+                    'parent_name' => $item['parent_name'] ?? ('Orang Tua ' . trim($item['name'])),
+                    'status' => 'Aman',
+                ]
+            );
+
+            // Tambahkan record attendance hari ini jika belum ada
+            Attendance::firstOrCreate(
+                [
+                    'student_id' => $student->id,
+                    'date' => now()->toDateString(),
+                ],
+                [
+                    'check_in_time' => '06:45 WIB',
+                    'status' => 'Hadir',
+                    'notes' => 'Tepat Waktu',
+                ]
+            );
+
+            $importedCount++;
+        }
+
+        return redirect()->back()->with('success', "Berhasil mengimpor {$importedCount} data siswa ke rombel binaan Anda.");
     }
 
     public function storeStudent(Request $request)
