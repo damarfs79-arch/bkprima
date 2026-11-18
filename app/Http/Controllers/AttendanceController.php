@@ -126,6 +126,8 @@ class AttendanceController extends Controller
         $authorizedClasses = $this->getAuthorizedClasses();
 
         $importedCount = 0;
+        $touchedClasses = [];
+
         foreach ($studentsData as $item) {
             if (empty($item['name'])) {
                 continue;
@@ -133,12 +135,21 @@ class AttendanceController extends Controller
 
             $className = !empty($item['className']) ? strtoupper(trim($item['className'])) : (!empty($authorizedClasses) ? $authorizedClasses[0] : 'X RPL 1');
             
-            // Jika guru, pastikan kelas termasuk kelas binaannya
-            if ($user && $user->role === 'guru' && !empty($authorizedClasses)) {
-                if (!in_array($className, $authorizedClasses)) {
-                    continue; // Skip siswa di luar rombel binaan guru
+            // Daftarkan kelas ke rombel binaan guru jika belum ada
+            if ($user && $user->role === 'guru') {
+                $currentRombels = [];
+                if (!empty($user->rombel)) {
+                    $decoded = json_decode($user->rombel, true);
+                    $currentRombels = is_array($decoded) ? $decoded : array_map('trim', explode(',', $user->rombel));
+                }
+                if (!in_array($className, $currentRombels)) {
+                    $currentRombels[] = $className;
+                    $user->rombel = json_encode(array_values(array_unique(array_filter($currentRombels))));
+                    $user->save();
                 }
             }
+
+            $touchedClasses[] = $className;
 
             $nisn = !empty($item['nisn']) ? trim((string)$item['nisn']) : '00' . rand(10000000, 99999999);
             

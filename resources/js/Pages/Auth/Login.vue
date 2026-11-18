@@ -28,11 +28,11 @@
       </div>
 
       <!-- Segmented Role Navigation Tabs -->
-      <div class="bg-slate-200/80 p-1 rounded-xl mb-3.5 grid grid-cols-3 gap-1 text-xs font-semibold shadow-inner">
+      <div class="bg-slate-200/80 p-1 rounded-xl mb-3.5 grid grid-cols-2 gap-1 text-xs font-semibold shadow-inner">
         <button
           type="button"
           @click="selectRole('guru')"
-          class="py-1.5 px-1 text-center rounded-lg font-bold transition cursor-pointer"
+          class="py-1.5 px-2 text-center rounded-lg font-bold transition cursor-pointer"
           :class="currentRole === 'guru' ? 'bg-blue-600 text-white shadow-xs' : 'text-slate-600 hover:text-slate-900'"
         >
           Guru BK
@@ -40,19 +40,12 @@
         <button
           type="button"
           @click="selectRole('admin')"
-          class="py-1.5 px-1 text-center rounded-lg font-bold transition cursor-pointer flex items-center justify-center gap-1"
+          class="py-1.5 px-2 text-center rounded-lg font-bold transition cursor-pointer flex items-center justify-center gap-1"
           :class="currentRole === 'admin' ? 'bg-indigo-600 text-white shadow-xs' : 'text-slate-600 hover:text-slate-900'"
         >
           <span>Admin</span>
           <span class="text-[9px] px-1 py-0.2 rounded" :class="currentRole === 'admin' ? 'bg-indigo-800 text-white' : 'bg-slate-300 text-slate-700'">Sistem</span>
         </button>
-        <router-link
-          to="/tamu"
-          class="py-1.5 px-1 text-center rounded-lg text-slate-600 hover:text-slate-900 transition flex items-center justify-center gap-1 cursor-pointer font-medium"
-        >
-          <span>Tamu</span>
-          <span class="text-[9px] px-1 py-0.2 bg-emerald-100 text-emerald-700 font-bold rounded">Publik</span>
-        </router-link>
       </div>
 
       <!-- Auth Card -->

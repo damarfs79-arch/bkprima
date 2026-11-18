@@ -1,103 +1,41 @@
 <template>
   <AppLayout active-tab="pelanggaran" show-share>
-    <div class="max-w-5xl mx-auto space-y-5 sm:space-y-6">
+    <div class="max-w-5xl mx-auto space-y-4 sm:space-y-5">
 
       <!-- ============================================================ -->
-      <!-- CARD 1: HEADER & STATS SUMMARY                               -->
+      <!-- HEADER RINGKAS: JUDUL + TOMBOL AKSI                         -->
       <!-- ============================================================ -->
-      <div class="bg-white rounded-xl p-5 sm:p-6 border border-slate-200 shadow-xs space-y-5">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div class="bg-white rounded-xl px-5 py-4 sm:px-6 sm:py-5 border border-slate-200 shadow-xs">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
-            <p class="text-xs font-semibold uppercase tracking-wider text-rose-600 mb-1">
-              Kedisiplinan &amp; Penanganan Kasus BK
-            </p>
-            <h1 class="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight leading-snug">
-              Catatan Pelanggaran &amp; Pemanggilan Siswa
+            <p class="text-[11px] font-semibold uppercase tracking-widest text-rose-600 mb-0.5">Kedisiplinan &amp; Penanganan Kasus BK</p>
+            <h1 class="text-lg sm:text-xl font-bold text-slate-900 tracking-tight leading-snug">
+              Catatan Pelanggaran Siswa
             </h1>
-            <p class="text-xs sm:text-sm text-slate-500 mt-0.5">
-              Rekapitulasi sanksi tata tertib, akumulasi poin &amp; penerbitan surat panggilan dinas orang tua (SP-1, SP-2, SP-3)
+            <p class="text-xs text-slate-500 mt-0.5 hidden sm:block">
+              Rekap sanksi tata tertib, akumulasi poin &amp; surat panggilan orang tua
             </p>
           </div>
 
           <div class="flex items-center gap-2 self-start sm:self-auto shrink-0">
             <button
               @click="openNewSummonsModal"
-              class="inline-flex items-center justify-center gap-1.5 bg-rose-600 hover:bg-rose-700 text-white font-semibold px-3.5 py-2 rounded-lg text-xs transition cursor-pointer"
+              class="inline-flex items-center gap-1.5 border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-semibold px-3.5 py-2 rounded-lg text-xs transition cursor-pointer"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-rose-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
               </svg>
               <span>Panggil Ortu (SP)</span>
             </button>
             <router-link
               to="/verifikasi"
-              class="inline-flex items-center justify-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded-lg text-xs transition cursor-pointer"
+              class="inline-flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded-lg text-xs transition cursor-pointer shadow-xs"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4" />
               </svg>
               <span>Catat Pelanggaran</span>
             </router-link>
-          </div>
-        </div>
-
-        <!-- 4 Summary KPI Cards (Interactive Filter Triggers) -->
-        <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 pt-1">
-          <!-- Total Kasus -->
-          <div 
-            @click="activeMainTab = 'pelanggaran'; selectedStatus = 'Semua'"
-            class="p-4 bg-white hover:bg-slate-50 rounded-xl border border-slate-200 cursor-pointer transition shadow-xs"
-          >
-            <div class="flex items-center justify-between text-slate-500 mb-1">
-              <span class="text-xs font-semibold uppercase tracking-wider">TOTAL KASUS</span>
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-              </svg>
-            </div>
-            <div class="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">{{ violations.length }}</div>
-            <span class="text-xs text-slate-500 font-medium">Bulan Oktober 2024</span>
-          </div>
-
-          <!-- Kasus Ringan -->
-          <div 
-            @click="activeMainTab = 'pelanggaran'; selectedStatus = 'Dalam Pembinaan'"
-            class="p-4 bg-white hover:bg-slate-50 rounded-xl border border-slate-200 cursor-pointer transition shadow-xs"
-          >
-            <div class="flex items-center justify-between text-slate-500 mb-1">
-              <span class="text-xs font-semibold uppercase tracking-wider">KASUS RINGAN</span>
-              <span class="text-xs font-medium text-slate-500 font-mono">+5 - +10</span>
-            </div>
-            <div class="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">4</div>
-            <span class="text-xs text-slate-500 font-medium">Teguran Lisan / Piket</span>
-          </div>
-
-          <!-- Kasus Sedang / SP -->
-          <div 
-            @click="activeMainTab = 'panggilan'; summonsFilter = 'SP-1'"
-            class="p-4 bg-white hover:bg-slate-50 rounded-xl border border-slate-200 cursor-pointer transition shadow-xs"
-          >
-            <div class="flex items-center justify-between text-slate-500 mb-1">
-              <span class="text-xs font-semibold uppercase tracking-wider">PERINGATAN SP</span>
-              <span class="text-xs font-medium text-amber-600 font-mono">+15 - +25</span>
-            </div>
-            <div class="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">2</div>
-            <span class="text-xs text-slate-500 font-medium">Konseling &amp; Surat SP</span>
-          </div>
-
-          <!-- Kasus Berat / Panggilan Ortu -->
-          <div 
-            @click="activeMainTab = 'panggilan'; summonsFilter = 'ALL'"
-            class="p-4 rounded-xl border cursor-pointer transition shadow-xs"
-            :class="activeMainTab === 'panggilan' ? 'bg-slate-50 border-slate-300 ring-1 ring-slate-300' : 'bg-white hover:bg-slate-50 border-slate-200'"
-          >
-            <div class="flex items-center justify-between text-slate-500 mb-1">
-              <span class="text-xs font-semibold uppercase tracking-wider text-rose-600">PANGGILAN ORTU</span>
-              <span class="text-xs font-medium text-rose-600 font-mono">&ge; 30 Poin</span>
-            </div>
-            <div class="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">{{ summonsList.length }}</div>
-            <span class="text-xs text-rose-600 font-medium">
-              Buka Layanan Surat SP &rarr;
-            </span>
           </div>
         </div>
       </div>
@@ -162,18 +100,22 @@
         <!-- TAB VIEW 1: TABEL CATATAN PELANGGARAN                        -->
         <!-- ============================================================ -->
         <div v-if="activeMainTab === 'pelanggaran'">
-          <!-- Filter Chips (Kategori / Status) -->
-          <div class="px-5 sm:px-6 py-3 bg-slate-50/60 border-b border-slate-100 flex items-center gap-2 overflow-x-auto text-xs">
-            <span class="text-slate-400 font-bold shrink-0 text-[11px] uppercase tracking-wider">Status:</span>
-            <button
-              v-for="st in statusFilters"
-              :key="st"
-              @click="selectedStatus = st"
-              class="px-3 py-1 rounded-lg font-bold text-xs transition cursor-pointer shrink-0"
-              :class="selectedStatus === st ? 'bg-blue-600 text-white shadow-2xs' : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'"
-            >
-              {{ st }}
-            </button>
+          <!-- Filter Chips (Kategori / Status) & Pengurutan Otomatis Poin -->
+          <div class="px-5 sm:px-6 py-3 bg-slate-50/60 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+            <div class="flex items-center gap-2 overflow-x-auto">
+              <span class="text-slate-400 font-bold shrink-0 text-[11px] uppercase tracking-wider">Status:</span>
+              <button
+                v-for="st in statusFilters"
+                :key="st"
+                @click="selectedStatus = st"
+                class="px-3 py-1 rounded-lg font-bold text-xs transition cursor-pointer shrink-0"
+                :class="selectedStatus === st ? 'bg-blue-600 text-white shadow-2xs' : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'"
+              >
+                {{ st }}
+              </button>
+            </div>
+
+  
           </div>
 
           <div class="p-5 sm:p-6">
@@ -185,8 +127,21 @@
                     <th class="py-3.5 px-4 text-[11px] uppercase tracking-wider">TANGGAL &amp; WAKTU</th>
                     <th class="py-3.5 px-4 text-[11px] uppercase tracking-wider">SISWA TERLAPOR</th>
                     <th class="py-3.5 px-4 text-[11px] uppercase tracking-wider">JENIS PELANGGARAN</th>
-                    <th class="py-3.5 px-4 text-center text-[11px] uppercase tracking-wider">BUKTI FOTO</th>
-                    <th class="py-3.5 px-4 text-center text-[11px] uppercase tracking-wider">POIN SANKSI</th>
+                    <th 
+                      @click="toggleSortByPoints"
+                      class="py-3.5 px-4 text-center text-[11px] uppercase tracking-wider cursor-pointer hover:bg-slate-100 transition select-none"
+                      title="Klik untuk mengubah urutan poin terbanyak / terendah"
+                    >
+                      <div class="inline-flex items-center justify-center gap-1">
+                        <span>POIN SANKSI</span>
+                        <svg v-if="sortBy === 'points-desc'" xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-blue-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7" />
+                        </svg>
+                        <svg v-else-if="sortBy === 'points-asc'" xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-blue-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 15l7-7 7 7" />
+                        </svg>
+                      </div>
+                    </th>
                     <th class="py-3.5 px-4 text-center text-[11px] uppercase tracking-wider">STATUS KASUS</th>
                     <th class="py-3.5 px-4 text-center text-[11px] uppercase tracking-wider">AKSI</th>
                   </tr>
@@ -199,28 +154,14 @@
                       <div class="text-[11px] text-slate-400">{{ item.time }}</div>
                     </td>
                     <td class="py-3.5 px-4">
-                      <div class="font-bold text-slate-900 text-xs sm:text-sm">{{ item.studentName }}</div>
-                      <div class="text-[11px] text-slate-500 font-medium">NISN: {{ item.nisn }} &bull; {{ item.className }}</div>
+                      <div class="font-bold text-slate-900 text-xs">{{ item.studentName }}</div>
+                      <div class="text-[11px] text-slate-500 mt-0.5">
+                        NISN: {{ item.nisn }} &bull; {{ item.className }}
+                      </div>
                     </td>
                     <td class="py-3.5 px-4">
                       <div class="font-semibold text-slate-800">{{ item.category }}</div>
                       <div class="text-[11px] text-slate-400 truncate max-w-xs">{{ item.note }}</div>
-                    </td>
-                    <td class="py-3.5 px-4 text-center">
-                      <button
-                        v-if="item.photoUrl"
-                        type="button"
-                        @click="openPhotoPreview(item)"
-                        class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-700 font-semibold text-[11px] border border-blue-200 transition cursor-pointer"
-                        title="Klik untuk melihat foto bukti"
-                      >
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-                        </svg>
-                        <span>Lihat Foto</span>
-                      </button>
-                      <span v-else class="text-slate-400 text-[11px] italic">Tanpa Foto</span>
                     </td>
                     <td class="py-3.5 px-4 text-center">
                       <span 
@@ -276,7 +217,7 @@
                     </td>
                   </tr>
                   <tr v-if="filteredViolations.length === 0">
-                    <td colspan="7" class="py-8 text-center text-slate-400 text-xs">
+                    <td colspan="6" class="py-8 text-center text-slate-400 text-xs">
                       Tidak ada catatan pelanggaran yang sesuai dengan pencarian.
                     </td>
                   </tr>
@@ -284,22 +225,11 @@
               </table>
             </div>
 
-            <!-- Bottom Summary & Export -->
-            <div class="flex flex-col sm:flex-row justify-between items-center gap-3 pt-5 border-t border-slate-100 mt-5">
+            <!-- Bottom Summary -->
+            <div class="flex justify-between items-center gap-3 pt-4 border-t border-slate-100 mt-4">
               <p class="text-xs text-slate-500 font-medium">
                 Menampilkan <span class="font-bold text-slate-800">{{ filteredViolations.length }}</span> dari {{ violations.length }} catatan pelanggaran
               </p>
-              <div class="flex items-center gap-2">
-                <button 
-                  @click="printViolations" 
-                  class="px-4 py-2 bg-white hover:bg-slate-50 text-slate-700 font-bold text-xs rounded-xl border border-slate-200 transition cursor-pointer flex items-center gap-1.5 shadow-2xs"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
-                  </svg>
-                  <span>Cetak Rekap Pelanggaran</span>
-                </button>
-              </div>
             </div>
           </div>
         </div>
@@ -898,6 +828,15 @@ const props = defineProps({
 // Active Mode: 'pelanggaran' | 'panggilan'
 const activeMainTab = ref('pelanggaran')
 const previewPhotoItem = ref(null)
+const sortBy = ref('points-desc') // 'points-desc' (Poin Terbanyak Auto) | 'date-desc' (Tanggal Terbaru) | 'points-asc'
+
+const toggleSortByPoints = () => {
+  if (sortBy.value === 'points-desc') {
+    sortBy.value = 'points-asc'
+  } else {
+    sortBy.value = 'points-desc'
+  }
+}
 
 const openPhotoPreview = (item) => {
   previewPhotoItem.value = item
@@ -908,22 +847,21 @@ onMounted(() => {
     activeMainTab.value = 'panggilan'
   }
   if (props.dbViolations && props.dbViolations.length > 0) {
-    const fromDb = props.dbViolations.map((v, i) => ({
+    // Jika ada data DB, HANYA tampilkan data DB (tidak merge dengan dummy)
+    violations.value = props.dbViolations.map((v) => ({
       id: v.id,
-      date: v.date || '24 Okt 2024',
+      date: v.date || new Date().toLocaleDateString('id-ID'),
       time: v.time ? `${v.time} WIB` : '07:30 WIB',
       studentName: v.student_name,
-      nisn: v.student?.nisn || ('22231' + (1000 + i)),
-      className: v.student_class,
+      nisn: v.student?.nisn || '-',
+      className: v.student_class || '-',
       category: v.category,
       note: v.notes || v.violation_name,
       photoUrl: v.photo_url || null,
-      points: v.points,
-      status: v.points >= 25 ? 'Panggilan Ortu' : (v.points >= 10 ? 'Dalam Pembinaan' : 'Selesai Dibina')
+      points: Number(v.points) || 0,
+      totalStudentPoints: Number(v.student?.total_violation_points) || Number(v.points) || 0,
+      status: Number(v.points) >= 25 ? 'Panggilan Ortu' : (Number(v.points) >= 10 ? 'Dalam Pembinaan' : 'Selesai Dibina')
     }))
-    // Merge new database violations ahead of defaults without duplicates
-    const existingIds = new Set(fromDb.map(d => d.id))
-    violations.value = [...fromDb, ...violations.value.filter(v => !existingIds.has(v.id))]
   }
 })
 
@@ -936,40 +874,17 @@ const statusFilters = ['Semua', 'Dalam Pembinaan', 'Panggilan Ortu', 'Selesai Di
 // 1. VIOLATIONS DATA
 const violations = ref([
   {
-    id: 1,
-    date: '24 Okt 2024',
-    time: '07:24 WIB',
-    studentName: 'Dimas Arya Pratama',
-    nisn: '22231063',
-    className: 'X RPL 1',
-    category: 'Terlambat Masuk Gerbang',
-    note: 'Bangun kesiangan, tiba di sekolah 07:24 WIB.',
-    points: 5,
-    status: 'Selesai Dibina'
-  },
-  {
-    id: 2,
-    date: '21 Okt 2024',
-    time: '09:45 WIB',
-    studentName: 'Andi Saputra',
-    nisn: '22231092',
+    id: 6,
+    date: '10 Okt 2024',
+    time: '10:30 WIB',
+    studentName: 'Zulfikar Ali Akbar',
+    nisn: '22231077',
     className: 'XI TSM 1',
-    category: 'Seragam Tidak Rapi / Baju Dikeluarkan',
-    note: 'Teguran lisan oleh petugas piket.',
-    points: 5,
-    status: 'Selesai Dibina'
-  },
-  {
-    id: 3,
-    date: '19 Okt 2024',
-    time: '11:15 WIB',
-    studentName: 'Rania Zahra Putri',
-    nisn: '22231105',
-    className: 'X DKV 1',
-    category: 'Membawa HP saat Jam Pelajaran',
-    note: 'Bermain game di kelas saat jam Bahasa Indonesia.',
-    points: 10,
-    status: 'Dalam Pembinaan'
+    category: 'Berkelahi di Area Parkir Luar',
+    note: 'Perselisihan antarsiswa di luar gerbang sekolah.',
+    points: 30,
+    totalStudentPoints: 85,
+    status: 'Panggilan Ortu'
   },
   {
     id: 4,
@@ -981,6 +896,7 @@ const violations = ref([
     category: 'Merokok di Lingkungan Sekolah',
     note: 'Kedapatan merokok di belakang kantin sekolah.',
     points: 25,
+    totalStudentPoints: 35,
     status: 'Panggilan Ortu'
   },
   {
@@ -993,19 +909,47 @@ const violations = ref([
     category: 'Membolos / Tidak Masuk Tanpa Izin',
     note: 'Tidak hadir tanpa surat izin selama 3 hari berturut-turut.',
     points: 15,
+    totalStudentPoints: 50,
     status: 'Panggilan Ortu'
   },
   {
-    id: 6,
-    date: '10 Okt 2024',
-    time: '10:30 WIB',
-    studentName: 'Zulfikar Ali Akbar',
-    nisn: '22231077',
+    id: 3,
+    date: '19 Okt 2024',
+    time: '11:15 WIB',
+    studentName: 'Rania Zahra Putri',
+    nisn: '22231105',
+    className: 'X DKV 1',
+    category: 'Membawa HP saat Jam Pelajaran',
+    note: 'Bermain game di kelas saat jam Bahasa Indonesia.',
+    points: 10,
+    totalStudentPoints: 10,
+    status: 'Dalam Pembinaan'
+  },
+  {
+    id: 1,
+    date: '24 Okt 2024',
+    time: '07:24 WIB',
+    studentName: 'Dimas Arya Pratama',
+    nisn: '22231063',
+    className: 'X RPL 1',
+    category: 'Terlambat Masuk Gerbang',
+    note: 'Bangun kesiangan, tiba di sekolah 07:24 WIB.',
+    points: 5,
+    totalStudentPoints: 5,
+    status: 'Selesai Dibina'
+  },
+  {
+    id: 2,
+    date: '21 Okt 2024',
+    time: '09:45 WIB',
+    studentName: 'Andi Saputra',
+    nisn: '22231092',
     className: 'XI TSM 1',
-    category: 'Berkelahi di Area Parkir Luar',
-    note: 'Perselisihan antarsiswa di luar gerbang sekolah.',
-    points: 30,
-    status: 'Panggilan Ortu'
+    category: 'Seragam Tidak Rapi / Baju Dikeluarkan',
+    note: 'Teguran lisan oleh petugas piket.',
+    points: 5,
+    totalStudentPoints: 5,
+    status: 'Selesai Dibina'
   },
   {
     id: 7,
@@ -1017,12 +961,13 @@ const violations = ref([
     category: 'Terlambat Masuk Gerbang',
     note: 'Terlambat 15 menit, diarahkan membersihkan koridor.',
     points: 5,
+    totalStudentPoints: 5,
     status: 'Selesai Dibina'
   }
 ])
 
 const filteredViolations = computed(() => {
-  return violations.value.filter(item => {
+  const result = violations.value.filter(item => {
     const matchesStatus = selectedStatus.value === 'Semua' || item.status === selectedStatus.value
     if (!matchesStatus) return false
 
@@ -1036,28 +981,45 @@ const filteredViolations = computed(() => {
     }
     return true
   })
+
+  // Pengurutan otomatis: Poin pelanggaran paling banyak diletakkan di atas sendiri
+  return [...result].sort((a, b) => {
+    if (sortBy.value === 'points-desc') {
+      const pointDiff = (Number(b.points) || 0) - (Number(a.points) || 0)
+      if (pointDiff !== 0) return pointDiff
+      const totalDiff = (Number(b.totalStudentPoints) || 0) - (Number(a.totalStudentPoints) || 0)
+      if (totalDiff !== 0) return totalDiff
+      return (Number(b.id) || 0) - (Number(a.id) || 0)
+    } else if (sortBy.value === 'points-asc') {
+      const pointDiff = (Number(a.points) || 0) - (Number(b.points) || 0)
+      if (pointDiff !== 0) return pointDiff
+      return (Number(b.id) || 0) - (Number(a.id) || 0)
+    } else {
+      return (Number(b.id) || 0) - (Number(a.id) || 0)
+    }
+  })
 })
 
 // 2. PARENT SUMMONS (SP) DATA
 const summonsList = ref([
   {
-    id: 1,
-    letterNumber: '421.5/081/BK/SMK-PGRI5/X/2024',
-    issueDate: '23 Okt 2024',
-    studentName: 'Bagus Setiawan',
-    nisn: '22231044',
-    className: 'X RPL 1',
-    caseTitle: 'Merokok di Lingkungan Sekolah & Membawa Korek',
-    caseDescription: 'Akumulasi sanksi mencapai 35 poin, membutuhkan mediasi orang tua.',
-    points: 35,
-    stage: 'SP-1',
-    meetingDate: 'Kamis, 24 Okt 2024',
-    meetingTime: '09.00 WIB',
-    room: 'Ruang BK Gedung A',
-    parentName: 'Ibu Siti Khotimah',
-    parentPhone: '+62 821-9923-4100',
-    status: 'Menunggu Kehadiran',
-    counselor: 'Dra. Hj. Nurul Hidayati, M.Pd'
+    id: 3,
+    letterNumber: '421.5/074/BK/SMK-PGRI5/X/2024',
+    issueDate: '18 Okt 2024',
+    studentName: 'Zulfikar Ali Akbar',
+    nisn: '22231077',
+    className: 'XI TSM 1',
+    caseTitle: 'Perkelahian Antar Siswa & Merusak Meja Ruang Kelas',
+    caseDescription: 'Akumulasi 85 poin, diperlukan sidang pleno bersama orang tua.',
+    points: 85,
+    stage: 'SP-3',
+    meetingDate: 'Senin, 21 Okt 2024',
+    meetingTime: '10.00 WIB',
+    room: 'Ruang Sidang Tatib',
+    parentName: 'Bpk. H. Akbar Maulana',
+    parentPhone: '+62 813-7721-0099',
+    status: 'Mediasi Selesai',
+    counselor: 'Bpk. Agus Wicaksono, S.Pd'
   },
   {
     id: 2,
@@ -1079,35 +1041,51 @@ const summonsList = ref([
     counselor: 'Bpk. Dwi Prasetyo, M.Pd'
   },
   {
-    id: 3,
-    letterNumber: '421.5/074/BK/SMK-PGRI5/X/2024',
-    issueDate: '18 Okt 2024',
-    studentName: 'Zulfikar Ali Akbar',
-    nisn: '22231077',
-    className: 'XI TSM 1',
-    caseTitle: 'Perkelahian Antar Siswa & Merusak Meja Ruang Kelas',
-    caseDescription: 'Akumulasi 85 poin, diperlukan sidang pleno bersama orang tua.',
-    points: 85,
-    stage: 'SP-3',
-    meetingDate: 'Senin, 21 Okt 2024',
-    meetingTime: '10.00 WIB',
-    room: 'Ruang Sidang Tatib',
-    parentName: 'Bpk. H. Akbar Maulana',
-    parentPhone: '+62 813-7721-0099',
-    status: 'Mediasi Selesai',
-    counselor: 'Bpk. Agus Wicaksono, S.Pd'
+    id: 1,
+    letterNumber: '421.5/081/BK/SMK-PGRI5/X/2024',
+    issueDate: '23 Okt 2024',
+    studentName: 'Bagus Setiawan',
+    nisn: '22231044',
+    className: 'X RPL 1',
+    caseTitle: 'Merokok di Lingkungan Sekolah & Membawa Korek',
+    caseDescription: 'Akumulasi sanksi mencapai 35 poin, membutuhkan mediasi orang tua.',
+    points: 35,
+    stage: 'SP-1',
+    meetingDate: 'Kamis, 24 Okt 2024',
+    meetingTime: '09.00 WIB',
+    room: 'Ruang BK Gedung A',
+    parentName: 'Ibu Siti Khotimah',
+    parentPhone: '+62 821-9923-4100',
+    status: 'Menunggu Kehadiran',
+    counselor: 'Dra. Hj. Nurul Hidayati, M.Pd'
   }
 ])
 
-const candidateStudents = [
-  { id: 101, name: 'Bagus Setiawan', nisn: '22231044', className: 'X RPL 1', points: 35, parent: 'Ibu Siti Khotimah', phone: '+62 821-9923-4100' },
-  { id: 102, name: 'Fajar Nugroho', nisn: '22231018', className: 'XII TKJ 1', points: 50, parent: 'Bpk. Joko Nugroho', phone: '+62 852-1100-3322' },
-  { id: 103, name: 'Zulfikar Ali Akbar', nisn: '22231077', className: 'XI TSM 1', points: 85, parent: 'Bpk. H. Akbar Maulana', phone: '+62 813-7721-0099' },
-  { id: 104, name: 'Danendra Putra', nisn: '22231093', className: 'X RPL 2', points: 40, parent: 'Bpk. Danendra Sr', phone: '+62 812-3301-4491' }
-]
+const candidateStudents = computed(() => {
+  if (props.dbStudents && props.dbStudents.length > 0) {
+    return [...props.dbStudents]
+      .sort((a, b) => (Number(b.total_violation_points) || 0) - (Number(a.total_violation_points) || 0))
+      .map(s => ({
+        id: s.id,
+        name: s.name,
+        nisn: s.nisn,
+        className: s.class_name,
+        points: Number(s.total_violation_points) || 0,
+        parent: s.parent_name || `Bpk/Ibu Wali ${s.name.split(' ')[0]}`,
+        phone: s.parent_phone || '+62 812-3456-7890'
+      }))
+  }
+
+  return [
+    { id: 103, name: 'Zulfikar Ali Akbar', nisn: '22231077', className: 'XI TSM 1', points: 85, parent: 'Bpk. H. Akbar Maulana', phone: '+62 813-7721-0099' },
+    { id: 102, name: 'Fajar Nugroho', nisn: '22231018', className: 'XII TKJ 1', points: 50, parent: 'Bpk. Joko Nugroho', phone: '+62 852-1100-3322' },
+    { id: 104, name: 'Danendra Putra', nisn: '22231093', className: 'X RPL 2', points: 40, parent: 'Bpk. Danendra Sr', phone: '+62 812-3301-4491' },
+    { id: 101, name: 'Bagus Setiawan', nisn: '22231044', className: 'X RPL 1', points: 35, parent: 'Ibu Siti Khotimah', phone: '+62 821-9923-4100' }
+  ]
+})
 
 const filteredSummons = computed(() => {
-  return summonsList.value.filter(item => {
+  const result = summonsList.value.filter(item => {
     if (summonsFilter.value === 'WAITING' && item.status !== 'Menunggu Kehadiran') return false
     if (summonsFilter.value === 'RESOLVED' && item.status !== 'Mediasi Selesai') return false
     if (summonsFilter.value === 'SP-1' && item.stage !== 'SP-1') return false
@@ -1124,6 +1102,9 @@ const filteredSummons = computed(() => {
     }
     return true
   })
+
+  // Urutkan akumulasi poin sanksi tertinggi di atas
+  return [...result].sort((a, b) => (Number(b.points) || 0) - (Number(a.points) || 0))
 })
 
 // Modals State
@@ -1171,7 +1152,7 @@ const prepareSummonsForStudent = (violation) => {
 }
 
 const onSelectStudentForSummons = () => {
-  const selected = candidateStudents.find(s => s.id === Number(newSummons.value.studentId))
+  const selected = candidateStudents.value.find(s => s.id === Number(newSummons.value.studentId))
   if (selected) {
     newSummons.value.studentName = selected.name
     newSummons.value.nisn = selected.nisn

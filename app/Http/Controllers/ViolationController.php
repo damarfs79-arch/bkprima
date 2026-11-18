@@ -11,8 +11,13 @@ class ViolationController extends Controller
 {
     public function index(Request $request)
     {
-        $violations = Violation::with('student')->latest()->get();
-        $students = Student::all();
+        $violations = Violation::with('student')
+            ->orderByDesc('points')
+            ->latest()
+            ->get();
+        $students = Student::orderByDesc('total_violation_points')
+            ->orderBy('name')
+            ->get();
 
         return Inertia::render('ViolationList', [
             'dbViolations' => $violations,
@@ -23,7 +28,7 @@ class ViolationController extends Controller
 
     public function create()
     {
-        $students = Student::orderBy('name')->get();
+        $students = Student::orderByDesc('total_violation_points')->orderBy('name')->get();
 
         return Inertia::render('InputViolation', [
             'studentsList' => $students,

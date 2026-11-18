@@ -174,11 +174,11 @@
           </div>
 
           <!-- Notification Button -->
-          <router-link to="/piket" class="p-2 text-slate-500 hover:text-slate-800 hover:bg-slate-100 rounded-lg transition relative cursor-pointer" title="Notifikasi Piket">
+          <button type="button" class="p-2 text-slate-500 hover:text-slate-800 hover:bg-slate-100 rounded-lg transition relative cursor-pointer" title="Notifikasi Sistem">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">
               <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
             </svg>
-          </router-link>
+          </button>
         </div>
       </header>
 
@@ -399,14 +399,6 @@ const menuItems = [
     ])
   },
   {
-    key: 'piket',
-    label: 'Piket Harian',
-    path: '/piket',
-    icon: () => h('svg', { xmlns: 'http://www.w3.org/2000/svg', class: 'h-4 w-4', fill: 'none', viewBox: '0 0 24 24', stroke: 'currentColor', 'stroke-width': '2' }, [
-      h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', d: 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z' })
-    ])
-  },
-  {
     key: 'panduan',
     label: 'Tata Tertib & Poin',
     path: '/panduan',
@@ -421,14 +413,6 @@ const menuItems = [
     icon: () => h('svg', { xmlns: 'http://www.w3.org/2000/svg', class: 'h-4 w-4', fill: 'none', viewBox: '0 0 24 24', stroke: 'currentColor', 'stroke-width': '2' }, [
       h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', d: 'M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z' })
     ])
-  },
-  {
-    key: 'tamu',
-    label: 'Portal Tamu (Siswa/Wali)',
-    path: '/tamu',
-    icon: () => h('svg', { xmlns: 'http://www.w3.org/2000/svg', class: 'h-4 w-4', fill: 'none', viewBox: '0 0 24 24', stroke: 'currentColor', 'stroke-width': '2' }, [
-      h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', d: 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z' })
-    ])
   }
 ]
 
@@ -441,7 +425,6 @@ const isRouteActive = (key) => {
   if (key === 'pemanggilan' && route.path === '/pemanggilan') return true
   if (key === 'verifikasi' && route.path === '/verifikasi') return true
   if (key === 'statistik' && route.path === '/statistik') return true
-  if (key === 'piket' && route.path === '/piket') return true
   if (key === 'panduan' && route.path === '/panduan') return true
   if (key === 'profil' && route.path === '/profil') return true
   return false
@@ -455,7 +438,6 @@ const currentTitle = computed(() => {
   if (route.path === '/pemanggilan') return 'Pemanggilan Orang Tua'
   if (route.path === '/verifikasi') return 'Input Pelanggaran'
   if (route.path === '/statistik') return 'Statistik Siswa'
-  if (route.path === '/piket') return 'Piket Harian'
   if (route.path === '/panduan') return 'Tata Tertib & Poin'
   if (route.path === '/profil') return 'Profil Guru BK'
   return 'Dashboard'
