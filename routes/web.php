@@ -4,11 +4,9 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\ViolationController;
-use App\Http\Controllers\PiketController;
 use App\Http\Controllers\RuleController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\AdminController;
-use App\Http\Controllers\GuestController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\PromotionController;
 use App\Http\Controllers\ArsipAlumniController;
@@ -47,10 +45,10 @@ Route::post('/pelanggaran/panggilan', [ViolationController::class, 'storeSummons
 Route::patch('/pelanggaran/panggilan/{id}', [ViolationController::class, 'updateSummons'])->name('violation.summons.update');
 Route::delete('/pelanggaran/panggilan/{id}', [ViolationController::class, 'destroySummons'])->name('violation.summons.destroy');
 
-// 5. Piket
-Route::get('/piket', [PiketController::class, 'index'])->name('piket.index');
-
-// 6. Tata Tertib & Panduan Poin (Master Data & Pemutihan)
+// 5. Tata Tertib & Panduan Poin (Master Data & Pemutihan)
+Route::get('/piket', function () {
+    return redirect('/absensi');
+});
 Route::get('/panduan', [RuleController::class, 'index'])->name('rules.index');
 Route::post('/panduan/aturan', [RuleController::class, 'storeRule'])->name('rules.store');
 Route::put('/panduan/aturan/{id}', [RuleController::class, 'updateRule'])->name('rules.update');
@@ -83,11 +81,13 @@ Route::post('/admin/pengaturan', [AdminController::class, 'updateSettings'])->na
 Route::patch('/admin/konsultasi/{id}', [AdminController::class, 'updateConsultationStatus'])->name('admin.consultation.update');
 Route::delete('/admin/konsultasi/{id}', [AdminController::class, 'deleteConsultation'])->name('admin.consultation.delete');
 
-// 9. Guest Portal (Siswa & Wali Murid)
-Route::get('/tamu', [GuestController::class, 'index'])->name('guest.index');
-Route::post('/tamu/konsultasi', [GuestController::class, 'storeConsultation'])->name('guest.consultation');
+// Redirect jika ada yang membuka link /tamu atau /portal-tamu agar tidak Not Found (404)
+Route::get('/tamu', function () {
+    return redirect()->route('login');
+})->name('guest.index');
+
 Route::get('/portal-tamu', function () {
-    return redirect('/tamu');
+    return redirect()->route('login');
 });
 
 // 10. Master Admin Kenaikan Kelas & Kelulusan

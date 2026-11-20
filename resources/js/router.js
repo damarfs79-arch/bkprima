@@ -32,12 +32,6 @@ const routes = [
     meta: { title: 'Statistik Kehadiran Siswa - BK Prima' }
   },
   {
-    path: '/piket',
-    name: 'piket',
-    component: () => import('./Pages/Piket.vue'),
-    meta: { title: 'Tugas & Penugasan Piket - BK Prima' }
-  },
-  {
     path: '/panduan',
     name: 'panduan',
     component: () => import('./Pages/RulePoints.vue'),
@@ -73,13 +67,11 @@ const routes = [
   },
   {
     path: '/tamu',
-    name: 'tamu',
-    component: () => import('./Pages/GuestPortal.vue'),
-    meta: { title: 'Portal Siswa & Wali Murid - BK Prima' }
+    redirect: '/login'
   },
   {
     path: '/portal-tamu',
-    redirect: '/tamu'
+    redirect: '/login'
   },
   {
     path: '/arsip-lulus',

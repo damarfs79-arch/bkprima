@@ -2,6 +2,27 @@
   <AppLayout active-tab="absensi" show-share>
     <div class="max-w-7xl mx-auto space-y-5">
 
+      <!-- Toast Notification -->
+      <transition
+        enter-active-class="transform ease-out duration-300 transition"
+        enter-from-class="translate-y-2 opacity-0 sm:translate-y-0 sm:translate-x-2"
+        enter-to-class="translate-y-0 opacity-100 sm:translate-x-0"
+        leave-active-class="transition ease-in duration-100"
+        leave-from-class="opacity-100"
+        leave-to-class="opacity-0"
+      >
+        <div v-if="toastMessage" class="fixed top-20 right-4 sm:right-8 z-50 bg-white border border-slate-200 rounded-xl shadow-lg p-4 flex items-center gap-3 text-xs max-w-sm">
+          <div class="w-8 h-8 rounded-lg bg-emerald-500 text-white flex items-center justify-center shrink-0">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
+            </svg>
+          </div>
+          <div>
+            <p class="font-semibold text-slate-800">{{ toastMessage }}</p>
+          </div>
+        </div>
+      </transition>
+
       <!-- ============================================================ -->
       <!-- TOP HEADER SECTION                                            -->
       <!-- ============================================================ -->
@@ -1440,6 +1461,14 @@ const props = defineProps({
 
 const isSyncing = ref(false)
 const isSubmitting = ref(false)
+const toastMessage = ref('')
+
+const showToast = (msg) => {
+  toastMessage.value = msg
+  setTimeout(() => {
+    toastMessage.value = ''
+  }, 3500)
+}
 
 // State filter bertingkat
 const selectedLevel = ref(props.initialFilters?.tingkat || 'ALL')
@@ -2124,10 +2153,11 @@ const submitImport = () => {
     onSuccess: () => {
       isSubmittingImport.value = false
       closeImportModal()
+      showToast(`Berhasil mengimpor ${payload.length} siswa ke database!`)
     },
-    onError: () => {
+    onError: (err) => {
       isSubmittingImport.value = false
-      alert('Gagal mengimpor data siswa. Pastikan rombel kelas sesuai dengan rombel binaan Anda.')
+      alert('Gagal mengimpor data siswa. Pastikan format kolom sudah benar.')
     }
   })
 }

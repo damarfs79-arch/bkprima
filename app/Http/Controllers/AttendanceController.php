@@ -150,6 +150,8 @@ class AttendanceController extends Controller
         }
 
         $importedCount = 0;
+        $touchedClasses = [];
+
         foreach ($studentsData as $item) {
             if (empty($item['name'])) {
                 continue;
@@ -197,6 +199,7 @@ class AttendanceController extends Controller
 
             $className = $targetClass->name;
             $classId = $targetClass->id;
+            $touchedClasses[] = $className;
             $parts = explode(' ', $className);
             $level = '10';
             if (!empty($parts[0])) {

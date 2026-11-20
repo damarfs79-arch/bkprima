@@ -14,8 +14,14 @@ class ViolationController extends Controller
 {
     public function index(Request $request)
     {
-        $violations = Violation::with('student')->latest()->get();
-        $students = Student::active()->get();
+        $violations = Violation::with('student')
+            ->orderByDesc('points')
+            ->latest()
+            ->get();
+        $students = Student::active()
+            ->orderByDesc('total_violation_points')
+            ->orderBy('name')
+            ->get();
         $summons = \App\Models\ParentSummon::with('student')->latest()->get();
 
         return Inertia::render('ViolationList', [
@@ -28,7 +34,7 @@ class ViolationController extends Controller
 
     public function create()
     {
-        $students = Student::active()->orderBy('name')->get();
+        $students = Student::active()->orderByDesc('total_violation_points')->orderBy('name')->get();
 
         return Inertia::render('InputViolation', [
             'studentsList' => $students,
