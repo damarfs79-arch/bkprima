@@ -29,5 +29,25 @@ class Rule extends Model
     {
         return $this->hasMany(PointDeduction::class);
     }
+
+    public function pointDeductions()
+    {
+        return $this->deductions();
+    }
+
+    public function pemutihan()
+    {
+        return $this->deductions();
+    }
+
+    public function students()
+    {
+        return $this->hasManyThrough(Student::class, PointDeduction::class, 'rule_id', 'id', 'id', 'student_id');
+    }
+
+    public function siswa()
+    {
+        return $this->students();
+    }
 }
 

@@ -14,5 +14,25 @@ class Major extends Model
         'name',
         'description',
     ];
+
+    public function classrooms()
+    {
+        return $this->hasMany(Classroom::class, 'jurusan_id');
+    }
+
+    public function kelas()
+    {
+        return $this->classrooms();
+    }
+
+    public function students()
+    {
+        return $this->hasMany(Student::class, 'major', 'code');
+    }
+
+    public function siswa()
+    {
+        return $this->students();
+    }
 }
 

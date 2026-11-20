@@ -305,24 +305,22 @@
             <!-- Tahap Surat & No Surat -->
             <div class="grid grid-cols-2 gap-3">
               <div>
-                <label class="block font-bold text-slate-700 mb-1">Tahap Panggilan (SP) *</label>
-                <select
+                <label class="block font-semibold text-slate-700 mb-1">Tahap Panggilan (SP) *</label>
+                <input
                   v-model="newSummons.stage"
+                  type="text"
+                  placeholder="Contoh: SP-1, SP-2, Panggilan 1..."
                   required
-                  class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
-                >
-                  <option value="SP-1">SP-1 (Klarifikasi &amp; Peringatan Awal)</option>
-                  <option value="SP-2">SP-2 (Peringatan Tertulis Keras)</option>
-                  <option value="SP-3">SP-3 (Konferensi Kasus Pleno / Skorsing)</option>
-                </select>
+                  class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                />
               </div>
               <div>
-                <label class="block font-bold text-slate-700 mb-1">No. Surat Resmi</label>
+                <label class="block font-semibold text-slate-700 mb-1">No. Surat Resmi</label>
                 <input
                   v-model="newSummons.letterNumber"
                   type="text"
-                  readonly
-                  class="w-full bg-slate-100 border border-slate-200 rounded-xl p-2.5 font-mono text-slate-600 cursor-not-allowed"
+                  placeholder="Nomor surat resmi..."
+                  class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 font-mono text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
                 />
               </div>
             </div>
@@ -654,7 +652,18 @@
 
 <script setup>
 import AppLayout from '../Layouts/AppLayout.vue'
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
+
+const props = defineProps({
+  students: {
+    type: Array,
+    default: () => []
+  },
+  dbSummons: {
+    type: Array,
+    default: () => []
+  }
+})
 
 const activeCategory = ref('ALL')
 const selectedClassFilter = ref('ALL')
@@ -670,116 +679,69 @@ const filterCategories = [
 ]
 
 // Summons Data Source
-const summonsList = ref([
-  {
-    id: 1,
-    letterNumber: '421.5/081/BK/SMK-PGRI5/X/2024',
-    issueDate: '23 Okt 2024',
-    studentName: 'Dimas Arya Pratama',
-    nisn: '00729182',
-    className: 'X RPL 1',
-    gradeLevel: 'X',
-    caseTitle: 'Terlambat Berulang & Membolos 3 Jam Pelajaran',
-    caseDescription: 'Poin pelanggaran mencapai 45 poin dan tidak mengikuti mapel produktif.',
-    points: 45,
-    stage: 'SP-1',
-    meetingDate: 'Jumat, 25 Okt 2024',
-    meetingTime: '08.30 WIB',
-    room: 'Ruang BK Gedung A',
-    parentName: 'Bpk. Bambang Arya',
-    parentPhone: '+62 812-3481-9901',
-    status: 'Menunggu Kehadiran',
-    counselor: 'Dra. Hj. Nurul Hidayati, M.Pd'
-  },
-  {
-    id: 2,
-    letterNumber: '421.5/079/BK/SMK-PGRI5/X/2024',
-    issueDate: '21 Okt 2024',
-    studentName: 'Bagus Setiawan',
-    nisn: '00729188',
-    className: 'X RPL 1',
-    gradeLevel: 'X',
-    caseTitle: 'Merokok di Lingkungan Sekolah & Membawa Korek',
-    caseDescription: 'Kedapatan merokok di area belakang bengkel saat jam istirahat pertama.',
-    points: 55,
-    stage: 'SP-2',
-    meetingDate: 'Kamis, 24 Okt 2024',
-    meetingTime: '09.00 WIB',
-    room: 'Ruang BK Gedung A',
-    parentName: 'Ibu Siti Khotimah',
-    parentPhone: '+62 821-9923-4100',
-    status: 'Menunggu Kehadiran',
-    counselor: 'Dra. Hj. Nurul Hidayati, M.Pd'
-  },
-  {
-    id: 3,
-    letterNumber: '421.5/074/BK/SMK-PGRI5/X/2024',
-    issueDate: '18 Okt 2024',
-    studentName: 'Zulfikar Ali Akbar',
-    nisn: '00729187',
-    className: 'XI TSM 1',
-    gradeLevel: 'XI',
-    caseTitle: 'Perkelahian Antar Siswa & Merusak Fasilitas Meja',
-    caseDescription: 'Akumulasi poin mencapai 85 poin, diperlukan sidang pleno bersama orang tua.',
-    points: 85,
-    stage: 'SP-3',
-    meetingDate: 'Senin, 21 Okt 2024',
-    meetingTime: '10.00 WIB',
-    room: 'Ruang Sidang Tatib',
-    parentName: 'Bpk. H. Akbar Maulana',
-    parentPhone: '+62 813-7721-0099',
-    status: 'Mediasi Selesai',
-    counselor: 'Bpk. Agus Wicaksono, S.Pd'
-  },
-  {
-    id: 4,
-    letterNumber: '421.5/071/BK/SMK-PGRI5/X/2024',
-    issueDate: '15 Okt 2024',
-    studentName: 'Rania Zahra Putri',
-    nisn: '00729184',
-    className: 'X DKV 1',
-    gradeLevel: 'X',
-    caseTitle: 'Terlambat Hadir > 5 Kali & Atribut Seragam Tidak Lengkap',
-    caseDescription: 'Poin pelanggaran mencapai 35 poin, perlu pembinaan awal di hadapan wali.',
-    points: 35,
-    stage: 'SP-1',
-    meetingDate: 'Kamis, 17 Okt 2024',
-    meetingTime: '08.00 WIB',
-    room: 'Ruang BK Gedung A',
-    parentName: 'Ibu Nurhayati',
-    parentPhone: '+62 812-4412-8800',
-    status: 'Mediasi Selesai',
-    counselor: 'Dra. Hj. Nurul Hidayati, M.Pd'
-  },
-  {
-    id: 5,
-    letterNumber: '421.5/068/BK/SMK-PGRI5/X/2024',
-    issueDate: '12 Okt 2024',
-    studentName: 'Fajar Nugroho',
-    nisn: '00729195',
-    className: 'XII TKJ 1',
-    gradeLevel: 'XII',
-    caseTitle: 'Alpa (Tanpa Keterangan) Selama 4 Hari Berturut-turut',
-    caseDescription: 'Tidak ada konfirmasi dari orang tua, surat panggilan tahap II dilayangkan.',
-    points: 50,
-    stage: 'SP-2',
-    meetingDate: 'Selasa, 15 Okt 2024',
-    meetingTime: '09.30 WIB',
-    room: 'Ruang BK Gedung A',
-    parentName: 'Bpk. Joko Nugroho',
-    parentPhone: '+62 852-1100-3322',
-    status: 'Mangkir / Panggil Ulang',
-    counselor: 'Bpk. Dwi Prasetyo, M.Pd'
+const summonsList = ref([])
+
+const loadDbSummons = () => {
+  if (props.dbSummons && props.dbSummons.length > 0) {
+    summonsList.value = props.dbSummons.map(s => {
+      const cls = s.student?.classroom 
+        ? `${s.student.classroom.tingkat} ${s.student.classroom.jurusan} ${s.student.classroom.rombel}`
+        : (s.student?.class_name || (s.student?.tingkat ? `${s.student.tingkat} ${s.student.jurusan} ${s.student.rombel}` : (s.class_name || '-')))
+      const grade = s.student?.tingkat || (cls.startsWith('XII') ? 'XII' : (cls.startsWith('XI') ? 'XI' : 'X'))
+      return {
+        id: s.id,
+        letterNumber: s.letter_number || '-',
+        issueDate: s.created_at ? new Date(s.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }) : 'Hari Ini',
+        studentName: s.student?.name || s.student_name || '-',
+        nisn: s.student?.nis || s.student?.nisn || s.nis || '-',
+        className: cls,
+        gradeLevel: grade,
+        caseTitle: s.case_title,
+        caseDescription: s.case_description || `Poin akumulasi ${s.points || 0} poin.`,
+        points: s.points || 0,
+        stage: s.stage || 'SP-1',
+        meetingDate: s.meeting_date || '-',
+        meetingTime: s.meeting_time || '-',
+        room: s.room || 'Ruang BK',
+        parentName: s.parent_name || 'Orang Tua / Wali',
+        parentPhone: s.parent_phone || '-',
+        status: s.status || 'Menunggu Kehadiran',
+        counselor: s.counselor_name || 'Guru BK'
+      }
+    })
+  } else {
+    summonsList.value = []
   }
-])
+}
+
+onMounted(() => {
+  loadDbSummons()
+})
+
+watch(() => props.dbSummons, () => {
+  loadDbSummons()
+}, { deep: true })
 
 // Problematic Students Pool for creating new summons
-const problematicStudents = [
-  { id: 101, name: 'Danendra Putra', nisn: '00729193', className: 'X RPL 2', points: 40, parent: 'Bpk. Danendra Sr', phone: '+62 812-3301-4491' },
-  { id: 102, name: 'Kevin Christian', nisn: '00729200', className: 'XI TKJ 1', points: 70, parent: 'Ibu Natalia', phone: '+62 813-9002-1133' },
-  { id: 103, name: 'Gilang Ramadhan', nisn: '00729196', className: 'X TSM 2', points: 45, parent: 'Bpk. Subardi', phone: '+62 852-3399-4400' },
-  { id: 104, name: 'Bima Satria Wijaya', nisn: '00729191', className: 'XII DKV 1', points: 80, parent: 'Bpk. Hartono', phone: '+62 812-7711-2299' }
-]
+const problematicStudents = computed(() => {
+  if (props.students && props.students.length > 0) {
+    return props.students.map(s => {
+      const cls = s.classroom 
+        ? `${s.classroom.tingkat} ${s.classroom.jurusan} ${s.classroom.rombel}` 
+        : (s.class_name || (s.tingkat ? `${s.tingkat} ${s.jurusan} ${s.rombel}` : '-'))
+      return {
+        id: s.id,
+        name: s.name,
+        nisn: s.nis || s.nisn || '',
+        className: cls,
+        points: s.total_violation_points || 0,
+        parent: s.parent_name || ('Wali dari ' + s.name),
+        phone: s.parent_phone || '-'
+      }
+    })
+  }
+  return []
+})
 
 const stats = computed(() => {
   const waiting = summonsList.value.filter(s => s.status === 'Menunggu Kehadiran').length

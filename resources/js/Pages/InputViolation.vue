@@ -1,49 +1,55 @@
 <template>
   <AppLayout active-tab="verifikasi" show-back>
-    <div class="max-w-3xl mx-auto space-y-6">
+    <div class="max-w-2xl mx-auto space-y-5">
 
       <!-- Toast Notification -->
       <transition enter-active-class="transform ease-out duration-300 transition" enter-from-class="translate-y-2 opacity-0 sm:translate-y-0 sm:translate-x-2" enter-to-class="translate-y-0 opacity-100 sm:translate-x-0" leave-active-class="transition ease-in duration-100" leave-from-class="opacity-100" leave-to-class="opacity-0">
-        <div v-if="showSuccessToast" class="fixed top-20 right-4 sm:right-8 z-50 bg-white border border-emerald-200 rounded-2xl shadow-xl p-4 flex items-center gap-3 text-xs max-w-sm">
-          <div class="w-8 h-8 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center font-bold text-sm shrink-0">
+        <div v-if="showSuccessToast" class="fixed top-20 right-4 sm:right-8 z-50 bg-white border border-emerald-200 rounded-xl shadow-lg p-3.5 flex items-center gap-3 text-xs max-w-sm">
+          <div class="w-7 h-7 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center font-bold text-sm shrink-0">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
               <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
             </svg>
           </div>
           <div>
-            <p class="font-bold text-gray-900">Data Berhasil Disimpan</p>
-            <p class="text-gray-500 text-[11px]">Catatan pelanggaran dan bukti foto berhasil tersimpan di sistem.</p>
+            <p class="font-bold text-slate-900">Data Tersimpan</p>
+            <p class="text-slate-500 text-[11px]">Catatan pelanggaran berhasil disimpan.</p>
           </div>
         </div>
       </transition>
 
       <!-- Main Form Container -->
-      <div class="bg-white rounded-xl p-5 sm:p-7 border border-slate-200 shadow-xs space-y-6">
+      <div class="bg-white rounded-xl p-5 sm:p-6 border border-slate-200 shadow-xs space-y-5">
         
         <!-- Header -->
-        <div class="border-b border-slate-200 pb-5">
-          <p class="text-xs font-semibold uppercase tracking-wider text-blue-600 mb-1">
-            Verifikasi &amp; Pelaporan
-          </p>
-          <h1 class="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">Form Input Pelanggaran</h1>
-          <p class="text-xs text-slate-500 mt-1 leading-relaxed">
-            Isi nama siswa, rincian jenis pelanggaran, dan lampirkan bukti foto langsung dari kamera atau galeri perangkat.
-          </p>
+        <div class="border-b border-slate-200 pb-4">
+          <h1 class="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">Input Pelanggaran</h1>
         </div>
 
-        <!-- 1. Identitas Siswa Terlapor (Pilih dari Database) -->
+        <!-- Server Validation Error Alert Banner -->
+        <div v-if="Object.keys(serverErrors).length > 0" class="p-3.5 bg-rose-50 border border-rose-200 rounded-lg text-xs text-rose-800 space-y-1">
+          <div class="font-bold flex items-center gap-1.5">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-rose-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+            <span>Terjadi kesalahan pengisian formulir:</span>
+          </div>
+          <ul class="list-disc list-inside text-[11px] text-rose-700 space-y-0.5">
+            <li v-for="(err, key) in serverErrors" :key="key">{{ Array.isArray(err) ? err[0] : err }}</li>
+          </ul>
+        </div>
+
+        <!-- Identitas Siswa -->
         <div class="space-y-3">
           <div class="flex items-center justify-between">
-            <label class="flex items-center gap-2 text-xs sm:text-sm font-semibold text-slate-800">
-              <span class="w-5 h-5 rounded-md bg-slate-100 text-slate-700 text-xs font-bold flex items-center justify-center">1</span>
-              <span>Identitas Siswa Terlapor</span>
+            <label class="text-xs sm:text-sm font-semibold text-slate-800">
+              Identitas Siswa
             </label>
             <button
               type="button"
               @click="isManualInput = !isManualInput"
               class="text-[11px] font-semibold text-blue-600 hover:text-blue-700 underline transition cursor-pointer"
             >
-              {{ isManualInput ? 'Pilih dari Database Siswa' : 'Input Manual (Siswa Luar / Belum Terdaftar)' }}
+              {{ isManualInput ? 'Pilih dari Database' : 'Input Manual' }}
             </button>
           </div>
 
@@ -54,17 +60,17 @@
             <div class="grid grid-cols-1 sm:grid-cols-12 gap-3">
               <!-- Filter Kelas -->
               <div class="sm:col-span-4">
-                <label class="block text-[11px] font-semibold text-slate-600 mb-1">Filter Kelas</label>
+                <label class="block text-[11px] font-semibold text-slate-600 mb-1">Kelas</label>
                 <div class="relative">
                   <select
                     v-model="selectedClassFilter"
-                    class="w-full bg-white border border-slate-300 rounded-lg px-3 py-2.5 text-xs sm:text-sm font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition cursor-pointer appearance-none pr-8"
+                    class="w-full bg-slate-50 hover:bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs font-medium text-slate-800 focus:outline-none focus:border-slate-400 transition cursor-pointer appearance-none pr-8"
                   >
-                    <option value="Semua">Semua Kelas ({{ props.studentsList?.length || 0 }} Siswa)</option>
+                    <option value="Semua">Semua Kelas</option>
                     <option v-for="cls in availableClasses" :key="cls" :value="cls">Kelas {{ cls }}</option>
                   </select>
                   <div class="absolute inset-y-0 right-0 flex items-center pr-2.5 pointer-events-none text-slate-400">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                     </svg>
                   </div>
@@ -74,21 +80,21 @@
               <!-- Pilih Siswa Terdaftar -->
               <div class="sm:col-span-8">
                 <label class="block text-[11px] font-semibold text-slate-600 mb-1">
-                  Pilih Nama Siswa Terdaftar *
+                  Siswa
                 </label>
                 <div class="relative">
                   <select
                     v-model="selectedStudentId"
                     @change="onStudentSelectChange"
-                    class="w-full bg-white border border-slate-300 rounded-lg px-3 py-2.5 text-xs sm:text-sm font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition cursor-pointer appearance-none pr-8"
+                    class="w-full bg-slate-50 hover:bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs font-medium text-slate-800 focus:outline-none focus:border-slate-400 transition cursor-pointer appearance-none pr-8"
                   >
-                    <option :value="null">-- Klik untuk memilih siswa dari database --</option>
+                    <option :value="null">Pilih siswa...</option>
                     <option v-for="s in filteredStudentsByClass" :key="s.id" :value="s.id">
-                      {{ s.name }} &bull; {{ s.class_name }} (NISN: {{ s.nisn }})
+                      {{ s.name }} &bull; {{ s.class_name }} (NIS: {{ s.nis || s.nisn }})
                     </option>
                   </select>
                   <div class="absolute inset-y-0 right-0 flex items-center pr-2.5 pointer-events-none text-slate-400">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                     </svg>
                   </div>
@@ -99,117 +105,73 @@
             <!-- Kartu Siswa Terpilih (Selected Student Confirmation Box) -->
             <div 
               v-if="selectedStudentObj" 
-              class="p-3.5 bg-blue-50/70 border border-blue-200 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs"
+              class="p-3 bg-slate-50 border border-slate-200 rounded-lg flex items-center justify-between gap-3 text-xs"
             >
-              <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-full bg-blue-600 text-white font-bold flex items-center justify-center shrink-0 text-sm shadow-2xs">
-                  {{ selectedStudentObj.name.charAt(0) }}
-                </div>
-                <div>
-                  <h4 class="font-bold text-slate-900 text-sm leading-tight">{{ selectedStudentObj.name }}</h4>
-                  <p class="text-slate-600 text-[11px] mt-0.5">
-                    NISN: <span class="font-mono text-slate-700">{{ selectedStudentObj.nisn }}</span> &bull; Kelas: <span class="font-semibold text-blue-700">{{ selectedStudentObj.class_name }}</span>
-                  </p>
-                </div>
+              <div>
+                <h4 class="font-bold text-slate-900 text-xs">{{ selectedStudentObj.name }}</h4>
+                <p class="text-slate-500 text-[11px] mt-0.5">
+                  NIS: {{ selectedStudentObj.nis || selectedStudentObj.nisn }} &bull; Kelas: {{ selectedStudentObj.class_name }} &bull; Poin: {{ selectedStudentObj.total_violation_points || 0 }}
+                </p>
               </div>
 
-              <div class="flex items-center gap-3 self-start sm:self-auto">
-                <div class="text-right text-[11px]">
-                  <span class="text-slate-500 block">Akumulasi Poin:</span>
-                  <span 
-                    class="font-bold px-2 py-0.5 rounded text-[10px]"
-                    :class="selectedStudentObj.total_violation_points >= 25 ? 'bg-rose-100 text-rose-700' : 'bg-slate-100 text-slate-700'"
-                  >
-                    {{ selectedStudentObj.total_violation_points || 0 }} Poin ({{ selectedStudentObj.status || 'Aman' }})
-                  </span>
-                </div>
-                <button
-                  type="button"
-                  @click="resetStudentSelection"
-                  class="px-2.5 py-1.5 rounded-lg text-slate-500 hover:text-slate-800 hover:bg-blue-100 text-[11px] font-semibold transition cursor-pointer flex items-center gap-1"
-                  title="Ganti Siswa"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                  <span>Ganti</span>
-                </button>
-              </div>
+              <button
+                type="button"
+                @click="resetStudentSelection"
+                class="px-2 py-1 rounded text-slate-500 hover:text-slate-800 hover:bg-slate-200 text-[11px] font-medium transition cursor-pointer"
+              >
+                Ganti
+              </button>
             </div>
-
-            <!-- Petunjuk Pemilihan Database -->
-            <p v-else class="text-[11px] text-slate-500 flex items-center gap-1.5">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-blue-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              <span>Memilih siswa dari database memastikan poin otomatis terakumulasi pada profil siswa yang sama tanpa menduplikasi data.</span>
-            </p>
 
           </div>
 
-          <!-- Mode 2: Input Manual (Hanya jika siswa belum ada di database) -->
+          <!-- Mode 2: Input Manual -->
           <div v-else class="space-y-3">
-            <div class="p-2.5 bg-amber-50 border border-amber-200 rounded-lg text-amber-800 text-[11px] flex items-start gap-2">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-amber-600 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-              </svg>
-              <span>Gunakan input manual hanya jika siswa belum terdaftar di database sekolah agar riwayat poin tidak bertumpuk terpisah.</span>
-            </div>
-
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div class="sm:col-span-2">
-                <label class="block text-[11px] font-semibold text-slate-600 mb-1">Nama Lengkap Siswa *</label>
+                <label class="block text-[11px] font-semibold text-slate-600 mb-1">Nama Lengkap</label>
                 <input
                   v-model="form.studentName"
                   type="text"
                   placeholder="Ketik nama lengkap siswa..."
-                  class="w-full bg-white border border-slate-300 rounded-lg px-3 py-2.5 text-xs sm:text-sm font-medium text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+                  class="w-full bg-slate-50 hover:bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs font-medium text-slate-800 placeholder-slate-400 focus:outline-none focus:border-slate-400 transition"
                 />
               </div>
               <div class="sm:col-span-1">
-                <label class="block text-[11px] font-semibold text-slate-600 mb-1">Kelas Siswa *</label>
+                <label class="block text-[11px] font-semibold text-slate-600 mb-1">Kelas</label>
                 <input
                   v-model="form.studentClass"
                   type="text"
                   placeholder="Contoh: X RPL 1"
-                  class="w-full bg-white border border-slate-300 rounded-lg px-3 py-2.5 text-xs sm:text-sm font-medium text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+                  class="w-full bg-slate-50 hover:bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs font-medium text-slate-800 placeholder-slate-400 focus:outline-none focus:border-slate-400 transition"
                 />
               </div>
             </div>
           </div>
         </div>
 
-        <!-- 2. Pelanggaran yang Dibuat Siswa -->
-        <div class="space-y-3 pt-2">
-          <label class="flex items-center gap-2 text-xs sm:text-sm font-semibold text-slate-800">
-            <span class="w-5 h-5 rounded-md bg-slate-100 text-slate-700 text-xs font-bold flex items-center justify-center">2</span>
-            <span>Pelanggaran yang Dibuat Siswa</span>
+        <!-- Pelanggaran -->
+        <div class="space-y-2.5 pt-2 border-t border-slate-100">
+          <label class="block text-xs sm:text-sm font-semibold text-slate-800">
+            Pelanggaran
           </label>
 
           <!-- Input Kategori Pelanggaran -->
-          <div class="relative">
-            <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-              </svg>
-            </div>
-            <input
-              v-model="form.category"
-              type="text"
-              placeholder="Ketik jenis atau kategori pelanggaran siswa..."
-              class="w-full bg-white border border-slate-300 rounded-lg pl-10 pr-4 py-2.5 text-xs sm:text-sm font-medium text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
-            />
-          </div>
+          <input
+            v-model="form.category"
+            type="text"
+            placeholder="Ketik jenis pelanggaran..."
+            class="w-full bg-slate-50 hover:bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs font-medium text-slate-800 placeholder-slate-400 focus:outline-none focus:border-slate-400 transition"
+          />
 
           <!-- Quick Category Tags -->
-          <div class="flex flex-wrap items-center gap-1.5 pt-0.5 text-[11px]">
-            <span class="text-slate-400">Kategori umum:</span>
+          <div class="flex flex-wrap items-center gap-1.5 text-xs">
             <button
               v-for="cat in commonCategories"
               :key="cat"
               type="button"
               @click="form.category = cat"
-              class="px-2.5 py-1 rounded-md bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium transition cursor-pointer"
+              class="px-2.5 py-1 rounded-md bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs transition cursor-pointer"
             >
               {{ cat }}
             </button>
@@ -220,54 +182,43 @@
             <textarea
               v-model="form.description"
               rows="3"
-              placeholder="Tuliskan kronologi singkat dan keterangan saksi/alasan siswa..."
-              class="w-full bg-white border border-slate-300 rounded-lg p-3 text-xs sm:text-sm font-medium text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition leading-relaxed"
+              placeholder="Keterangan / kronologi singkat..."
+              class="w-full bg-slate-50 hover:bg-white border border-slate-200 rounded-lg p-3 text-xs font-medium text-slate-800 placeholder-slate-400 focus:outline-none focus:border-slate-400 transition leading-relaxed"
             ></textarea>
           </div>
         </div>
 
-        <!-- 3. Poin Pelanggaran (Opsional) -->
-        <div class="space-y-3 pt-2">
+        <!-- Poin Pelanggaran (Opsional) -->
+        <div class="space-y-2.5 pt-2 border-t border-slate-100">
           <div class="flex items-center justify-between">
-            <label class="flex items-center gap-2 text-xs sm:text-sm font-semibold text-slate-800">
-              <span class="w-5 h-5 rounded-md bg-slate-100 text-slate-700 text-xs font-bold flex items-center justify-center">3</span>
-              <span>Poin Pelanggaran (Opsional)</span>
+            <label class="text-xs sm:text-sm font-semibold text-slate-800">
+              Poin (Opsional)
             </label>
-            <span class="text-[11px] font-medium text-slate-500">
-              {{ (form.points === null || form.points === '') ? 'Status: Kasus Pembinaan (Tanpa Poin)' : `Poin Terakumulasi: +${form.points} Poin` }}
+            <span class="text-[11px] text-slate-500 font-medium">
+              {{ (form.points === null || form.points === '') ? 'Kasus Pembinaan (0 Poin)' : `+${form.points} Poin` }}
             </span>
           </div>
 
-          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <div class="sm:col-span-1">
-              <div class="relative">
-                <input
-                  v-model="form.points"
-                  type="number"
-                  min="0"
-                  max="100"
-                  placeholder="Kosongkan jika pembinaan..."
-                  class="w-full bg-white border border-slate-300 rounded-lg px-3 py-2.5 text-xs sm:text-sm font-medium text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
-                />
-              </div>
-            </div>
-            <div class="sm:col-span-2 flex items-center">
-              <p class="text-[11px] text-slate-500 leading-relaxed">
-                Poin bersifat opsional. Kosongkan nilai jika kasus berupa teguran lisan, konseling awal, atau pembinaan langsung tanpa sanksi poin.
-              </p>
-            </div>
+          <div>
+            <input
+              v-model="form.points"
+              type="number"
+              min="0"
+              max="100"
+              placeholder="0 (kosongkan jika pembinaan)"
+              class="w-full bg-slate-50 hover:bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs font-medium text-slate-800 placeholder-slate-400 focus:outline-none focus:border-slate-400 transition"
+            />
           </div>
 
           <!-- Quick Points Selector -->
-          <div class="flex flex-wrap items-center gap-1.5 pt-0.5 text-[11px]">
-            <span class="text-slate-400">Pilihan cepat:</span>
+          <div class="flex flex-wrap items-center gap-1.5 text-xs">
             <button
               type="button"
               @click="form.points = null"
               class="px-2 py-0.5 rounded-md border text-xs font-medium transition cursor-pointer"
               :class="(form.points === null || form.points === '') ? 'bg-blue-50 border-blue-300 text-blue-700 font-bold' : 'bg-slate-100 border-slate-200 text-slate-600 hover:bg-slate-200'"
             >
-              Tanpa Poin (Pembinaan)
+              Tanpa Poin
             </button>
             <button
               v-for="pt in [5, 10, 15, 20, 25, 30, 50]"
@@ -277,17 +228,16 @@
               class="px-2 py-0.5 rounded-md border text-xs font-medium transition cursor-pointer"
               :class="form.points === pt ? 'bg-blue-50 border-blue-300 text-blue-700 font-bold' : 'bg-slate-100 border-slate-200 text-slate-600 hover:bg-slate-200'"
             >
-              +{{ pt }} Poin
+              +{{ pt }}
             </button>
           </div>
         </div>
 
-        <!-- 4. Bukti Foto Pelanggaran -->
-        <div class="space-y-3 pt-2">
+        <!-- Bukti Foto -->
+        <div class="space-y-2.5 pt-2 border-t border-slate-100">
           <div class="flex items-center justify-between">
-            <label class="flex items-center gap-2 text-xs sm:text-sm font-semibold text-slate-800">
-              <span class="w-5 h-5 rounded-md bg-slate-100 text-slate-700 text-xs font-bold flex items-center justify-center">4</span>
-              <span>Bukti Foto Pelanggaran (Opsional)</span>
+            <label class="text-xs sm:text-sm font-semibold text-slate-800">
+              Bukti Foto (Opsional)
             </label>
             <span 
               v-if="form.photoUrl" 
@@ -295,83 +245,64 @@
             >
               Foto Terlampir
             </span>
-            <span 
-              v-else 
-              class="text-xs font-medium text-slate-500"
-            >
-              Belum Ada Foto
-            </span>
           </div>
 
           <!-- Photo State: If Photo Exists -->
           <div 
             v-if="form.photoUrl"
-            class="relative rounded-xl overflow-hidden border border-slate-200 bg-slate-900 group shadow-sm"
+            class="relative rounded-lg overflow-hidden border border-slate-200 bg-slate-900 group"
           >
             <img
               :src="form.photoUrl"
-              alt="Bukti Foto Pelanggaran"
-              class="w-full max-h-80 object-contain bg-slate-950 mx-auto"
+              alt="Bukti Foto"
+              class="w-full max-h-56 object-contain bg-slate-950 mx-auto"
             />
-            <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-950/85 via-slate-950/50 to-transparent p-4 flex flex-col sm:flex-row sm:items-end justify-between gap-2">
-              <div class="text-white text-xs">
-                <p class="font-semibold text-emerald-300">
-                  Bukti Foto Terlampir
-                </p>
-                <p class="text-[10px] text-slate-300 mt-0.5">{{ form.photoTimestamp || 'Diambil saat input data • GeoTag Valid' }}</p>
-              </div>
+            <div class="absolute inset-x-0 bottom-0 bg-slate-950/80 p-2.5 flex items-center justify-between">
+              <span class="text-white text-xs font-medium">Foto Terlampir</span>
               <button
                 type="button"
                 @click="removePhoto"
-                class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-rose-600/90 hover:bg-rose-700 text-white text-[11px] font-semibold transition self-start sm:self-auto cursor-pointer"
+                class="px-2 py-1 rounded bg-rose-600 hover:bg-rose-700 text-white text-[11px] font-semibold transition cursor-pointer"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                </svg>
-                <span>Hapus Foto</span>
+                Hapus
               </button>
             </div>
           </div>
 
-          <!-- Photo State: Empty Placeholder -->
+          <!-- Photo State: Empty Placeholder Compact -->
           <div 
             v-else
-            class="relative rounded-xl border-2 border-dashed border-slate-300 bg-slate-50/70 p-6 sm:p-8 text-center flex flex-col items-center justify-center transition hover:bg-slate-50"
+            class="rounded-lg border border-dashed border-slate-300 bg-slate-50/50 p-4 text-center flex items-center justify-center gap-2 text-slate-500 text-xs"
           >
-            <div class="w-12 h-12 rounded-full bg-white border border-slate-200 text-slate-400 flex items-center justify-center mb-2 shadow-2xs">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-              </svg>
-            </div>
-            <p class="text-xs sm:text-sm font-semibold text-slate-700">Belum Ada Bukti Foto</p>
-            <p class="text-[11px] text-slate-500 max-w-xs mt-0.5 leading-relaxed">
-              Buka kamera langsung untuk memfoto bukti pelanggaran atau unggah file foto dari perangkat.
-            </p>
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+            <span>Belum ada bukti foto</span>
           </div>
 
           <!-- Upload & Camera Actions -->
-          <div class="grid grid-cols-2 gap-3 pt-1">
+          <div class="grid grid-cols-2 gap-2.5 pt-1">
             <button
               type="button"
               @click="openCameraModal"
-              class="py-2.5 px-4 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-700 font-semibold text-xs flex items-center justify-center gap-2 border border-blue-200 transition cursor-pointer"
+              class="py-2 px-3 rounded-lg bg-slate-50 hover:bg-slate-100 text-slate-700 font-medium text-xs flex items-center justify-center gap-1.5 border border-slate-200 transition cursor-pointer"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
               </svg>
-              <span>{{ form.photoUrl ? 'Foto Ulang (Kamera)' : 'Ambil Foto Baru' }}</span>
+              <span>{{ form.photoUrl ? 'Foto Ulang' : 'Kamera' }}</span>
             </button>
             <button
               type="button"
               @click="triggerUpload"
-              class="py-2.5 px-4 rounded-lg bg-white hover:bg-slate-50 text-slate-700 font-semibold text-xs flex items-center justify-center gap-2 border border-slate-300 transition cursor-pointer shadow-xs"
+              class="py-2 px-3 rounded-lg bg-white hover:bg-slate-50 text-slate-700 font-medium text-xs flex items-center justify-center gap-1.5 border border-slate-200 transition cursor-pointer shadow-2xs"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
               </svg>
-              <span>Pilih dari Galeri</span>
+              <span>Galeri</span>
             </button>
             <input 
               type="file" 
@@ -384,21 +315,18 @@
         </div>
 
         <!-- Submit Button -->
-        <div class="pt-4 border-t border-slate-200">
+        <div class="pt-3 border-t border-slate-200">
           <button
             type="button"
             :disabled="isSubmitting"
             @click="handleSubmit"
-            class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg text-xs sm:text-sm flex items-center justify-center gap-2 transition cursor-pointer disabled:opacity-75 disabled:cursor-not-allowed"
+            class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 rounded-lg text-xs sm:text-sm flex items-center justify-center gap-2 transition cursor-pointer disabled:opacity-75 disabled:cursor-not-allowed shadow-2xs"
           >
             <svg v-if="isSubmitting" class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
               <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
               <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
             </svg>
-            <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
-            </svg>
-            <span>{{ isSubmitting ? 'Menyimpan...' : 'Simpan Data Pelanggaran' }}</span>
+            <span v-else>{{ isSubmitting ? 'Menyimpan...' : 'Simpan Pelanggaran' }}</span>
           </button>
         </div>
 
@@ -576,6 +504,7 @@ const props = defineProps({
 })
 
 const showSuccessToast = ref(false)
+const serverErrors = ref({})
 const isSubmitting = ref(false)
 const fileUpload = ref(null)
 const photoFile = ref(null)
@@ -836,38 +765,55 @@ const removePhoto = () => {
 
 // Submit Form
 const handleSubmit = () => {
+  serverErrors.value = {}
+
   if (!form.value.studentName.trim()) {
-    alert('Mohon pilih siswa terlapor dari database atau masukkan nama siswa')
+    alert('Mohon pilih siswa terlapor dari database atau masukkan nama siswa.')
     return
   }
   if (!form.value.category.trim()) {
-    alert('Mohon isi jenis atau kategori pelanggaran')
+    alert('Mohon isi jenis atau kategori pelanggaran.')
     return
   }
 
   isSubmitting.value = true
-  const pointsVal = (form.value.points !== null && form.value.points !== '') ? Number(form.value.points) : null
+  const pointsVal = (form.value.points !== null && form.value.points !== '' && !isNaN(Number(form.value.points))) 
+    ? Number(form.value.points) 
+    : null
 
   const payload = {
-    student_id: form.value.studentId,
-    student_name: form.value.studentName,
-    student_class: form.value.studentClass,
-    category: form.value.category,
-    violation_name: form.value.category,
-    notes: form.value.description,
-    points: pointsVal,
-    poin: pointsVal,
-    foto_bukti: photoFile.value,
-    photo_url: photoFile.value ? null : form.value.photoUrl,
+    student_name: form.value.studentName.trim(),
+    category: form.value.category.trim(),
+    violation_name: form.value.category.trim(),
     date: new Date().toISOString().slice(0, 10),
     time: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }),
     reporter: 'Guru Piket & BK',
     penalty_action: pointsVal === null ? 'Pembinaan & teguran lisan' : 'Teguran tertulis & pencatatan kedisiplinan',
   }
 
+  if (form.value.studentId) {
+    payload.student_id = form.value.studentId
+  }
+  if (form.value.studentClass) {
+    payload.student_class = form.value.studentClass
+  }
+  if (form.value.description) {
+    payload.notes = form.value.description
+  }
+  if (pointsVal !== null) {
+    payload.points = pointsVal
+    payload.poin = pointsVal
+  }
+  if (photoFile.value) {
+    payload.foto_bukti = photoFile.value
+  } else if (form.value.photoUrl && form.value.photoUrl.startsWith('data:image')) {
+    payload.photo_url = form.value.photoUrl
+  }
+
   router.post('/pelanggaran', payload, {
     forceFormData: true,
     onSuccess: () => {
+      serverErrors.value = {}
       showSuccessToast.value = true
       resetStudentSelection()
       photoFile.value = null
@@ -884,6 +830,11 @@ const handleSubmit = () => {
       setTimeout(() => {
         showSuccessToast.value = false
       }, 3000)
+    },
+    onError: (errors) => {
+      serverErrors.value = errors || {}
+      const firstError = Object.values(errors).flat()[0]
+      alert(firstError || 'Gagal menyimpan catatan pelanggaran. Periksa kembali isian formulir.')
     },
     onFinish: () => {
       isSubmitting.value = false

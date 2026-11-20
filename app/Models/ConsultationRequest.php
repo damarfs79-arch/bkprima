@@ -15,4 +15,14 @@ class ConsultationRequest extends Model
         'contacted_at',
         'notes',
     ];
+
+    public function student()
+    {
+        return $this->belongsTo(Student::class, 'student_name', 'name');
+    }
+
+    public function siswa()
+    {
+        return $this->student();
+    }
 }

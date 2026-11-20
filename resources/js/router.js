@@ -82,6 +82,12 @@ const routes = [
     redirect: '/tamu'
   },
   {
+    path: '/arsip-lulus',
+    name: 'arsip-lulus',
+    component: () => import('./Pages/ArsipAlumni.vue'),
+    meta: { title: 'Arsip Siswa Lulus - BK Prima' }
+  },
+  {
     path: '/:pathMatch(.*)*',
     redirect: '/absensi'
   }

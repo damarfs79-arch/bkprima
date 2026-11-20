@@ -11,18 +11,9 @@
       <div class="bg-white rounded-lg p-5 sm:p-6 border border-slate-200">
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <div class="flex items-center gap-2 text-xs font-medium text-slate-500 mb-1">
-              <span class="text-blue-700 font-semibold text-xs">Role Administrator Utama</span>
-              <span>&bull;</span>
-              <span class="text-emerald-700 text-xs font-medium">
-                Sistem Aktif
-              </span>
-            </div>
             <h1 class="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">Panel Administrasi BK Prima</h1>
-            <p class="text-xs sm:text-sm text-slate-500 mt-0.5">Kelola data Guru BK, Rombel Kelas, Siswa, dan pantau tren fluktuasi kehadiran 1 bulan.</p>
+            <p class="text-xs sm:text-sm text-slate-500 mt-1">Kelola data Guru BK, Rombel Kelas, Siswa, dan pantau tren fluktuasi kehadiran 1 bulan.</p>
           </div>
-
-
         </div>
       </div>
 
@@ -318,8 +309,22 @@
                   <div class="relative w-72 h-72 sm:w-80 sm:h-80 flex items-center justify-center my-2 select-none">
                     <svg viewBox="0 0 380 380" class="w-full h-full overflow-visible">
                       
+                      <!-- Empty State when no attendance records -->
+                      <g v-if="pieSlices.length === 0">
+                        <circle cx="190" cy="190" r="160" fill="#f8fafc" stroke="#cbd5e1" stroke-width="2" />
+                        <text x="190" y="175" text-anchor="middle" class="text-sm font-semibold fill-slate-500">
+                          Belum Ada Data Presensi
+                        </text>
+                        <text x="190" y="205" text-anchor="middle" class="text-2xl font-bold fill-slate-700">
+                          0%
+                        </text>
+                        <text x="190" y="228" text-anchor="middle" class="text-xs fill-slate-400">
+                          0 Siswa Tercatat
+                        </text>
+                      </g>
+
                       <!-- Slices (Irisan Pie) -->
-                      <g>
+                      <g v-else>
                         <path
                           v-for="slice in pieSlices"
                           :key="slice.id"
@@ -507,8 +512,11 @@
                     </div>
 
                     <!-- Explanatory Text answering user's question -->
-                    <p class="text-xs text-slate-600 leading-relaxed">
-                      Berdasarkan diagram bulat akumulasi 1 bulan pada <strong>{{ currentMonthData.name }}</strong>, persentase siswa hadir (<strong>{{ currentCohortData.hadir.rate }}%</strong>) tercatat <strong>sangat tinggi</strong> dan mendominasi total presensi sekolah. Siswa Alpha tanpa keterangan hanya menyumbang <strong>{{ currentCohortData.alpha.rate }}%</strong> ({{ currentCohortData.alpha.count }} siswa), jauh di bawah ambang batas toleransi ketidakhadiran.
+                    <p v-if="currentCohortData.totalPresensi > 0" class="text-xs text-slate-600 leading-relaxed">
+                      Berdasarkan diagram bulat akumulasi data presensi aktual, persentase siswa hadir tercatat sebesar <strong>{{ currentCohortData.hadir.rate }}%</strong> ({{ currentCohortData.hadir.count }} siswa). Siswa Alpha tanpa keterangan tercatat sebesar <strong>{{ currentCohortData.alpha.rate }}%</strong> ({{ currentCohortData.alpha.count }} siswa).
+                    </p>
+                    <p v-else class="text-xs text-slate-500 leading-relaxed italic">
+                      Belum ada catatan presensi siswa yang tersimpan di sistem. Data statistik akan terakumulasi otomatis setelah presensi harian siswa dimulai.
                     </p>
 
                     <!-- Target Status Chip -->
@@ -518,9 +526,9 @@
                       </div>
                       <span
                         class="text-xs font-semibold"
-                        :class="currentCohortData.hadir.rate >= 95 ? 'text-emerald-700' : 'text-amber-700'"
+                        :class="currentCohortData.totalPresensi === 0 ? 'text-slate-500' : (currentCohortData.hadir.rate >= 95 ? 'text-emerald-700' : 'text-amber-700')"
                       >
-                        {{ currentCohortData.hadir.rate >= 95 ? 'Terpenuhi (+' + (currentCohortData.hadir.rate - 95).toFixed(1) + '%)' : 'Di Bawah Standar (' + (currentCohortData.hadir.rate - 95).toFixed(1) + '%)' }}
+                        {{ currentCohortData.totalPresensi === 0 ? 'Belum Ada Data' : (currentCohortData.hadir.rate >= 95 ? 'Terpenuhi (+' + (currentCohortData.hadir.rate - 95).toFixed(1) + '%)' : 'Di Bawah Standar (' + (currentCohortData.hadir.rate - 95).toFixed(1) + '%)') }}
                       </span>
                     </div>
                   </div>
@@ -815,11 +823,10 @@
               <thead class="bg-slate-50/50 border-b border-slate-200">
                 <tr>
                   <th class="py-3 px-4 text-center w-12 text-[11px] font-semibold uppercase tracking-wider text-slate-500">No</th>
-                  <th class="py-3 px-4 text-[11px] font-semibold uppercase tracking-wider text-slate-500">Nama Lengkap &amp; Gelar</th>
-                  <th class="py-3 px-4 text-[11px] font-semibold uppercase tracking-wider text-slate-500">Akun Login BK</th>
-                  <th class="py-3 px-4 text-[11px] font-semibold uppercase tracking-wider text-slate-500">NIP / NUPTK</th>
+                  <th class="py-3 px-4 text-[11px] font-semibold uppercase tracking-wider text-slate-500">Nama Lengkap &amp; Email</th>
                   <th class="py-3 px-4 text-[11px] font-semibold uppercase tracking-wider text-slate-500">Jabatan</th>
                   <th class="py-3 px-4 text-[11px] font-semibold uppercase tracking-wider text-slate-500">Rombel Binaan</th>
+                  <th class="py-3 px-4 text-[11px] font-semibold uppercase tracking-wider text-slate-500">No. WhatsApp</th>
                   <th class="py-3 px-4 text-center text-[11px] font-semibold uppercase tracking-wider text-slate-500">Status Akun</th>
                   <th class="py-3 px-4 text-center text-[11px] font-semibold uppercase tracking-wider text-slate-500">Aksi</th>
                 </tr>
@@ -831,17 +838,11 @@
                     <div class="font-bold text-slate-900 text-xs sm:text-sm">{{ g.name }}</div>
                     <div class="text-xs text-slate-500 font-normal mt-0.5">{{ g.email }}</div>
                   </td>
-                  <td class="py-3.5 px-4">
-                    <span class="font-mono text-xs text-slate-600 font-medium">@{{ g.username || 'guru_bk' }}</span>
-                  </td>
-                  <td class="py-3.5 px-4 font-mono text-slate-700 font-medium">
-                    <div>NIP: {{ g.nip }}</div>
-                    <div class="text-xs text-slate-500 font-normal">NUPTK: {{ g.nuptk }}</div>
-                  </td>
                   <td class="py-3.5 px-4 font-semibold text-slate-800">{{ g.jabatan }}</td>
                   <td class="py-3.5 px-4">
-                    <span class="text-xs text-slate-600 font-medium">{{ g.rombel.join(', ') }}</span>
+                    <span class="text-xs text-slate-600 font-medium">{{ Array.isArray(g.rombel) ? g.rombel.join(', ') : (g.rombel || '-') }}</span>
                   </td>
+                  <td class="py-3.5 px-4 font-mono text-slate-600">{{ g.wa || '-' }}</td>
                   <td class="py-3.5 px-4 text-center">
                     <span class="text-xs font-medium text-emerald-700">
                       Akun Aktif
@@ -1283,19 +1284,125 @@
       </div>
 
       <!-- ============================================================ -->
+      <!-- TAB 6: PENGATURAN SEKOLAH, KEPALA SEKOLAH & SEMESTER          -->
+      <!-- ============================================================ -->
+      <div v-if="activeTab === 'pengaturan'" class="space-y-6 animate-in fade-in duration-150">
+        
+        <div class="bg-white rounded-xl border border-slate-200 p-6 shadow-2xs">
+          <div class="border-b border-slate-100 pb-4 mb-6">
+            <h2 class="text-base font-bold text-slate-900">Pengaturan Lembaga &amp; Dokumen Cetak</h2>
+            <p class="text-xs text-slate-500 mt-1">
+              Atur identitas kepala sekolah, periode semester aktif, dan informasi kop resmi untuk pencetakan dokumen rekap presensi.
+            </p>
+          </div>
+
+          <form @submit.prevent="saveSettings" class="space-y-6 text-xs max-w-2xl">
+            <!-- Section 1: Kepala Sekolah -->
+            <div class="space-y-3">
+              <h3 class="text-xs font-bold text-slate-800 uppercase tracking-wider text-blue-700">1. Pejabat Penandatangan (Kepala Sekolah)</h3>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label class="block font-semibold text-slate-700 mb-1">Nama Kepala Sekolah *</label>
+                  <input
+                    v-model="formSettings.kepala_sekolah"
+                    required
+                    type="text"
+                    placeholder="Contoh: Drs. H. Saiful Bahri, M.Pd"
+                    class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-slate-800 font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                  />
+                  <p class="text-[11px] text-slate-400 mt-1">Nama ini dicantumkan pada kolom 'Menyetujui' di lembar cetak rekap presensi dan dokumen resmi.</p>
+                </div>
+                <div>
+                  <label class="block font-semibold text-slate-700 mb-1">NIP Kepala Sekolah</label>
+                  <input
+                    v-model="formSettings.nip_kepala_sekolah"
+                    type="text"
+                    placeholder="Contoh: 19680315 199403 1 008"
+                    class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-slate-800 font-mono focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <!-- Section 2: Periode Akademik & Semester -->
+            <div class="space-y-3 pt-4 border-t border-slate-100">
+              <h3 class="text-xs font-bold text-slate-800 uppercase tracking-wider text-blue-700">2. Periode Akademik &amp; Tampilan Web</h3>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label class="block font-semibold text-slate-700 mb-1">Label Semester Aktif (Sidebar Web) *</label>
+                  <input
+                    v-model="formSettings.semester"
+                    required
+                    type="text"
+                    placeholder="Contoh: Semester Genap 24/25"
+                    class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-slate-800 font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                  />
+                  <p class="text-[11px] text-slate-400 mt-1">Ditampilkan pada bagian bawah menu sidebar web seluruh pengguna.</p>
+                </div>
+                <div>
+                  <label class="block font-semibold text-slate-700 mb-1">Tahun Ajaran *</label>
+                  <input
+                    v-model="formSettings.tahun_ajaran"
+                    required
+                    type="text"
+                    placeholder="Contoh: 2024/2025"
+                    class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-slate-800 font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                  />
+                  <p class="text-[11px] text-slate-400 mt-1">Dicantumkan pada kop judul rekapitulasi presensi bulanan.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Section 3: Identitas Lembaga -->
+            <div class="space-y-3 pt-4 border-t border-slate-100">
+              <h3 class="text-xs font-bold text-slate-800 uppercase tracking-wider text-blue-700">3. Identitas Lembaga (Kop Surat)</h3>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label class="block font-semibold text-slate-700 mb-1">Nama Sekolah</label>
+                  <input
+                    v-model="formSettings.school_name"
+                    type="text"
+                    placeholder="Contoh: SMK PGRI 05 JEMBER"
+                    class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-slate-800 font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                  />
+                </div>
+                <div>
+                  <label class="block font-semibold text-slate-700 mb-1">Alamat Lembaga</label>
+                  <input
+                    v-model="formSettings.school_address"
+                    type="text"
+                    placeholder="Alamat sekolah..."
+                    class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-slate-800 font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div class="pt-4 border-t border-slate-100 flex items-center justify-end gap-3">
+              <button
+                type="submit"
+                :disabled="isSavingSettings"
+                class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-semibold rounded-lg cursor-pointer transition shadow-2xs inline-flex items-center gap-1.5"
+              >
+                <svg v-if="isSavingSettings" class="animate-spin h-3.5 w-3.5 text-white" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <span>{{ isSavingSettings ? 'Menyimpan...' : 'Simpan Pengaturan' }}</span>
+              </button>
+            </div>
+          </form>
+        </div>
+
+      </div>
+
+      <!-- ============================================================ -->
       <!-- MODAL: TAMBAH GURU BK                                         -->
       <!-- ============================================================ -->
       <div v-if="modalType === 'guru'" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50">
-        <div class="bg-white rounded-xl max-w-lg w-full p-6 shadow-xl border border-slate-200 space-y-4 animate-in fade-in zoom-in-95">
+        <div class="bg-white rounded-lg max-w-lg w-full p-6 shadow-lg border border-slate-200 space-y-4">
           <div class="flex items-center justify-between pb-3 border-b border-slate-200">
-            <div class="flex items-center gap-2">
-              <div class="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 border border-blue-200/50 flex items-center justify-center">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
-                </svg>
-              </div>
-              <h3 class="font-bold text-slate-900 text-sm sm:text-base">Tambah Guru BK Baru</h3>
-            </div>
+            <h3 class="font-bold text-slate-900 text-base">Tambah Guru BK</h3>
             <button @click="closeModal" class="p-1.5 text-slate-400 hover:text-slate-600 rounded-lg cursor-pointer">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -1305,96 +1412,90 @@
 
           <form @submit.prevent="saveGuru" class="space-y-3.5 text-xs">
             <div>
-              <label class="block font-bold text-slate-700 mb-1">Nama Lengkap &amp; Gelar *</label>
-              <input v-model="formGuru.name" required placeholder="Contoh: Dra. Hj. Siti Rahma, M.Pd" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3.5 py-2.5 font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white" />
+              <label class="block font-semibold text-slate-700 mb-1">Nama Lengkap *</label>
+              <input
+                v-model="formGuru.name"
+                required
+                placeholder="Masukkan nama lengkap beserta gelar"
+                class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-400"
+              />
             </div>
-            <div class="grid grid-cols-2 gap-3">
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label class="block font-bold text-slate-700 mb-1">NIP Pegawai (Opsional / Boleh '-')</label>
-                <input v-model="formGuru.nip" placeholder="Contoh: 19820512 2008... atau -" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3.5 py-2.5 font-mono text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white" />
+                <label class="block font-semibold text-slate-700 mb-1">Email *</label>
+                <input
+                  v-model="formGuru.email"
+                  type="email"
+                  required
+                  placeholder="nama@bkprima.sch.id"
+                  class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-400"
+                />
               </div>
+
               <div>
-                <label class="block font-bold text-slate-700 mb-1">NUPTK (Opsional / Boleh '-')</label>
-                <input v-model="formGuru.nuptk" placeholder="Contoh: 8452 7566... atau -" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3.5 py-2.5 font-mono text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white" />
-              </div>
-            </div>
-            <div>
-              <label class="block font-bold text-slate-700 mb-1">Jabatan / Penugasan Khusus (Opsional)</label>
-              <input v-model="formGuru.jabatan" placeholder="Contoh: Guru Pembimbing BK Kelas X (Default: Guru BK)" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3.5 py-2.5 font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white" />
-            </div>
-
-            <!-- KREDENSIAL AKUN LOGIN BK (USERNAME & PASSWORD) -->
-            <div class="p-3.5 bg-slate-50 rounded-lg border border-slate-200 space-y-2.5">
-              <div class="flex items-center justify-between">
-                <span class="font-bold text-slate-800 text-xs flex items-center gap-1.5">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-blue-600" viewBox="0 0 20 20" fill="currentColor">
-                    <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
-                  </svg>
-                  Kredensial Akun Login Guru BK
-                </span>
-                <span class="text-xs text-slate-500 font-medium">Akses Portal /login</span>
-              </div>
-
-              <div class="grid grid-cols-2 gap-3">
-                <div>
-                  <label class="block font-bold text-slate-700 mb-1">Username Akun (Opsional)</label>
-                  <div class="relative">
-                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-mono font-bold text-xs select-none">@</span>
-                    <input
-                      v-model="formGuru.username"
-                      placeholder="Otomatis dari nama jika kosong"
-                      class="w-full bg-white border border-slate-200 rounded-lg pl-7 pr-3 py-2 font-mono text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label class="block font-bold text-slate-700 mb-1">Kata Sandi (Password, Opsional)</label>
-                  <div class="relative">
-                    <input
-                      :type="showGuruPassword ? 'text' : 'password'"
-                      v-model="formGuru.password"
-                      placeholder="Default: 123456"
-                      class="w-full bg-white border border-slate-200 rounded-lg px-3.5 py-2 pr-9 text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono"
-                    />
-                    <button
-                      type="button"
-                      @click="showGuruPassword = !showGuruPassword"
-                      class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 cursor-pointer p-0.5"
-                      :title="showGuruPassword ? 'Sembunyikan sandi' : 'Tampilkan sandi'"
-                    >
-                      <svg v-if="!showGuruPassword" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                      </svg>
-                      <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18" />
-                      </svg>
-                    </button>
-                  </div>
+                <label class="block font-semibold text-slate-700 mb-1">Kata Sandi</label>
+                <div class="relative">
+                  <input
+                    :type="showGuruPassword ? 'text' : 'password'"
+                    v-model="formGuru.password"
+                    placeholder="Default: 123456"
+                    class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 pr-9 text-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-400 font-mono text-xs"
+                  />
+                  <button
+                    type="button"
+                    @click="showGuruPassword = !showGuruPassword"
+                    class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 cursor-pointer p-0.5"
+                    :title="showGuruPassword ? 'Sembunyikan sandi' : 'Tampilkan sandi'"
+                  >
+                    <svg v-if="!showGuruPassword" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                    </svg>
+                    <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18" />
+                    </svg>
+                  </button>
                 </div>
               </div>
-              <p class="text-[10px] text-slate-500">Jika dikosongkan, username dibuat otomatis dan sandi awal adalah: 123456</p>
             </div>
 
-            <div class="grid grid-cols-2 gap-3">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label class="block font-bold text-slate-700 mb-1">WhatsApp Aktif (Boleh '-')</label>
-                <input v-model="formGuru.wa" placeholder="Contoh: +62 812... atau -" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3.5 py-2.5 text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white" />
+                <label class="block font-semibold text-slate-700 mb-1">Jabatan</label>
+                <input
+                  v-model="formGuru.jabatan"
+                  placeholder="Guru Pembimbing BK"
+                  class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-400"
+                />
               </div>
+
               <div>
-                <label class="block font-bold text-slate-700 mb-1">Email Belajar.id (Boleh '-')</label>
-                <input v-model="formGuru.email" type="text" placeholder="Contoh: nama@guru.belajar.id atau -" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3.5 py-2.5 text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white" />
+                <label class="block font-semibold text-slate-700 mb-1">No. WhatsApp</label>
+                <input
+                  v-model="formGuru.wa"
+                  placeholder="081234567890"
+                  class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-400"
+                />
               </div>
             </div>
+
             <div>
-              <label class="block font-bold text-slate-700 mb-1">Rombel Binaan (Boleh '-')</label>
-              <input v-model="formGuru.rombelText" placeholder="Contoh: X RPL 1, X RPL 2 atau -" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3.5 py-2.5 text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white" />
+              <label class="block font-semibold text-slate-700 mb-1">Rombel Binaan</label>
+              <input
+                v-model="formGuru.rombelText"
+                placeholder="Pisahkan dengan koma, contoh: X RPL 1, X RPL 2"
+                class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-400"
+              />
             </div>
 
             <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-200">
-              <button type="button" @click="closeModal" class="px-4 py-2.5 rounded-lg border border-slate-200 font-bold text-slate-600 hover:bg-slate-100 transition cursor-pointer">Batal</button>
-              <button type="submit" class="px-5 py-2.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-bold transition cursor-pointer shadow-sm">Simpan Guru BK</button>
+              <button type="button" @click="closeModal" class="px-4 py-2 rounded-lg border border-slate-200 font-semibold text-slate-600 hover:bg-slate-50 transition cursor-pointer">
+                Batal
+              </button>
+              <button type="submit" class="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold transition cursor-pointer shadow-xs">
+                Simpan Guru BK
+              </button>
             </div>
           </form>
         </div>
@@ -1406,17 +1507,7 @@
       <div v-if="modalType === 'kelas'" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50">
         <div class="bg-white rounded-xl max-w-lg w-full p-6 shadow-xl border border-slate-200 space-y-4 animate-in fade-in zoom-in-95">
           <div class="flex items-center justify-between pb-3 border-b border-slate-200">
-            <div class="flex items-center gap-2">
-              <div class="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 border border-blue-200/50 flex items-center justify-center">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                </svg>
-              </div>
-              <div>
-                <h3 class="font-bold text-slate-900 text-sm sm:text-base">Tambah Rombel Kelas Baru</h3>
-                <p class="text-[11px] text-slate-500 font-normal">Buat rombel kelas dan tentukan jurusan serta Guru BK pendamping</p>
-              </div>
-            </div>
+            <h3 class="font-bold text-slate-900 text-base">Tambah Rombel Kelas Baru</h3>
             <button @click="closeModal" class="p-1.5 text-slate-400 hover:text-slate-600 rounded-lg cursor-pointer">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -1437,50 +1528,31 @@
               <div>
                 <div class="flex items-center justify-between mb-1">
                   <label class="block font-bold text-slate-700">Jurusan *</label>
-                  <button type="button" @click="openModal('jurusan')" class="text-[10px] text-blue-600 hover:text-blue-700 font-bold cursor-pointer">
+                  <button type="button" @click="openModal('jurusan')" class="text-[11px] text-blue-600 hover:text-blue-700 font-semibold cursor-pointer">
                     + Kelola Jurusan
                   </button>
                 </div>
-                <input
-                  v-model="formKelas.jurusan"
-                  list="jurusan-datalist"
+                <select
+                  v-model="formKelas.jurusan_id"
+                  @change="onJurusanSelectChange"
                   required
-                  placeholder="Ketik atau pilih kode..."
-                  class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3.5 py-2.5 font-bold text-slate-800 uppercase focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white"
-                  @input="formKelas.jurusan = formKelas.jurusan.toUpperCase(); autoGenerateClassName()"
-                />
-                <datalist id="jurusan-datalist">
-                  <option v-for="j in jurusanList" :key="j.code" :value="j.code">
+                  class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3.5 py-2.5 font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
+                >
+                  <option value="" disabled>-- Pilih Jurusan --</option>
+                  <option v-for="j in jurusanList" :key="j.id" :value="j.id">
                     {{ j.code }} - {{ j.name }}
                   </option>
-                </datalist>
+                </select>
               </div>
             </div>
 
-            <!-- Quick Choice Badges untuk Jurusan -->
-            <div class="pt-0.5">
-              <span class="text-[10px] text-slate-400 font-medium block mb-1">Pilihan Cepat Jurusan:</span>
-              <div class="flex flex-wrap gap-1.5">
-                <button
-                  v-for="j in jurusanList"
-                  :key="j.code"
-                  type="button"
-                  @click="formKelas.jurusan = j.code; autoGenerateClassName()"
-                  class="px-2.5 py-1 rounded-md text-[11px] font-bold border transition cursor-pointer"
-                  :class="formKelas.jurusan === j.code ? 'bg-blue-600 text-white border-blue-600 shadow-xs' : 'bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-200'"
-                >
-                  {{ j.code }}
-                </button>
-              </div>
-            </div>
-
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <label class="block font-bold text-slate-700 mb-1">Nama Rombel *</label>
                 <input
                   v-model="formKelas.name"
                   required
-                  placeholder="Contoh: X RPL 1"
+                  placeholder="X RPL 1"
                   class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3.5 py-2.5 font-bold text-slate-800 uppercase focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white"
                 />
               </div>
@@ -1489,7 +1561,7 @@
                 <input
                   v-model="formKelas.waliKelas"
                   required
-                  placeholder="Contoh: Bpk. Kurniawan, S.Kom"
+                  placeholder="Nama wali kelas"
                   class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3.5 py-2.5 font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white"
                 />
               </div>
@@ -1498,14 +1570,14 @@
             <div>
               <div class="flex items-center justify-between mb-1">
                 <label class="block font-bold text-slate-700">Guru BK Pendamping</label>
-                <button type="button" @click="openModal('guru')" class="text-[10px] text-blue-600 hover:text-blue-700 font-bold cursor-pointer">
+                <button type="button" @click="openModal('guru')" class="text-[11px] text-blue-600 hover:text-blue-700 font-semibold cursor-pointer">
                   + Tambah Guru BK Baru
                 </button>
               </div>
-              <select v-model="formKelas.guruBK" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3.5 py-2.5 font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer">
-                <option v-for="g in guruBkList" :key="g.id" :value="g.name">{{ g.name }}</option>
+              <select v-model="formKelas.guruBkId" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3.5 py-2.5 font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer">
+                <option value="">-- Belum Ditentukan --</option>
+                <option v-for="g in guruBkList" :key="g.id" :value="g.id">{{ g.name }}</option>
               </select>
-              <p class="text-[10px] text-slate-400 mt-1">Daftar Guru BK bersumber dari menu Kelola Guru BK.</p>
             </div>
 
             <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-200">
@@ -1802,19 +1874,9 @@
       <!-- MODAL: EDIT DATA GURU BK                                     -->
       <!-- ============================================================ -->
       <div v-if="modalType === 'edit-guru'" class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/50">
-        <div class="bg-white rounded-xl max-w-md w-full p-5 sm:p-6 shadow-xl border border-slate-200 space-y-4 animate-in fade-in zoom-in-95">
+        <div class="bg-white rounded-lg max-w-md w-full p-5 sm:p-6 shadow-lg border border-slate-200 space-y-4">
           <div class="flex items-center justify-between pb-3 border-b border-slate-200">
-            <div class="flex items-center gap-2.5">
-              <div class="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 border border-blue-200/50 flex items-center justify-center">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                </svg>
-              </div>
-              <div>
-                <h3 class="font-bold text-slate-900 text-sm sm:text-base">Edit Data Guru BK</h3>
-                <p class="text-[11px] text-slate-500">Perbarui data tenaga konselor sekolah</p>
-              </div>
-            </div>
+            <h3 class="font-bold text-slate-900 text-base">Edit Guru BK</h3>
             <button @click="closeModal" class="p-1.5 text-slate-400 hover:text-slate-600 rounded-lg cursor-pointer">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -1824,98 +1886,89 @@
 
           <form @submit.prevent="updateGuru" class="space-y-3.5 text-xs">
             <div>
-              <label class="block font-bold text-slate-700 mb-1">Nama Lengkap &amp; Gelar *</label>
-              <input v-model="formEditGuru.name" required class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3.5 py-2.5 font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white" />
+              <label class="block font-semibold text-slate-700 mb-1">Nama Lengkap *</label>
+              <input
+                v-model="formEditGuru.name"
+                required
+                placeholder="Masukkan nama lengkap beserta gelar"
+                class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-400"
+              />
             </div>
 
-            <div class="grid grid-cols-2 gap-3">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label class="block font-bold text-slate-700 mb-1">NIP (Boleh '-')</label>
-                <input v-model="formEditGuru.nip" placeholder="Contoh: 19820512... atau -" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3.5 py-2.5 font-mono text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white" />
-              </div>
-              <div>
-                <label class="block font-bold text-slate-700 mb-1">NUPTK (Boleh '-')</label>
-                <input v-model="formEditGuru.nuptk" placeholder="Contoh: 8452... atau -" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3.5 py-2.5 font-mono text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white" />
-              </div>
-            </div>
-
-            <div class="grid grid-cols-2 gap-3">
-              <div>
-                <label class="block font-bold text-slate-700 mb-1">Jabatan (Boleh '-')</label>
-                <input v-model="formEditGuru.jabatan" placeholder="Contoh: Guru BK atau -" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3.5 py-2.5 text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white" />
-              </div>
-              <div>
-                <label class="block font-bold text-slate-700 mb-1">Email Resmi (Boleh '-')</label>
-                <input v-model="formEditGuru.email" type="text" placeholder="nama@guru.belajar.id atau -" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3.5 py-2.5 text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white" />
-              </div>
-            </div>
-
-            <!-- KREDENSIAL AKUN LOGIN BK (USERNAME & PASSWORD) -->
-            <div class="p-3.5 bg-slate-50 rounded-lg border border-slate-200 space-y-2.5">
-              <div class="flex items-center justify-between">
-                <span class="font-bold text-slate-800 text-xs flex items-center gap-1.5">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-blue-600" viewBox="0 0 20 20" fill="currentColor">
-                    <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
-                  </svg>
-                  Kredensial Akun Login Guru BK
-                </span>
-                <span class="text-xs text-slate-500 font-medium">Akses Portal</span>
+                <label class="block font-semibold text-slate-700 mb-1">Email *</label>
+                <input
+                  v-model="formEditGuru.email"
+                  type="email"
+                  required
+                  placeholder="nama@bkprima.sch.id"
+                  class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-400"
+                />
               </div>
 
-              <div class="grid grid-cols-2 gap-3">
-                <div>
-                  <label class="block font-bold text-slate-700 mb-1">Username Login *</label>
-                  <div class="relative">
-                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-mono font-bold text-xs select-none">@</span>
-                    <input
-                      v-model="formEditGuru.username"
-                      required
-                      placeholder="Username akun..."
-                      class="w-full bg-white border border-slate-200 rounded-lg pl-7 pr-3 py-2 font-mono text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                  </div>
+              <div>
+                <label class="block font-semibold text-slate-700 mb-1">Kata Sandi</label>
+                <div class="relative">
+                  <input
+                    :type="showEditGuruPassword ? 'text' : 'password'"
+                    v-model="formEditGuru.password"
+                    placeholder="Kosongkan jika tetap"
+                    class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 pr-9 text-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-400 font-mono text-xs"
+                  />
+                  <button
+                    type="button"
+                    @click="showEditGuruPassword = !showEditGuruPassword"
+                    class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 cursor-pointer p-0.5"
+                    :title="showEditGuruPassword ? 'Sembunyikan sandi' : 'Tampilkan sandi'"
+                  >
+                    <svg v-if="!showEditGuruPassword" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                    </svg>
+                    <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18" />
+                    </svg>
+                  </button>
                 </div>
+              </div>
+            </div>
 
-                <div>
-                  <label class="block font-bold text-slate-700 mb-1">Ganti Sandi (Opsional)</label>
-                  <div class="relative">
-                    <input
-                      :type="showEditGuruPassword ? 'text' : 'password'"
-                      v-model="formEditGuru.password"
-                      placeholder="Kosongkan jika tetap"
-                      class="w-full bg-white border border-slate-200 rounded-lg px-3.5 py-2 pr-9 text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono"
-                    />
-                    <button
-                      type="button"
-                      @click="showEditGuruPassword = !showEditGuruPassword"
-                      class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 cursor-pointer p-0.5"
-                      :title="showEditGuruPassword ? 'Sembunyikan sandi' : 'Tampilkan sandi'"
-                    >
-                      <svg v-if="!showEditGuruPassword" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                      </svg>
-                      <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18" />
-                      </svg>
-                    </button>
-                  </div>
-                </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label class="block font-semibold text-slate-700 mb-1">Jabatan</label>
+                <input
+                  v-model="formEditGuru.jabatan"
+                  placeholder="Guru Pembimbing BK"
+                  class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-400"
+                />
+              </div>
+
+              <div>
+                <label class="block font-semibold text-slate-700 mb-1">No. WhatsApp</label>
+                <input
+                  v-model="formEditGuru.wa"
+                  placeholder="081234567890"
+                  class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-400"
+                />
               </div>
             </div>
 
             <div>
-              <label class="block font-bold text-slate-700 mb-1">Rombel Binaan (Pisahkan dengan koma)</label>
-              <input v-model="formEditGuru.rombelText" placeholder="Contoh: X RPL 1, X RPL 2, XI RPL 1" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3.5 py-2.5 text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white" />
+              <label class="block font-semibold text-slate-700 mb-1">Rombel Binaan</label>
+              <input
+                v-model="formEditGuru.rombelText"
+                placeholder="Pisahkan dengan koma, contoh: X RPL 1, X RPL 2"
+                class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-400"
+              />
             </div>
 
             <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-200">
-              <button type="button" @click="closeModal" class="px-4 py-2.5 rounded-lg border border-slate-200 font-bold text-slate-600 hover:bg-slate-100 transition cursor-pointer">Batal</button>
-              <button type="submit" class="px-5 py-2.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-bold transition cursor-pointer shadow-sm flex items-center gap-1.5">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                </svg>
-                <span>Simpan Perubahan</span>
+              <button type="button" @click="closeModal" class="px-4 py-2 rounded-lg border border-slate-200 font-semibold text-slate-600 hover:bg-slate-50 transition cursor-pointer">
+                Batal
+              </button>
+              <button type="submit" class="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold transition cursor-pointer shadow-xs">
+                Simpan Perubahan
               </button>
             </div>
           </form>
@@ -1928,17 +1981,7 @@
       <div v-if="modalType === 'edit-kelas'" class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/50">
         <div class="bg-white rounded-xl max-w-md w-full p-5 sm:p-6 shadow-xl border border-slate-200 space-y-4 animate-in fade-in zoom-in-95">
           <div class="flex items-center justify-between pb-3 border-b border-slate-200">
-            <div class="flex items-center gap-2.5">
-              <div class="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 border border-blue-200/50 flex items-center justify-center">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                </svg>
-              </div>
-              <div>
-                <h3 class="font-bold text-slate-900 text-sm sm:text-base">Edit Rombel Kelas</h3>
-                <p class="text-[11px] text-slate-500">Perbarui data rombel dan wali pendamping</p>
-              </div>
-            </div>
+            <h3 class="font-bold text-slate-900 text-base">Edit Rombel Kelas</h3>
             <button @click="closeModal" class="p-1.5 text-slate-400 hover:text-slate-600 rounded-lg cursor-pointer">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -1958,8 +2001,8 @@
               </div>
               <div>
                 <label class="block font-bold text-slate-700 mb-1">Jurusan *</label>
-                <select v-model="formEditKelas.jurusan" required class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3.5 py-2.5 font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer">
-                  <option v-for="j in jurusanList" :key="j.code" :value="j.code">{{ j.code }} - {{ j.name }}</option>
+                <select v-model="formEditKelas.jurusan_id" @change="onEditJurusanSelectChange" required class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3.5 py-2.5 font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer">
+                  <option v-for="j in jurusanList" :key="j.id" :value="j.id">{{ j.code }} - {{ j.name }}</option>
                 </select>
               </div>
             </div>
@@ -1967,7 +2010,7 @@
             <div class="grid grid-cols-2 gap-3">
               <div>
                 <label class="block font-bold text-slate-700 mb-1">Nama Rombel *</label>
-                <input v-model="formEditKelas.name" required class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3.5 py-2.5 font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white uppercase" />
+                <input v-model="formEditKelas.name" required placeholder="X RPL 1" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3.5 py-2.5 font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white uppercase" />
               </div>
               <div>
                 <label class="block font-bold text-slate-700 mb-1">Kapasitas Siswa</label>
@@ -1977,24 +2020,20 @@
 
             <div>
               <label class="block font-bold text-slate-700 mb-1">Nama Wali Kelas *</label>
-              <input v-model="formEditKelas.waliKelas" required class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3.5 py-2.5 text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white" />
+              <input v-model="formEditKelas.waliKelas" required placeholder="Nama wali kelas" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3.5 py-2.5 text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white" />
             </div>
 
             <div>
-              <label class="block font-bold text-slate-700 mb-1">Guru BK Pendamping *</label>
-              <select v-model="formEditKelas.guruBK" required class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3.5 py-2.5 text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer">
-                <option v-for="g in guruBkList" :key="g.id" :value="g.name">{{ g.name }}</option>
+              <label class="block font-bold text-slate-700 mb-1">Guru BK Pendamping</label>
+              <select v-model="formEditKelas.guruBkId" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3.5 py-2.5 text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer">
+                <option value="">-- Belum Ditentukan --</option>
+                <option v-for="g in guruBkList" :key="g.id" :value="g.id">{{ g.name }}</option>
               </select>
             </div>
 
             <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-200">
               <button type="button" @click="closeModal" class="px-4 py-2.5 rounded-lg border border-slate-200 font-bold text-slate-600 hover:bg-slate-100 transition cursor-pointer">Batal</button>
-              <button type="submit" class="px-5 py-2.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-bold transition cursor-pointer shadow-sm flex items-center gap-1.5">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                </svg>
-                <span>Simpan Perubahan</span>
-              </button>
+              <button type="submit" class="px-5 py-2.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-bold transition cursor-pointer shadow-sm">Simpan Perubahan</button>
             </div>
           </form>
         </div>
@@ -2315,6 +2354,20 @@ const props = defineProps({
     type: Object,
     default: () => ({})
   },
+  attendanceStats: {
+    type: Object,
+    default: () => ({
+      totalPresensi: 0,
+      hadirCount: 0,
+      sakitCount: 0,
+      izinCount: 0,
+      alphaCount: 0,
+      hadirRate: 0,
+      sakitRate: 0,
+      izinRate: 0,
+      alphaRate: 0,
+    })
+  },
   consultations: {
     type: Array,
     default: () => []
@@ -2338,6 +2391,10 @@ const props = defineProps({
   initialJurusanList: {
     type: Array,
     default: () => []
+  },
+  settings: {
+    type: Object,
+    default: () => ({})
   }
 })
 
@@ -2345,11 +2402,11 @@ const getSavedTab = () => {
   if (typeof window !== 'undefined') {
     const params = new URLSearchParams(window.location.search)
     const tabParam = params.get('tab')
-    if (tabParam && ['dashboard', 'guru', 'kelas', 'siswa', 'konsultasi'].includes(tabParam)) {
+    if (tabParam && ['dashboard', 'guru', 'kelas', 'siswa', 'konsultasi', 'pengaturan'].includes(tabParam)) {
       return tabParam
     }
     const saved = localStorage.getItem('bkprima_admin_active_tab')
-    if (saved && ['dashboard', 'guru', 'kelas', 'siswa', 'konsultasi'].includes(saved)) {
+    if (saved && ['dashboard', 'guru', 'kelas', 'siswa', 'konsultasi', 'pengaturan'].includes(saved)) {
       return saved
     }
   }
@@ -2443,8 +2500,45 @@ const tabs = computed(() => [
     icon: () => h('svg', { xmlns: 'http://www.w3.org/2000/svg', class: 'h-4 w-4', fill: 'none', viewBox: '0 0 24 24', stroke: 'currentColor', 'stroke-width': '2' }, [
       h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', d: 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z' })
     ])
+  },
+  {
+    id: 'pengaturan',
+    label: 'Pengaturan Sekolah',
+    icon: () => h('svg', { xmlns: 'http://www.w3.org/2000/svg', class: 'h-4 w-4', fill: 'none', viewBox: '0 0 24 24', stroke: 'currentColor', 'stroke-width': '2' }, [
+      h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', d: 'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z' }),
+      h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', d: 'M15 12a3 3 0 11-6 0 3 3 0 016 0z' })
+    ])
   }
 ])
+
+// ==========================================
+// PENGATURAN SEKOLAH & SEMESTER
+// ==========================================
+const formSettings = ref({
+  kepala_sekolah: props.settings?.kepala_sekolah || 'Drs. H. Saiful Bahri, M.Pd',
+  nip_kepala_sekolah: props.settings?.nip_kepala_sekolah || '19680315 199403 1 008',
+  semester: props.settings?.semester || 'Semester Genap 24/25',
+  tahun_ajaran: props.settings?.tahun_ajaran || '2024/2025',
+  school_name: props.settings?.school_name || 'SMK PGRI 05 JEMBER',
+  school_address: props.settings?.school_address || 'Jl. Krakatau No. 54 Tanggul, Kab. Jember - Jawa Timur',
+})
+
+const isSavingSettings = ref(false)
+
+const saveSettings = () => {
+  isSavingSettings.value = true
+  router.post('/admin/pengaturan', formSettings.value, {
+    preserveScroll: true,
+    onSuccess: () => {
+      isSavingSettings.value = false
+      showToast('Pengaturan sekolah, kepala sekolah, dan semester berhasil disimpan.')
+    },
+    onError: (errs) => {
+      isSavingSettings.value = false
+      alert(Object.values(errs)[0] || 'Gagal menyimpan pengaturan.')
+    }
+  })
+}
 
 // ==========================================
 // 1. STATISTIKA PRESENSI SISWA (DIAGRAM BULAT PENUH 1 BULAN SEPERTI FOTO 1)
@@ -2467,28 +2561,28 @@ const monthlyAttendanceDb = {
     summary: 'Tingkat kehadiran siswa meningkat +1.6% dibanding April berkat program pembinaan wali kelas dan apel motivasi belajar.',
     cohorts: {
       all: {
-        totalSiswa: 1080,
+        totalSiswa: 0,
         hadir: { rate: 95.8, count: 1035, label: 'Hadir', color: '#2563eb', desc: 'Siswa hadir mengikuti seluruh sesi KBM' },
         sakit: { rate: 2.1, count: 23, label: 'Sakit', color: '#0ea5e9', desc: 'Terkonfirmasi surat keterangan dokter / wali' },
         izin: { rate: 1.4, count: 15, label: 'Izin', color: '#f59e0b', desc: 'Izin tertulis keperluan keluarga / dinas' },
         alpha: { rate: 0.7, count: 7, label: 'Alpha', color: '#f43f5e', desc: 'Tidak ada pemberitahuan, dalam bimbingan BK' }
       },
       x: {
-        totalSiswa: 360,
+        totalSiswa: 0,
         hadir: { rate: 96.4, count: 347, label: 'Hadir', color: '#2563eb', desc: 'Disiplin tinggi adaptasi Fase E' },
         sakit: { rate: 1.9, count: 7, label: 'Sakit', color: '#0ea5e9', desc: 'Sakit terkonfirmasi wali' },
         izin: { rate: 1.1, count: 4, label: 'Izin', color: '#f59e0b', desc: 'Izin keperluan keluarga' },
         alpha: { rate: 0.6, count: 2, label: 'Alpha', color: '#f43f5e', desc: 'Alpha tanpa keterangan' }
       },
       xi: {
-        totalSiswa: 360,
+        totalSiswa: 0,
         hadir: { rate: 95.2, count: 343, label: 'Hadir', color: '#2563eb', desc: 'Termasuk rombel simulasi PKL industri' },
         sakit: { rate: 2.3, count: 8, label: 'Sakit', color: '#0ea5e9', desc: 'Sakit terkonfirmasi dokter' },
         izin: { rate: 1.7, count: 6, label: 'Izin', color: '#f59e0b', desc: 'Izin persiapan magang' },
         alpha: { rate: 0.8, count: 3, label: 'Alpha', color: '#f43f5e', desc: 'Alpha tanpa keterangan' }
       },
       xii: {
-        totalSiswa: 360,
+        totalSiswa: 0,
         hadir: { rate: 95.8, count: 345, label: 'Hadir', color: '#2563eb', desc: 'Fokus persiapan asesmen kelulusan & UKK' },
         sakit: { rate: 2.1, count: 8, label: 'Sakit', color: '#0ea5e9', desc: 'Sakit terkonfirmasi wali' },
         izin: { rate: 1.4, count: 5, label: 'Izin', color: '#f59e0b', desc: 'Izin tes kerja / dinas' },
@@ -2508,28 +2602,28 @@ const monthlyAttendanceDb = {
     summary: 'Terdapat penurunan presensi hadir sebesar -1.1% dipengaruhi masa libur cuti bersama dan cuaca curah hujan tinggi.',
     cohorts: {
       all: {
-        totalSiswa: 1080,
+        totalSiswa: 0,
         hadir: { rate: 94.2, count: 1017, label: 'Hadir', color: '#2563eb', desc: 'Siswa hadir KBM penuh' },
         sakit: { rate: 2.9, count: 31, label: 'Sakit', color: '#0ea5e9', desc: 'Flu musiman pasca cuaca ekstrem' },
         izin: { rate: 1.8, count: 20, label: 'Izin', color: '#f59e0b', desc: 'Izin mudik / acara keluarga' },
         alpha: { rate: 1.1, count: 12, label: 'Alpha', color: '#f43f5e', desc: 'Keterlambatan kembali ke sekolah' }
       },
       x: {
-        totalSiswa: 360,
+        totalSiswa: 0,
         hadir: { rate: 94.7, count: 341, label: 'Hadir', color: '#2563eb', desc: 'Kehadiran awal pekan stabil' },
         sakit: { rate: 2.8, count: 10, label: 'Sakit', color: '#0ea5e9', desc: 'Sakit terkonfirmasi' },
         izin: { rate: 1.6, count: 6, label: 'Izin', color: '#f59e0b', desc: 'Izin keluarga' },
         alpha: { rate: 0.9, count: 3, label: 'Alpha', color: '#f43f5e', desc: 'Alpha' }
       },
       xi: {
-        totalSiswa: 360,
+        totalSiswa: 0,
         hadir: { rate: 93.6, count: 337, label: 'Hadir', color: '#2563eb', desc: 'Persiapan jadwal penempatan DU/DI' },
         sakit: { rate: 3.2, count: 12, label: 'Sakit', color: '#0ea5e9', desc: 'Sakit berizin' },
         izin: { rate: 2.0, count: 7, label: 'Izin', color: '#f59e0b', desc: 'Izin kegiatan keluarga' },
         alpha: { rate: 1.2, count: 4, label: 'Alpha', color: '#f43f5e', desc: 'Alpha' }
       },
       xii: {
-        totalSiswa: 360,
+        totalSiswa: 0,
         hadir: { rate: 94.3, count: 339, label: 'Hadir', color: '#2563eb', desc: 'Intensif materi ujian akhir' },
         sakit: { rate: 2.7, count: 10, label: 'Sakit', color: '#0ea5e9', desc: 'Sakit berizin' },
         izin: { rate: 1.8, count: 6, label: 'Izin', color: '#f59e0b', desc: 'Izin kedukaan/keluarga' },
@@ -2549,28 +2643,28 @@ const monthlyAttendanceDb = {
     summary: 'Presensi melonjak +1.5% berkat kedisiplinan apel pagi dan tindak lanjut pendampingan wali kelas.',
     cohorts: {
       all: {
-        totalSiswa: 1080,
+        totalSiswa: 0,
         hadir: { rate: 95.3, count: 1029, label: 'Hadir', color: '#2563eb', desc: 'Siswa hadir KBM penuh' },
         sakit: { rate: 2.3, count: 25, label: 'Sakit', color: '#0ea5e9', desc: 'Sakit terkonfirmasi' },
         izin: { rate: 1.6, count: 17, label: 'Izin', color: '#f59e0b', desc: 'Izin resmi' },
         alpha: { rate: 0.8, count: 9, label: 'Alpha', color: '#f43f5e', desc: 'Alpha' }
       },
       x: {
-        totalSiswa: 360,
+        totalSiswa: 0,
         hadir: { rate: 95.8, count: 345, label: 'Hadir', color: '#2563eb', desc: 'Kehadiran disiplin' },
         sakit: { rate: 2.2, count: 8, label: 'Sakit', color: '#0ea5e9', desc: 'Sakit terkonfirmasi' },
         izin: { rate: 1.4, count: 5, label: 'Izin', color: '#f59e0b', desc: 'Izin resmi' },
         alpha: { rate: 0.6, count: 2, label: 'Alpha', color: '#f43f5e', desc: 'Alpha' }
       },
       xi: {
-        totalSiswa: 360,
+        totalSiswa: 0,
         hadir: { rate: 94.9, count: 342, label: 'Hadir', color: '#2563eb', desc: 'KBM berjalan efektif' },
         sakit: { rate: 2.5, count: 9, label: 'Sakit', color: '#0ea5e9', desc: 'Sakit terkonfirmasi' },
         izin: { rate: 1.7, count: 6, label: 'Izin', color: '#f59e0b', desc: 'Izin resmi' },
         alpha: { rate: 0.9, count: 3, label: 'Alpha', color: '#f43f5e', desc: 'Alpha' }
       },
       xii: {
-        totalSiswa: 360,
+        totalSiswa: 0,
         hadir: { rate: 95.2, count: 343, label: 'Hadir', color: '#2563eb', desc: 'Simulasi ujian berjalan tertib' },
         sakit: { rate: 2.2, count: 8, label: 'Sakit', color: '#0ea5e9', desc: 'Sakit terkonfirmasi' },
         izin: { rate: 1.7, count: 6, label: 'Izin', color: '#f59e0b', desc: 'Izin resmi' },
@@ -2590,28 +2684,28 @@ const monthlyAttendanceDb = {
     summary: 'Penurunan ringan -0.7% dampak kendala banjir akses jalan penghubung di beberapa titik tempat tinggal siswa.',
     cohorts: {
       all: {
-        totalSiswa: 1080,
+        totalSiswa: 0,
         hadir: { rate: 93.8, count: 1013, label: 'Hadir', color: '#2563eb', desc: 'Siswa hadir KBM' },
         sakit: { rate: 3.4, count: 37, label: 'Sakit', color: '#0ea5e9', desc: 'Sakit terkonfirmasi' },
         izin: { rate: 1.9, count: 21, label: 'Izin', color: '#f59e0b', desc: 'Izin kendala cuaca' },
         alpha: { rate: 0.9, count: 9, label: 'Alpha', color: '#f43f5e', desc: 'Alpha' }
       },
       x: {
-        totalSiswa: 360,
+        totalSiswa: 0,
         hadir: { rate: 94.4, count: 340, label: 'Hadir', color: '#2563eb', desc: 'Kehadiran Fase E' },
         sakit: { rate: 3.1, count: 11, label: 'Sakit', color: '#0ea5e9', desc: 'Sakit' },
         izin: { rate: 1.7, count: 6, label: 'Izin', color: '#f59e0b', desc: 'Izin' },
         alpha: { rate: 0.8, count: 3, label: 'Alpha', color: '#f43f5e', desc: 'Alpha' }
       },
       xi: {
-        totalSiswa: 360,
+        totalSiswa: 0,
         hadir: { rate: 93.2, count: 335, label: 'Hadir', color: '#2563eb', desc: 'Kehadiran Fase F' },
         sakit: { rate: 3.7, count: 13, label: 'Sakit', color: '#0ea5e9', desc: 'Sakit' },
         izin: { rate: 2.1, count: 8, label: 'Izin', color: '#f59e0b', desc: 'Izin' },
         alpha: { rate: 1.0, count: 4, label: 'Alpha', color: '#f43f5e', desc: 'Alpha' }
       },
       xii: {
-        totalSiswa: 360,
+        totalSiswa: 0,
         hadir: { rate: 93.8, count: 338, label: 'Hadir', color: '#2563eb', desc: 'Kehadiran Fase F' },
         sakit: { rate: 3.4, count: 12, label: 'Sakit', color: '#0ea5e9', desc: 'Sakit' },
         izin: { rate: 1.9, count: 7, label: 'Izin', color: '#f59e0b', desc: 'Izin' },
@@ -2631,28 +2725,28 @@ const monthlyAttendanceDb = {
     summary: 'Awal Semester Genap berjalan tertib dengan kenaikan +1.2% siswa aktif mengikuti seluruh agenda sekolah.',
     cohorts: {
       all: {
-        totalSiswa: 1080,
+        totalSiswa: 0,
         hadir: { rate: 94.5, count: 1021, label: 'Hadir', color: '#2563eb', desc: 'Siswa hadir KBM awal semester' },
         sakit: { rate: 2.6, count: 28, label: 'Sakit', color: '#0ea5e9', desc: 'Sakit terkonfirmasi' },
         izin: { rate: 2.0, count: 22, label: 'Izin', color: '#f59e0b', desc: 'Izin perpanjangan tiket' },
         alpha: { rate: 0.9, count: 9, label: 'Alpha', color: '#f43f5e', desc: 'Alpha' }
       },
       x: {
-        totalSiswa: 360,
+        totalSiswa: 0,
         hadir: { rate: 95.0, count: 342, label: 'Hadir', color: '#2563eb', desc: 'Awal semester genap' },
         sakit: { rate: 2.4, count: 9, label: 'Sakit', color: '#0ea5e9', desc: 'Sakit' },
         izin: { rate: 1.8, count: 6, label: 'Izin', color: '#f59e0b', desc: 'Izin' },
         alpha: { rate: 0.8, count: 3, label: 'Alpha', color: '#f43f5e', desc: 'Alpha' }
       },
       xi: {
-        totalSiswa: 360,
+        totalSiswa: 0,
         hadir: { rate: 94.1, count: 339, label: 'Hadir', color: '#2563eb', desc: 'Awal semester genap' },
         sakit: { rate: 2.7, count: 10, label: 'Sakit', color: '#0ea5e9', desc: 'Sakit' },
         izin: { rate: 2.2, count: 8, label: 'Izin', color: '#f59e0b', desc: 'Izin' },
         alpha: { rate: 1.0, count: 3, label: 'Alpha', color: '#f43f5e', desc: 'Alpha' }
       },
       xii: {
-        totalSiswa: 360,
+        totalSiswa: 0,
         hadir: { rate: 94.4, count: 340, label: 'Hadir', color: '#2563eb', desc: 'Awal semester genap' },
         sakit: { rate: 2.7, count: 10, label: 'Sakit', color: '#0ea5e9', desc: 'Sakit' },
         izin: { rate: 2.0, count: 7, label: 'Izin', color: '#f59e0b', desc: 'Izin' },
@@ -2667,8 +2761,26 @@ const currentMonthData = computed(() => {
 })
 
 const currentCohortData = computed(() => {
-  const cohorts = currentMonthData.value.cohorts
-  return cohorts[selectedAngkatan.value] || cohorts.all
+  const stats = props.attendanceStats || {}
+  const totalPresensi = stats.totalPresensi || 0
+  const hadirRate = stats.hadirRate !== undefined ? stats.hadirRate : 0
+  const sakitRate = stats.sakitRate !== undefined ? stats.sakitRate : 0
+  const izinRate = stats.izinRate !== undefined ? stats.izinRate : 0
+  const alphaRate = stats.alphaRate !== undefined ? stats.alphaRate : 0
+
+  const hadirCount = stats.hadirCount || 0
+  const sakitCount = stats.sakitCount || 0
+  const izinCount = stats.izinCount || 0
+  const alphaCount = stats.alphaCount || 0
+
+  return {
+    totalSiswa: totalSiswaCount.value,
+    totalPresensi,
+    hadir: { rate: hadirRate, count: hadirCount, label: 'Hadir', color: '#2563eb', desc: 'Siswa hadir mengikuti KBM' },
+    sakit: { rate: sakitRate, count: sakitCount, label: 'Sakit', color: '#0ea5e9', desc: 'Keterangan sakit dari dokter/wali' },
+    izin: { rate: izinRate, count: izinCount, label: 'Izin', color: '#f59e0b', desc: 'Izin tertulis dinas/keluarga' },
+    alpha: { rate: alphaRate, count: alphaCount, label: 'Alpha', color: '#f43f5e', desc: 'Tanpa keterangan presensi' }
+  }
 })
 
 const selectedAngkatanLabel = computed(() => {
@@ -2686,29 +2798,23 @@ const totalAbsenCount = computed(() => {
 })
 
 const monthlyList = computed(() => {
-  const angkatanKey = selectedAngkatan.value
-  return ['januari', 'februari', 'maret', 'april', 'mei'].map(k => {
-    const m = monthlyAttendanceDb[k]
-    const cohort = m.cohorts[angkatanKey] || m.cohorts.all
-    return {
-      id: m.id,
-      name: m.name,
-      shortName: m.shortName,
-      trend: m.trend,
-      delta: m.delta,
-      hadirRate: cohort.hadir.rate
-    }
-  })
+  return []
 })
 
 const pieSlices = computed(() => {
   const cohort = currentCohortData.value
+  if (cohort.totalPresensi === 0) {
+    return []
+  }
+
   const items = [
     { id: 'hadir', ...cohort.hadir },
     { id: 'sakit', ...cohort.sakit },
     { id: 'izin', ...cohort.izin },
     { id: 'alpha', ...cohort.alpha }
-  ]
+  ].filter(it => it.rate > 0)
+
+  if (items.length === 0) return []
 
   const cx = 190
   const cy = 190
@@ -2759,13 +2865,28 @@ const pieSlices = computed(() => {
   })
 })
 
-const jurusanStats = ref([
-  { name: 'RPL', fullName: 'Rekayasa Perangkat Lunak', rate: 97.2, target: 95.0, students: 107, color: '#10b981', status: 'Sangat Baik' },
-  { name: 'DKV', fullName: 'Desain Komunikasi Visual', rate: 95.8, target: 95.0, students: 69, color: '#2563eb', status: 'Melampaui Target' },
-  { name: 'TKJ', fullName: 'Teknik Komputer & Jaringan', rate: 96.0, target: 95.0, students: 72, color: '#6366f1', status: 'Melampaui Target' },
-  { name: 'AKL', fullName: 'Akuntansi Keuangan Lembaga', rate: 95.1, target: 95.0, students: 36, color: '#0d9488', status: 'Memenuhi Target' },
-  { name: 'TSM', fullName: 'Teknik Sepeda Motor', rate: 94.1, target: 95.0, students: 72, color: '#f59e0b', status: 'Perlu Perhatian' }
-])
+const jurusanStats = computed(() => {
+  if (jurusanList.value && jurusanList.value.length > 0) {
+    const colors = ['#10b981', '#2563eb', '#6366f1', '#0d9488', '#f59e0b', '#ec4899']
+    return jurusanList.value.map((j, idx) => {
+      const count = siswaList.value.filter(s => {
+        const cls = s.className ? s.className.toUpperCase() : ''
+        return cls.includes(j.code.toUpperCase()) || (s.major && s.major.toUpperCase() === j.code.toUpperCase())
+      }).length
+
+      return {
+        name: j.code,
+        fullName: j.name,
+        rate: count > 0 ? 96.0 : 0.0,
+        target: 95.0,
+        students: count,
+        color: colors[idx % colors.length],
+        status: count > 0 ? 'Aktif' : 'Belum Ada Siswa'
+      }
+    })
+  }
+  return []
+})
 
 const weeklyStats = ref([
   { week: 'Pekan 1', range: '1 - 7 Oktober', rate: 94.2, change: 'Stabil awal pekan', color: '#2563eb' },
@@ -2799,7 +2920,7 @@ const monthAttendanceData = computed(() => {
   return rawRates.map((rate, idx) => {
     const x = Math.round(startX + idx * stepX)
     const y = Math.round(210 - (rate - 85) * 12)
-    const count = Math.round((rate / 100) * 1080)
+    const count = Math.round((rate / 100) * totalSiswaCount.value)
     return {
       day: idx + 1,
       rate,
@@ -2892,36 +3013,29 @@ const guruBkList = ref(props.initialGuruBkList && props.initialGuruBkList.length
 
 const formGuru = ref({
   name: '',
-  username: '',
-  password: '',
-  nip: '',
-  nuptk: '',
-  jabatan: '',
   email: '',
+  password: '',
+  jabatan: '',
   wa: '',
   rombelText: ''
 })
 
 const saveGuru = async () => {
   if (!formGuru.value.name || !formGuru.value.name.trim()) return
+  if (!formGuru.value.email || !formGuru.value.email.trim()) return
 
   const cleanName = formGuru.value.name.trim()
-  const cleanUsername = (formGuru.value.username && formGuru.value.username.trim() && formGuru.value.username.trim() !== '-')
-    ? formGuru.value.username.trim().toLowerCase().replace(/[^a-z0-9_]/g, '')
-    : cleanName.toLowerCase().replace(/[^a-z0-9]/g, '_').replace(/_+/g, '_').replace(/^_|_$/g, '').slice(0, 30) || 'guru_bk'
+  const cleanEmail = formGuru.value.email.trim().toLowerCase()
 
-  const rArray = (formGuru.value.rombelText && formGuru.value.rombelText.trim() && formGuru.value.rombelText.trim() !== '-')
+  const rArray = (formGuru.value.rombelText && formGuru.value.rombelText.trim())
     ? formGuru.value.rombelText.split(',').map(s => s.trim().toUpperCase()).filter(Boolean)
     : []
 
   const payload = {
     name: cleanName,
-    username: cleanUsername,
+    email: cleanEmail,
     password: formGuru.value.password || '123456',
-    nip: formGuru.value.nip && formGuru.value.nip.trim() ? formGuru.value.nip.trim() : '-',
-    nuptk: formGuru.value.nuptk && formGuru.value.nuptk.trim() ? formGuru.value.nuptk.trim() : '-',
-    jabatan: formGuru.value.jabatan && formGuru.value.jabatan.trim() && formGuru.value.jabatan.trim() !== '-' ? formGuru.value.jabatan.trim() : 'Guru BK',
-    email: formGuru.value.email && formGuru.value.email.trim() && formGuru.value.email.trim() !== '-' ? formGuru.value.email.trim() : `${cleanUsername}@guru.smk.belajar.id`,
+    jabatan: formGuru.value.jabatan && formGuru.value.jabatan.trim() ? formGuru.value.jabatan.trim() : 'Guru BK',
     wa: formGuru.value.wa && formGuru.value.wa.trim() ? formGuru.value.wa.trim() : '-',
     rombelText: formGuru.value.rombelText && formGuru.value.rombelText.trim() ? formGuru.value.rombelText.trim() : '-'
   }
@@ -2951,17 +3065,14 @@ const saveGuru = async () => {
     guruBkList.value.push({ id: Date.now(), ...payload, rombel: rArray })
   }
 
-  showToast(`Akun login Guru BK ${cleanName} (@${cleanUsername}) berhasil dibuat!`)
+  showToast(`Akun Guru BK ${cleanName} (${cleanEmail}) berhasil dibuat!`)
   
   // Reset form
   formGuru.value = {
     name: '',
-    username: '',
-    password: '',
-    nip: '',
-    nuptk: '',
-    jabatan: '',
     email: '',
+    password: '',
+    jabatan: '',
     wa: '',
     rombelText: ''
   }
@@ -2972,12 +3083,9 @@ const saveGuru = async () => {
 const formEditGuru = ref({
   id: null,
   name: '',
-  username: '',
-  password: '',
-  nip: '',
-  nuptk: '',
-  jabatan: '',
   email: '',
+  password: '',
+  jabatan: '',
   wa: '',
   rombelText: ''
 })
@@ -2989,13 +3097,10 @@ const editGuru = (g) => {
   formEditGuru.value = {
     id: g.id,
     name: g.name,
-    username: g.username || '',
+    email: g.email || '',
     password: '',
-    nip: g.nip === '-' ? '' : g.nip,
-    nuptk: g.nuptk === '-' ? '' : g.nuptk,
-    jabatan: g.jabatan,
-    email: g.email,
-    wa: g.wa,
+    jabatan: g.jabatan || 'Guru BK',
+    wa: g.wa === '-' ? '' : (g.wa || ''),
     rombelText: Array.isArray(g.rombel) ? g.rombel.join(', ') : (g.rombel || '')
   }
   showEditGuruPassword.value = false
@@ -3008,18 +3113,15 @@ const updateGuru = async () => {
   if (idx !== -1) {
     const rArray = formEditGuru.value.rombelText
       ? formEditGuru.value.rombelText.split(',').map(s => s.trim().toUpperCase()).filter(Boolean)
-      : ['X RPL 1']
+      : []
 
-    const cleanUsername = (formEditGuru.value.username || formEditGuru.value.name.toLowerCase().replace(/[^a-z0-9]/g, '_')).trim().toLowerCase()
+    const cleanEmail = formEditGuru.value.email ? formEditGuru.value.email.trim().toLowerCase() : editingGuru.value.email
 
     const payload = {
       name: formEditGuru.value.name,
-      username: cleanUsername,
+      email: cleanEmail,
       password: formEditGuru.value.password || undefined,
-      nip: formEditGuru.value.nip && formEditGuru.value.nip.trim() ? formEditGuru.value.nip.trim() : '-',
-      nuptk: formEditGuru.value.nuptk && formEditGuru.value.nuptk.trim() ? formEditGuru.value.nuptk.trim() : '-',
-      jabatan: formEditGuru.value.jabatan && formEditGuru.value.jabatan.trim() && formEditGuru.value.jabatan.trim() !== '-' ? formEditGuru.value.jabatan.trim() : 'Guru BK',
-      email: formEditGuru.value.email && formEditGuru.value.email.trim() && formEditGuru.value.email.trim() !== '-' ? formEditGuru.value.email.trim() : `${cleanUsername}@guru.smk.belajar.id`,
+      jabatan: formEditGuru.value.jabatan && formEditGuru.value.jabatan.trim() ? formEditGuru.value.jabatan.trim() : 'Guru BK',
       wa: formEditGuru.value.wa && formEditGuru.value.wa.trim() ? formEditGuru.value.wa.trim() : '-',
       rombelText: formEditGuru.value.rombelText && formEditGuru.value.rombelText.trim() ? formEditGuru.value.rombelText.trim() : '-'
     }
@@ -3039,15 +3141,12 @@ const updateGuru = async () => {
     guruBkList.value[idx] = {
       ...guruBkList.value[idx],
       name: formEditGuru.value.name,
-      username: cleanUsername,
-      nip: formEditGuru.value.nip || '-',
-      nuptk: formEditGuru.value.nuptk || '-',
+      email: cleanEmail,
       jabatan: formEditGuru.value.jabatan,
-      email: formEditGuru.value.email,
       wa: formEditGuru.value.wa,
       rombel: rArray
     }
-    showToast(`Data akun Guru BK ${formEditGuru.value.name} (@${cleanUsername}) berhasil diperbarui.`)
+    showToast(`Data Guru BK ${formEditGuru.value.name} (${cleanEmail}) berhasil diperbarui.`)
   }
   closeModal()
 }
@@ -3059,9 +3158,9 @@ const confirmDeleteGuru = (g) => {
     title: 'Hapus Akun Guru BK',
     message: 'Apakah Anda yakin ingin menghapus akun konselor ini? Akun tidak lagi dapat digunakan untuk login ke portal sistem.',
     targetInfo: {
-      name: `${g.name} (@${g.username || 'guru_bk'})`,
+      name: `${g.name} (${g.email})`,
       tag: g.jabatan,
-      sub: `NIP: ${g.nip} • ${Array.isArray(g.rombel) ? g.rombel.join(', ') : g.rombel}`
+      sub: `Rombel: ${Array.isArray(g.rombel) ? g.rombel.join(', ') : (g.rombel || '-')}`
     },
     confirmText: 'Ya, Hapus Akun',
     cancelText: 'Batal',
@@ -3168,7 +3267,13 @@ const saveJurusan = (andCreateClass = false) => {
       if (andCreateClass) {
         setTimeout(() => {
           openModal('kelas')
-          formKelas.value.jurusan = savedCode
+          const found = jurusanList.value.find(j => j.code === savedCode)
+          if (found) {
+            formKelas.value.jurusan_id = found.id
+            formKelas.value.jurusan = found.code
+          } else {
+            formKelas.value.jurusan = savedCode
+          }
           autoGenerateClassName()
         }, 120)
       }
@@ -3224,16 +3329,7 @@ const confirmDeleteJurusan = (j) => {
 // ==========================================
 // 3. DATA KELAS / ROMBEL
 // ==========================================
-const kelasList = ref(props.initialKelasList && props.initialKelasList.length > 0 ? [...props.initialKelasList] : [
-  { id: 1, name: 'X RPL 1', level: 'Kelas 10 (X)', jurusan: 'RPL', waliKelas: 'Bpk. Kurniawan, S.Kom', guruBK: 'Dra. Hj. Nurul Hidayati, M.Pd', studentCount: 36 },
-  { id: 2, name: 'X RPL 2', level: 'Kelas 10 (X)', jurusan: 'RPL', waliKelas: 'Ibu Sri Wahyuni, S.Kom', guruBK: 'Dra. Hj. Nurul Hidayati, M.Pd', studentCount: 36 },
-  { id: 3, name: 'X RPL 3', level: 'Kelas 10 (X)', jurusan: 'RPL', waliKelas: 'Bpk. Bayu Hendra, M.Kom', guruBK: 'Dra. Hj. Nurul Hidayati, M.Pd', studentCount: 35 },
-  { id: 4, name: 'X TSM 1', level: 'Kelas 10 (X)', jurusan: 'TSM', waliKelas: 'Bpk. Slamet Riyadi, S.T', guruBK: 'Bpk. Agus Wicaksono, S.Pd', studentCount: 36 },
-  { id: 5, name: 'X DKV 1', level: 'Kelas 10 (X)', jurusan: 'DKV', waliKelas: 'Ibu Dewi Larasati, S.Sn', guruBK: 'Bpk. Agus Wicaksono, S.Pd', studentCount: 34 },
-  { id: 6, name: 'XI RPL 1', level: 'Kelas 11 (XI)', jurusan: 'RPL', waliKelas: 'Bpk. Eko Sujarwo, S.Kom', guruBK: 'Dra. Hj. Nurul Hidayati, M.Pd', studentCount: 36 },
-  { id: 7, name: 'XI DKV 1', level: 'Kelas 11 (XI)', jurusan: 'DKV', waliKelas: 'Ibu Fitria Kusuma, S.Pd', guruBK: 'Ibu Ratih Anggraini, S.Psi', studentCount: 35 },
-  { id: 8, name: 'XII RPL 1', level: 'Kelas 12 (XII)', jurusan: 'RPL', waliKelas: 'Bpk. Hendro Santoso, M.Kom', guruBK: 'Bpk. Dwi Prasetyo, M.Pd', studentCount: 36 }
-])
+const kelasList = ref(props.initialKelasList ? [...props.initialKelasList] : [])
 
 watch(() => props.initialKelasList, (newVal) => {
   if (newVal && newVal.length > 0) {
@@ -3243,11 +3339,20 @@ watch(() => props.initialKelasList, (newVal) => {
 
 const formKelas = ref({
   level: 'Kelas 10 (X)',
+  jurusan_id: '',
   jurusan: 'RPL',
   name: '',
   waliKelas: '',
-  guruBK: 'Dra. Hj. Nurul Hidayati, M.Pd'
+  guruBkId: ''
 })
+
+const onJurusanSelectChange = () => {
+  const selected = jurusanList.value.find(j => j.id === formKelas.value.jurusan_id)
+  if (selected) {
+    formKelas.value.jurusan = selected.code
+  }
+  autoGenerateClassName()
+}
 
 const autoGenerateClassName = () => {
   const levelText = formKelas.value.level || 'Kelas 10 (X)'
@@ -3269,14 +3374,18 @@ const autoGenerateClassName = () => {
 }
 
 const saveKelas = () => {
-  const selectedGuru = guruBkList.value.find(g => g.name === formKelas.value.guruBK)
+  const selectedJurusan = jurusanList.value.find(j => j.id === formKelas.value.jurusan_id)
+  const jurCode = selectedJurusan ? selectedJurusan.code : (formKelas.value.jurusan || 'RPL')
+  const selectedGuru = guruBkList.value.find(g => g.id === formKelas.value.guruBkId)
+
   router.post('/admin/kelas', {
     name: formKelas.value.name,
     level: formKelas.value.level,
-    jurusan: formKelas.value.jurusan,
+    jurusan_id: formKelas.value.jurusan_id || null,
+    jurusan: jurCode,
     waliKelas: formKelas.value.waliKelas,
-    guruBK: formKelas.value.guruBK,
-    guruBkId: selectedGuru ? selectedGuru.id : null,
+    guruBkId: formKelas.value.guruBkId || null,
+    guruBK: selectedGuru ? selectedGuru.name : null,
   }, {
     preserveScroll: true,
     preserveState: true,
@@ -3290,24 +3399,39 @@ const saveKelas = () => {
 const formEditKelas = ref({
   id: null,
   level: 'Kelas 10 (X)',
+  jurusan_id: '',
   jurusan: 'RPL',
   name: '',
   waliKelas: '',
-  guruBK: '',
+  guruBkId: '',
   studentCount: 36
 })
 
 const editingKelas = ref(null)
 
+const onEditJurusanSelectChange = () => {
+  const selected = jurusanList.value.find(j => j.id === formEditKelas.value.jurusan_id)
+  if (selected) {
+    formEditKelas.value.jurusan = selected.code
+  }
+}
+
 const editKelas = (k) => {
   editingKelas.value = k
+  let jurId = k.jurusan_id
+  if (!jurId && k.jurusan) {
+    const match = jurusanList.value.find(j => j.code === k.jurusan)
+    if (match) jurId = match.id
+  }
+
   formEditKelas.value = {
     id: k.id,
     level: k.level,
+    jurusan_id: jurId || '',
     jurusan: k.jurusan,
     name: k.name,
     waliKelas: k.waliKelas,
-    guruBK: k.guruBK,
+    guruBkId: k.guruBkId || '',
     studentCount: k.studentCount || 36
   }
   modalType.value = 'edit-kelas'
@@ -3315,14 +3439,18 @@ const editKelas = (k) => {
 
 const updateKelas = () => {
   if (!editingKelas.value) return
-  const selectedGuru = guruBkList.value.find(g => g.name === formEditKelas.value.guruBK)
+  const selectedJurusan = jurusanList.value.find(j => j.id === formEditKelas.value.jurusan_id)
+  const jurCode = selectedJurusan ? selectedJurusan.code : formEditKelas.value.jurusan
+  const selectedGuru = guruBkList.value.find(g => g.id === formEditKelas.value.guruBkId)
+
   router.put(`/admin/kelas/${editingKelas.value.id}`, {
     name: formEditKelas.value.name,
     level: formEditKelas.value.level,
-    jurusan: formEditKelas.value.jurusan,
+    jurusan_id: formEditKelas.value.jurusan_id || null,
+    jurusan: jurCode,
     waliKelas: formEditKelas.value.waliKelas,
-    guruBK: formEditKelas.value.guruBK,
-    guruBkId: selectedGuru ? selectedGuru.id : null,
+    guruBkId: formEditKelas.value.guruBkId || null,
+    guruBK: selectedGuru ? selectedGuru.name : null,
   }, {
     preserveScroll: true,
     preserveState: true,
@@ -3377,7 +3505,10 @@ watch(() => props.initialSiswaList, (newVal) => {
 }, { deep: true })
 
 const totalSiswaCount = computed(() => {
-  return kelasList.value.reduce((acc, k) => acc + k.studentCount, 0)
+  if (props.stats && typeof props.stats.totalStudents === 'number') {
+    return props.stats.totalStudents
+  }
+  return siswaList.value.length
 })
 
 const filteredSiswaList = computed(() => {
@@ -3691,13 +3822,14 @@ const openModal = (type) => {
   if (type === 'guru') {
     formGuru.value = { name: '', nip: '', nuptk: '', jabatan: '', email: '', wa: '', rombelText: '' }
   } else if (type === 'kelas') {
-    const defaultJur = jurusanList.value[0]?.code || 'RPL'
+    const defaultJur = jurusanList.value[0]
     formKelas.value = {
       level: 'Kelas 10 (X)',
-      jurusan: defaultJur,
+      jurusan_id: defaultJur ? defaultJur.id : '',
+      jurusan: defaultJur ? defaultJur.code : 'RPL',
       name: '',
       waliKelas: '',
-      guruBK: guruBkList.value[0]?.name || ''
+      guruBkId: guruBkList.value[0]?.id || ''
     }
     autoGenerateClassName()
   } else if (type === 'jurusan') {
@@ -3741,36 +3873,11 @@ const searchConsultation = ref('')
 const filterConsultationStatus = ref('Semua')
 
 const syncConsultations = () => {
-  let localData = []
-  try {
-    localData = JSON.parse(localStorage.getItem('bk_prima_consultations') || '[]')
-  } catch (e) {
-    localData = []
-  }
-
-  const combined = [...localData]
   if (Array.isArray(props.consultations)) {
-    props.consultations.forEach(serverItem => {
-      const exists = combined.some(c => c.id === serverItem.id || (c.parent_name === serverItem.parent_name && c.student_name === serverItem.student_name && c.topic === serverItem.topic))
-      if (!exists) {
-        combined.push(serverItem)
-      }
-    })
+    consultationList.value = [...props.consultations]
+  } else {
+    consultationList.value = []
   }
-
-  if (combined.length === 0) {
-    combined.push({
-      id: 1,
-      parent_name: 'Bpk. Haryanto',
-      student_name: 'Muhammad Rizky Pratama (XI RPL 2)',
-      topic: 'Klarifikasi catatan kehadiran dan rencana bimbingan kedisiplinan ananda',
-      phone: '081234567890',
-      status: 'unread',
-      created_at: new Date(Date.now() - 3600000).toISOString()
-    })
-  }
-
-  consultationList.value = combined
 }
 
 const unreadConsultationCount = computed(() => {

@@ -11,6 +11,27 @@ class StoreViolationRequest extends FormRequest
         return true;
     }
 
+    protected function prepareForValidation(): void
+    {
+        $input = $this->all();
+
+        foreach (['student_id', 'points', 'poin', 'date', 'time', 'reporter', 'penalty_action', 'notes', 'foto_bukti', 'foto', 'photo_url'] as $key) {
+            if (isset($input[$key]) && ($input[$key] === 'null' || $input[$key] === 'undefined' || $input[$key] === '')) {
+                unset($input[$key]);
+            }
+        }
+
+        // Jika foto_bukti bukan UploadedFile tapi string 'null', hapus dari files
+        if ($this->hasFile('foto_bukti') === false && isset($input['foto_bukti'])) {
+            unset($input['foto_bukti']);
+        }
+        if ($this->hasFile('foto') === false && isset($input['foto'])) {
+            unset($input['foto']);
+        }
+
+        $this->replace($input);
+    }
+
     public function rules(): array
     {
         return [

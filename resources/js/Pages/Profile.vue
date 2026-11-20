@@ -1,40 +1,37 @@
 <template>
-  <AppLayout active-tab="profil" show-back>
-    <div class="max-w-4xl mx-auto space-y-5">
+  <AppLayout title="Profil Guru BK">
+    <div class="max-w-4xl mx-auto space-y-6">
 
-      <!-- Toast Notification -->
+      <!-- Toast Feedback -->
       <transition
-        enter-active-class="transform ease-out duration-300 transition"
-        enter-from-class="translate-y-2 opacity-0 sm:translate-y-0 sm:translate-x-2"
-        enter-to-class="translate-y-0 opacity-100 sm:translate-x-0"
-        leave-active-class="transition ease-in duration-100"
+        enter-active-class="transform transition ease-out duration-300"
+        enter-from-class="-translate-y-2 opacity-0"
+        enter-to-class="translate-y-0 opacity-100"
+        leave-active-class="transition ease-in duration-200"
         leave-from-class="opacity-100"
         leave-to-class="opacity-0"
       >
-        <div v-if="showToast" class="fixed top-20 right-4 sm:right-8 z-50 bg-white border border-slate-200 rounded-xl shadow-lg p-4 flex items-center gap-3 text-xs max-w-xs">
-          <div class="w-8 h-8 rounded-lg bg-emerald-500 text-white flex items-center justify-center shrink-0">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
-            </svg>
-          </div>
-          <div>
-            <p class="font-semibold text-slate-800">Profil berhasil disimpan</p>
-            <p class="text-slate-500 text-[11px] mt-0.5">Data Guru BK telah diperbarui.</p>
-          </div>
+        <div
+          v-if="showToast"
+          class="fixed top-5 right-5 z-50 flex items-center gap-2.5 bg-slate-900 text-white text-xs font-medium px-4 py-3 rounded-xl shadow-lg border border-slate-700"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-emerald-400" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+          </svg>
+          <span>{{ toastMessage }}</span>
         </div>
       </transition>
 
       <!-- Page Header -->
-      <div class="bg-white rounded-xl px-5 py-4 border border-slate-200 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <p class="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-0.5">Manajemen Akun</p>
-          <h1 class="text-lg font-bold text-slate-900">Profil Guru BK</h1>
-          <p class="text-xs text-slate-500 mt-0.5">Pembaruan biodata, kontak kedinasan &amp; rombel binaan</p>
+          <h2 class="text-lg sm:text-xl font-bold text-slate-800 tracking-tight">Pengaturan Profil &amp; Akun</h2>
+          <p class="text-xs text-slate-500 mt-0.5">Kelola identitas, foto profil, dan kredensial akses Guru BK</p>
         </div>
         <button
           @click="saveProfile"
           :disabled="isSaving"
-          class="self-start sm:self-auto inline-flex items-center gap-2 bg-slate-800 hover:bg-slate-700 disabled:opacity-60 text-white font-semibold px-4 py-2 rounded-lg text-xs transition cursor-pointer active:scale-95"
+          class="inline-flex items-center gap-2 px-4 py-2 bg-slate-800 hover:bg-slate-700 disabled:opacity-60 text-white font-semibold rounded-lg text-xs shadow-sm transition cursor-pointer active:scale-95"
         >
           <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
@@ -73,7 +70,7 @@
             <h3 class="text-sm sm:text-base font-bold text-slate-900">{{ form.name }}</h3>
             <p class="text-xs text-slate-500 mt-0.5">{{ form.jabatan || 'Guru Bimbingan Konseling' }}</p>
             <p class="text-xs text-slate-400">SMK PGRI 05 JEMBER</p>
-            <p class="text-[11px] text-slate-400 mt-2">Format JPG/PNG, maks. 2MB &bull; Disarankan foto resmi berseragam dinas.</p>
+            <p class="text-[11px] text-slate-400 mt-2">Format JPG/PNG, maks. 2MB. Disarankan foto resmi berseragam.</p>
           </div>
         </div>
       </div>
@@ -81,7 +78,7 @@
       <!-- Form Grid -->
       <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
 
-        <!-- Left: Data Kepegawaian -->
+        <!-- Left: Data Pendidik -->
         <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-5 space-y-4">
           <div class="flex items-center gap-2.5 pb-3 border-b border-slate-100">
             <div class="w-8 h-8 rounded-lg bg-slate-100 text-slate-500 flex items-center justify-center shrink-0">
@@ -91,11 +88,11 @@
             </div>
             <div>
               <p class="text-xs font-bold text-slate-800 leading-tight">Informasi Pokok Pendidik</p>
-              <p class="text-[11px] text-slate-400">Data resmi identitas kepegawaian</p>
+              <p class="text-[11px] text-slate-400">Identitas nama dan penugasan</p>
             </div>
           </div>
 
-          <!-- Nama -->
+          <!-- Nama Lengkap -->
           <div>
             <label class="block text-xs font-semibold text-slate-700 mb-1.5">Nama Lengkap &amp; Gelar</label>
             <div class="relative">
@@ -110,36 +107,6 @@
                 </svg>
               </span>
             </div>
-          </div>
-
-          <!-- NIP -->
-          <div>
-            <div class="flex items-center justify-between mb-1.5">
-              <label class="text-xs font-semibold text-slate-700">NIP</label>
-              <span class="inline-flex items-center gap-1 text-[10px] font-semibold text-slate-400 bg-slate-100 border border-slate-200 px-2 py-0.5 rounded-md">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                </svg>
-                Terkunci
-              </span>
-            </div>
-            <input
-              :value="form.nip"
-              type="text"
-              class="w-full bg-slate-100 border border-slate-200 rounded-lg px-3 py-2.5 text-xs font-mono text-slate-500 cursor-not-allowed select-none"
-              readonly
-            />
-            <p class="text-[10px] text-slate-400 mt-1">Hubungi Operator Sekolah / Dapodik jika perlu mengubah NIP.</p>
-          </div>
-
-          <!-- NUPTK -->
-          <div>
-            <label class="block text-xs font-semibold text-slate-700 mb-1.5">NUPTK</label>
-            <input
-              v-model="form.nuptk"
-              type="text"
-              class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2.5 text-xs font-mono text-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-300 focus:border-slate-400 focus:bg-white transition"
-            />
           </div>
 
           <!-- Jabatan -->
@@ -165,8 +132,8 @@
                 </svg>
               </div>
               <div>
-                <p class="text-xs font-bold text-slate-800 leading-tight">Kontak &amp; Panggilan BK</p>
-                <p class="text-[11px] text-slate-400">Komunikasi wali siswa &amp; kedinasan</p>
+                <p class="text-xs font-bold text-slate-800 leading-tight">Kontak &amp; Komunikasi</p>
+                <p class="text-[11px] text-slate-400">Komunikasi resmi wali siswa dan sekolah</p>
               </div>
             </div>
 
@@ -179,12 +146,12 @@
                 placeholder="+62 8xx-xxxx-xxxx"
                 class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2.5 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-300 focus:border-slate-400 focus:bg-white transition"
               />
-              <p class="text-[10px] text-slate-400 mt-1">Digunakan untuk panggilan &amp; surat pemanggilan wali murid.</p>
+              <p class="text-[10px] text-slate-400 mt-1">Digunakan untuk keperluan pemanggilan wali murid.</p>
             </div>
 
             <!-- Email -->
             <div>
-              <label class="block text-xs font-semibold text-slate-700 mb-1.5">Email Kedinasan (Belajar.id)</label>
+              <label class="block text-xs font-semibold text-slate-700 mb-1.5">Email Akun (Login)</label>
               <input
                 v-model="form.email"
                 type="email"
@@ -276,6 +243,61 @@
         </div>
       </div>
 
+      <!-- Ubah Password Card -->
+      <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-5 space-y-4">
+        <div class="flex items-center gap-2.5 pb-3 border-b border-slate-100">
+          <div class="w-8 h-8 rounded-lg bg-slate-100 text-slate-500 flex items-center justify-center shrink-0">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+            </svg>
+          </div>
+          <div>
+            <p class="text-xs font-bold text-slate-800 leading-tight">Keamanan Akun &amp; Kata Sandi</p>
+            <p class="text-[11px] text-slate-400">Perbarui kata sandi masuk Guru BK</p>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1.5">Password Saat Ini</label>
+            <input
+              v-model="passwordForm.current_password"
+              type="password"
+              placeholder="Masukkan password lama"
+              class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2.5 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-300 focus:border-slate-400 focus:bg-white transition"
+            />
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1.5">Password Baru</label>
+            <input
+              v-model="passwordForm.password"
+              type="password"
+              placeholder="Minimal 8 karakter"
+              class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2.5 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-300 focus:border-slate-400 focus:bg-white transition"
+            />
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1.5">Konfirmasi Password Baru</label>
+            <input
+              v-model="passwordForm.password_confirmation"
+              type="password"
+              placeholder="Ulangi password baru"
+              class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2.5 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-300 focus:border-slate-400 focus:bg-white transition"
+            />
+          </div>
+        </div>
+
+        <div class="flex justify-end pt-1">
+          <button
+            @click="changePassword"
+            :disabled="isChangingPassword"
+            class="px-4 py-2 bg-slate-800 hover:bg-slate-700 disabled:opacity-60 text-white font-semibold rounded-lg text-xs flex items-center gap-1.5 transition cursor-pointer"
+          >
+            <span>{{ isChangingPassword ? 'Memperbarui...' : 'Perbarui Password' }}</span>
+          </button>
+        </div>
+      </div>
+
       <!-- Footer Actions -->
       <div class="flex flex-col sm:flex-row gap-2.5 pt-1 pb-6">
         <button
@@ -316,24 +338,30 @@ const props = defineProps({
 })
 
 const showToast = ref(false)
+const toastMessage = ref('Profil Guru BK berhasil diperbarui!')
 const isSaving = ref(false)
+const isChangingPassword = ref(false)
 const fileInput = ref(null)
+const avatarFile = ref(null)
 const rombelInputRef = ref(null)
 const showRombelInput = ref(false)
 const newRombelInput = ref('')
 
 const DEFAULT_AVATAR = 'https://ui-avatars.com/api/?name=Guru+BK&background=e2e8f0&color=475569&bold=true&size=200'
-
 const avatarPreview = ref(DEFAULT_AVATAR)
 
 const form = ref({
   name: '',
-  nip: '',
-  nuptk: '',
   jabatan: '',
   wa: '',
   email: '',
   rombel: []
+})
+
+const passwordForm = ref({
+  current_password: '',
+  password: '',
+  password_confirmation: ''
 })
 
 onMounted(() => {
@@ -341,14 +369,14 @@ onMounted(() => {
     form.value.name    = props.profileUser.name    || ''
     form.value.email   = props.profileUser.email   || ''
     form.value.wa      = props.profileUser.phone   || ''
-    form.value.nip     = props.profileUser.nip     || ''
-    form.value.nuptk   = props.profileUser.nuptk   || ''
     form.value.jabatan = props.profileUser.jabatan || ''
     form.value.rombel  = Array.isArray(props.profileUser.rombel)
       ? [...props.profileUser.rombel]
       : []
 
-    if (form.value.name) {
+    if (props.profileUser.avatar_url) {
+      avatarPreview.value = props.profileUser.avatar_url
+    } else if (form.value.name) {
       avatarPreview.value = `https://ui-avatars.com/api/?name=${encodeURIComponent(form.value.name)}&background=e2e8f0&color=475569&bold=true&size=200`
     }
   }
@@ -383,6 +411,7 @@ const onFileChange = (e) => {
     alert('Ukuran file melebihi batas 2MB. Pilih foto yang lebih kecil.')
     return
   }
+  avatarFile.value = file
   const reader = new FileReader()
   reader.onload = (event) => {
     avatarPreview.value = event.target.result
@@ -392,15 +421,22 @@ const onFileChange = (e) => {
 
 const saveProfile = () => {
   isSaving.value = true
-  router.post('/profil', {
-    name:    form.value.name,
-    email:   form.value.email,
-    phone:   form.value.wa,
-    nuptk:   form.value.nuptk,
+  const payload = {
+    name: form.value.name,
+    email: form.value.email,
+    phone: form.value.wa,
     jabatan: form.value.jabatan,
-    rombel:  form.value.rombel,
-  }, {
+    rombel: form.value.rombel,
+  }
+
+  if (avatarFile.value) {
+    payload.avatar = avatarFile.value
+  }
+
+  router.post('/profil', payload, {
+    forceFormData: true,
     onSuccess: () => {
+      toastMessage.value = 'Profil Guru BK berhasil diperbarui!'
       showToast.value = true
       setTimeout(() => { showToast.value = false }, 3500)
     },
@@ -410,6 +446,44 @@ const saveProfile = () => {
     },
     onFinish: () => {
       isSaving.value = false
+    }
+  })
+}
+
+const changePassword = () => {
+  if (!passwordForm.value.current_password) {
+    alert('Password saat ini wajib diisi.')
+    return
+  }
+  if (!passwordForm.value.password || passwordForm.value.password.length < 8) {
+    alert('Password baru minimal 8 karakter.')
+    return
+  }
+  if (passwordForm.value.password !== passwordForm.value.password_confirmation) {
+    alert('Konfirmasi password baru tidak cocok.')
+    return
+  }
+
+  isChangingPassword.value = true
+  router.post('/profil/password', {
+    current_password: passwordForm.value.current_password,
+    password: passwordForm.value.password,
+    password_confirmation: passwordForm.value.password_confirmation,
+  }, {
+    onSuccess: () => {
+      passwordForm.value.current_password = ''
+      passwordForm.value.password = ''
+      passwordForm.value.password_confirmation = ''
+      toastMessage.value = 'Password akun berhasil diperbarui!'
+      showToast.value = true
+      setTimeout(() => { showToast.value = false }, 3500)
+    },
+    onError: (errors) => {
+      const firstError = Object.values(errors)[0]
+      if (firstError) alert(firstError)
+    },
+    onFinish: () => {
+      isChangingPassword.value = false
     }
   })
 }

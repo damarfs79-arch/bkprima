@@ -517,6 +517,42 @@
         </div>
       </div>
 
+      <!-- MODAL CARD KONFIRMASI HAPUS ATURAN / PEMUTIHAN -->
+      <div v-if="deleteConfirm.show" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs">
+        <div class="bg-white rounded-xl border border-slate-200 shadow-xl max-w-sm w-full p-6 text-center animate-in fade-in zoom-in-95 duration-150">
+          <div class="w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4 border bg-rose-50 text-rose-600 border-rose-200">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+            </svg>
+          </div>
+          <h3 class="text-base font-bold text-slate-800 mb-1">
+            {{ deleteConfirm.title }}
+          </h3>
+          <p class="text-xs text-slate-500 leading-relaxed">
+            {{ deleteConfirm.message }}
+          </p>
+          <div v-if="deleteConfirm.detail" class="mt-4 p-3 bg-slate-50 rounded-lg border border-slate-200 text-left text-xs">
+            <span class="font-bold text-slate-800">{{ deleteConfirm.detail }}</span>
+          </div>
+          <div class="flex items-center gap-3 mt-6">
+            <button
+              type="button"
+              @click="deleteConfirm.show = false"
+              class="flex-1 px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-lg text-xs transition cursor-pointer"
+            >
+              Batal
+            </button>
+            <button
+              type="button"
+              @click="executeConfirmedDelete"
+              class="flex-1 px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white font-semibold rounded-lg text-xs transition cursor-pointer flex items-center justify-center gap-1.5"
+            >
+              <span>{{ deleteConfirm.confirmText }}</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
     </div>
   </AppLayout>
 </template>
@@ -675,9 +711,25 @@ const submitRuleForm = () => {
   }
 }
 
-const deleteRule = (id) => {
-  if (confirm('Yakin ingin menghapus aturan tata tertib ini?')) {
-    router.delete(`/panduan/aturan/${id}`, { preserveScroll: true })
+const deleteConfirm = ref({
+  show: false,
+  title: '',
+  message: '',
+  detail: '',
+  confirmText: 'Ya, Hapus',
+  action: null
+})
+
+const deleteRule = (ruleOrId) => {
+  const id = typeof ruleOrId === 'object' ? ruleOrId.id : ruleOrId
+  const name = typeof ruleOrId === 'object' ? ruleOrId.name : 'aturan tata tertib ini'
+  deleteConfirm.value = {
+    show: true,
+    title: 'Hapus Aturan Tata Tertib',
+    message: 'Apakah Anda yakin ingin menghapus aturan tata tertib ini dari sistem?',
+    detail: name,
+    confirmText: 'Ya, Hapus Aturan',
+    action: () => router.delete(`/panduan/aturan/${id}`, { preserveScroll: true })
   }
 }
 
@@ -698,9 +750,23 @@ const submitDeductionForm = () => {
   })
 }
 
-const deleteDeduction = (id) => {
-  if (confirm('Hapus catatan pemutihan poin ini? Poin siswa akan dikalkulasi ulang.')) {
-    router.delete(`/panduan/pemutihan/${id}`, { preserveScroll: true })
+const deleteDeduction = (itemOrId) => {
+  const id = typeof itemOrId === 'object' ? itemOrId.id : itemOrId
+  const student = typeof itemOrId === 'object' ? (itemOrId.student_name || 'siswa') : 'siswa'
+  deleteConfirm.value = {
+    show: true,
+    title: 'Hapus Catatan Pemutihan',
+    message: 'Apakah Anda yakin ingin menghapus catatan pemutihan poin ini? Poin siswa akan dikalkulasi ulang.',
+    detail: `Pemutihan poin untuk: ${student}`,
+    confirmText: 'Ya, Hapus Catatan',
+    action: () => router.delete(`/panduan/pemutihan/${id}`, { preserveScroll: true })
   }
+}
+
+const executeConfirmedDelete = () => {
+  if (typeof deleteConfirm.value.action === 'function') {
+    deleteConfirm.value.action()
+  }
+  deleteConfirm.value.show = false
 }
 </script>

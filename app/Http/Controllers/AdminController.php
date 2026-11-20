@@ -20,7 +20,7 @@ class AdminController extends Controller
             'totalStudents' => Student::count(),
             'totalViolations' => Violation::count(),
             'activeUsers' => User::count(),
-            'systemHealth' => '99.9%',
+            'systemHealth' => '100%',
         ];
 
         $consultationRequests = ConsultationRequest::orderBy('created_at', 'desc')->get();
@@ -35,57 +35,44 @@ class AdminController extends Controller
                     'id' => $u->id,
                     'name' => $u->name,
                     'username' => $u->username ?? '',
-                    'nip' => $u->nip ?? '-',
-                    'nuptk' => $u->nuptk ?? '-',
+                    'avatar' => $u->avatar,
+                    'avatar_url' => $u->avatar_url,
                     'jabatan' => $u->jabatan ?? 'Guru Pembimbing BK',
                     'email' => $u->email,
-                    'wa' => $u->phone ?? '+62 8...',
-                    'rombel' => $u->rombel ? array_map('trim', explode(',', $u->rombel)) : ['X RPL 1'],
+                    'wa' => $u->phone ?? '-',
+                    'rombel' => $u->rombel ? array_map('trim', explode(',', $u->rombel)) : [],
                 ];
             });
 
-        // 2. Auto-seed default classrooms jika kosong
-        if (Classroom::count() === 0) {
-            $firstGuru = User::where('role', 'guru')->first();
-            $guruName = $firstGuru ? $firstGuru->name : 'Dra. Hj. Nurul Hidayati, M.Pd';
-            $guruId = $firstGuru ? $firstGuru->id : null;
-
-            $defaultClasses = [
-                ['name' => 'X RPL 1', 'level' => 'Kelas 10 (X)', 'major' => 'RPL', 'wali_kelas' => 'Bpk. Kurniawan, S.Kom', 'guru_bk_id' => $guruId, 'guru_bk_name' => $guruName],
-                ['name' => 'X RPL 2', 'level' => 'Kelas 10 (X)', 'major' => 'RPL', 'wali_kelas' => 'Bpk. Suherman, S.Pd', 'guru_bk_id' => $guruId, 'guru_bk_name' => $guruName],
-                ['name' => 'X RPL 3', 'level' => 'Kelas 10 (X)', 'major' => 'RPL', 'wali_kelas' => 'Ibu Maya, S.Kom', 'guru_bk_id' => $guruId, 'guru_bk_name' => $guruName],
-                ['name' => 'X TSM 1', 'level' => 'Kelas 10 (X)', 'major' => 'TSM', 'wali_kelas' => 'Bpk. Joko, S.T', 'guru_bk_id' => $guruId, 'guru_bk_name' => $guruName],
-                ['name' => 'X TSM 2', 'level' => 'Kelas 10 (X)', 'major' => 'TSM', 'wali_kelas' => 'Bpk. Dedi, S.Pd', 'guru_bk_id' => $guruId, 'guru_bk_name' => $guruName],
-                ['name' => 'X DKV 1', 'level' => 'Kelas 10 (X)', 'major' => 'DKV', 'wali_kelas' => 'Ibu Sinta, S.Ds', 'guru_bk_id' => $guruId, 'guru_bk_name' => $guruName],
-                ['name' => 'X DKV 2', 'level' => 'Kelas 10 (X)', 'major' => 'DKV', 'wali_kelas' => 'Bpk. Fajar, S.Kom', 'guru_bk_id' => $guruId, 'guru_bk_name' => $guruName],
-                ['name' => 'XI RPL 1', 'level' => 'Kelas 11 (XI)', 'major' => 'RPL', 'wali_kelas' => 'Ibu Rina, S.Kom', 'guru_bk_id' => $guruId, 'guru_bk_name' => $guruName],
-            ];
-
-            foreach ($defaultClasses as $dc) {
-                Classroom::create($dc);
+        // 2. Ambil data Kelas / Rombel dari database
+        $kelasList = Classroom::with(['guruBk', 'jurusan'])->withCount('students')->orderBy('name')->get()->map(function ($c) {
+            $guruName = '-';
+            if ($c->guruBk && $c->guruBk->role === 'guru') {
+                $guruName = $c->guruBk->name;
+            } elseif (!empty($c->guru_bk_name) && $c->guru_bk_name !== 'Admin IT Sekolah') {
+                $guruName = $c->guru_bk_name;
             }
-        }
 
-        // 3. Ambil data Kelas / Rombel dari database
-        $kelasList = Classroom::with('guruBk')->orderBy('name')->get()->map(function ($c) {
-            $count = Student::where('class_name', $c->name)->count();
             return [
                 'id' => $c->id,
                 'name' => $c->name,
                 'level' => $c->level,
                 'jurusan' => $c->major,
+                'jurusan_id' => $c->jurusan_id,
+                'jurusan_nama' => $c->jurusan ? $c->jurusan->name : $c->major,
                 'waliKelas' => $c->wali_kelas ?? '-',
-                'guruBK' => $c->guru_bk_name ?? ($c->guruBk ? $c->guruBk->name : '-'),
-                'guruBkId' => $c->guru_bk_id,
-                'studentCount' => $count,
+                'guruBK' => $guruName,
+                'guruBkId' => ($c->guruBk && $c->guruBk->role === 'guru') ? $c->guru_bk_id : null,
+                'studentCount' => $c->students_count,
             ];
         });
 
-        // 4. Ambil data Siswa dari database
+        // 3. Ambil data Siswa dari database
         $siswaList = Student::orderBy('class_name')->orderBy('name')->get()->map(function ($s) {
             return [
                 'id' => $s->id,
-                'nisn' => $s->nisn,
+                'nis' => $s->nis,
+                'nisn' => $s->nis,
                 'name' => $s->name,
                 'className' => $s->class_name,
                 'gender' => $s->gender,
@@ -95,83 +82,96 @@ class AdminController extends Controller
             ];
         });
 
-        // 5. Auto-seed default majors jika kosong
-        if (Major::count() === 0) {
-            $defaultMajors = [
-                ['code' => 'RPL', 'name' => 'Rekayasa Perangkat Lunak / PPLG', 'description' => 'Pengembangan software, web, mobile, dan game'],
-                ['code' => 'TSM', 'name' => 'Teknik Sepeda Motor', 'description' => 'Teknik otomotif kendaraan roda dua dan mekanik'],
-                ['code' => 'DKV', 'name' => 'Desain Komunikasi Visual', 'description' => 'Kreatif grafis, animasi, video editing, dan media digital'],
-                ['code' => 'TKJ', 'name' => 'Teknik Komputer & Jaringan', 'description' => 'Infrastruktur jaringan, routing, server, dan cyber security'],
-                ['code' => 'AKL', 'name' => 'Akuntansi & Keuangan Lembaga', 'description' => 'Pembukuan keuangan, perpajakan, dan perbankan'],
-                ['code' => 'OTKP', 'name' => 'Otomatisasi & Tata Kelola Perkantoran', 'description' => 'Manajemen perkantoran, administrasi bisnis, dan korespondensi'],
-            ];
-            foreach ($defaultMajors as $dm) {
-                Major::create($dm);
-            }
-        }
-
         $jurusanList = Major::orderBy('code')->get();
+
+        // 4. Hitung statistik presensi aktual dari database
+        $totalAttendances = \App\Models\Attendance::count();
+        $hadirCount = \App\Models\Attendance::where('status', 'Hadir')->count();
+        $sakitCount = \App\Models\Attendance::where('status', 'Sakit')->count();
+        $izinCount = \App\Models\Attendance::where('status', 'Izin')->count();
+        $alphaCount = \App\Models\Attendance::where('status', 'Alpa')->count();
+
+        $hadirRate = $totalAttendances > 0 ? round(($hadirCount / $totalAttendances) * 100, 1) : 0;
+        $sakitRate = $totalAttendances > 0 ? round(($sakitCount / $totalAttendances) * 100, 1) : 0;
+        $izinRate = $totalAttendances > 0 ? round(($izinCount / $totalAttendances) * 100, 1) : 0;
+        $alphaRate = $totalAttendances > 0 ? round(($alphaCount / $totalAttendances) * 100, 1) : 0;
+
+        $attendanceStats = [
+            'totalPresensi' => $totalAttendances,
+            'hadirCount' => $hadirCount,
+            'sakitCount' => $sakitCount,
+            'izinCount' => $izinCount,
+            'alphaCount' => $alphaCount,
+            'hadirRate' => $hadirRate,
+            'sakitRate' => $sakitRate,
+            'izinRate' => $izinRate,
+            'alphaRate' => $alphaRate,
+        ];
 
         return Inertia::render('AdminDashboard', [
             'stats' => $stats,
+            'attendanceStats' => $attendanceStats,
             'consultations' => $consultationRequests,
             'unreadConsultationsCount' => $unreadConsultationsCount,
             'initialGuruBkList' => $guruBkList,
             'initialKelasList' => $kelasList,
             'initialSiswaList' => $siswaList,
             'initialJurusanList' => $jurusanList,
+            'settings' => \App\Models\Setting::getAll(),
         ]);
     }
 
     public function storeGuru(Request $request)
     {
-        $rawUsername = trim((string)$request->input('username', ''));
-        if (empty($rawUsername) || $rawUsername === '-') {
-            $baseUser = preg_replace('/[^a-z0-9]/', '', strtolower($request->input('name', 'guru_bk')));
+        $rawEmail = strtolower(trim((string)$request->input('email', '')));
+        $rawPassword = (string)$request->input('password', '');
+        if (empty($rawPassword)) {
+            $rawPassword = '123456';
+        }
+
+        $baseUser = explode('@', $rawEmail)[0] ?? '';
+        $baseUser = preg_replace('/[^a-z0-9_]/', '', strtolower($baseUser));
+        if (empty($baseUser)) {
+            $baseUser = preg_replace('/[^a-z0-9_]/', '', strtolower($request->input('name', 'guru_bk')));
             if (empty($baseUser)) $baseUser = 'guru_bk';
-            $rawUsername = $baseUser;
-            $counter = 1;
-            while (User::where('username', $rawUsername)->exists()) {
-                $rawUsername = $baseUser . $counter++;
-            }
-        } else {
-            $rawUsername = strtolower($rawUsername);
+        }
+        $rawUsername = $baseUser;
+        $counter = 1;
+        while (User::where('username', $rawUsername)->exists()) {
+            $rawUsername = $baseUser . $counter++;
         }
 
         $request->merge([
+            'email' => $rawEmail,
             'username' => $rawUsername,
-            'password' => !empty($request->input('password')) ? $request->input('password') : '123456',
+            'password' => $rawPassword,
             'jabatan' => !empty(trim((string)$request->input('jabatan', ''))) ? trim($request->input('jabatan')) : 'Guru BK',
-            'nip' => !empty(trim((string)$request->input('nip', ''))) ? trim($request->input('nip')) : '-',
-            'nuptk' => !empty(trim((string)$request->input('nuptk', ''))) ? trim($request->input('nuptk')) : '-',
             'wa' => !empty(trim((string)$request->input('wa', ''))) ? trim($request->input('wa')) : '-',
-            'email' => !empty(trim((string)$request->input('email', ''))) && $request->input('email') !== '-' ? trim($request->input('email')) : ($rawUsername . '@guru.smk.belajar.id'),
             'rombelText' => !empty(trim((string)$request->input('rombelText', ''))) ? trim($request->input('rombelText')) : '-',
         ]);
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'username' => 'required|string|max:50|unique:users,username',
+            'email' => 'required|email|max:255|unique:users,email',
+            'username' => 'nullable|string|max:50',
             'password' => 'required|string|min:6',
-            'nip' => 'nullable|string|max:50',
-            'nuptk' => 'nullable|string|max:50',
             'jabatan' => 'nullable|string|max:255',
-            'email' => 'nullable|string|max:255',
             'wa' => 'nullable|string|max:30',
             'rombelText' => 'nullable|string',
+        ], [
+            'name.required' => 'Nama lengkap wajib diisi.',
+            'email.required' => 'Email wajib diisi.',
+            'email.email' => 'Format email tidak valid.',
+            'email.unique' => 'Email sudah terdaftar. Silakan gunakan email lain.',
+            'password.min' => 'Kata sandi minimal 6 karakter.',
         ]);
-
-        $username = $validated['username'];
-        $email = $validated['email'];
 
         $user = User::create([
             'name' => $validated['name'],
-            'username' => $username,
-            'email' => $email,
+            'username' => $rawUsername,
+            'email' => $validated['email'],
             'password' => Hash::make($validated['password']),
             'role' => 'guru',
-            'nip' => $validated['nip'] ?? '-',
-            'nuptk' => $validated['nuptk'] ?? '-',
             'jabatan' => $validated['jabatan'] ?? 'Guru BK',
             'phone' => $validated['wa'] ?? '-',
             'rombel' => $validated['rombelText'] ?? '-',
@@ -195,8 +195,8 @@ class AdminController extends Controller
                     'id' => $user->id,
                     'name' => $user->name,
                     'username' => $user->username,
-                    'nip' => $user->nip,
-                    'nuptk' => $user->nuptk,
+                    'avatar' => $user->avatar,
+                    'avatar_url' => $user->avatar_url,
                     'jabatan' => $user->jabatan,
                     'email' => $user->email,
                     'wa' => $user->phone,
@@ -205,51 +205,40 @@ class AdminController extends Controller
             ]);
         }
 
-        return redirect()->back()->with('success', 'Akun Guru BK ' . $user->name . ' (@' . $user->username . ') berhasil dibuat!');
+        return redirect()->back()->with('success', 'Akun Guru BK ' . $user->name . ' (' . $user->email . ') berhasil dibuat!');
     }
 
     public function updateGuru(Request $request, $id)
     {
         $user = User::findOrFail($id);
 
-        $rawUsername = trim((string)$request->input('username', ''));
-        if (empty($rawUsername) || $rawUsername === '-') {
-            $rawUsername = $user->username;
-        } else {
-            $rawUsername = strtolower($rawUsername);
-        }
+        $rawEmail = strtolower(trim((string)$request->input('email', $user->email)));
 
         $request->merge([
-            'username' => $rawUsername,
+            'email' => $rawEmail,
             'jabatan' => !empty(trim((string)$request->input('jabatan', ''))) ? trim($request->input('jabatan')) : ($user->jabatan ?: 'Guru BK'),
-            'nip' => !empty(trim((string)$request->input('nip', ''))) ? trim($request->input('nip')) : '-',
-            'nuptk' => !empty(trim((string)$request->input('nuptk', ''))) ? trim($request->input('nuptk')) : '-',
             'wa' => !empty(trim((string)$request->input('wa', ''))) ? trim($request->input('wa')) : '-',
-            'email' => !empty(trim((string)$request->input('email', ''))) && $request->input('email') !== '-' ? trim($request->input('email')) : $user->email,
             'rombelText' => !empty(trim((string)$request->input('rombelText', ''))) ? trim($request->input('rombelText')) : '-',
         ]);
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'username' => 'required|string|max:50|unique:users,username,' . $user->id,
+            'email' => 'required|email|max:255|unique:users,email,' . $user->id,
             'password' => 'nullable|string|min:6',
-            'nip' => 'nullable|string|max:50',
-            'nuptk' => 'nullable|string|max:50',
             'jabatan' => 'nullable|string|max:255',
-            'email' => 'nullable|string|max:255',
             'wa' => 'nullable|string|max:30',
             'rombelText' => 'nullable|string',
+        ], [
+            'name.required' => 'Nama lengkap wajib diisi.',
+            'email.required' => 'Email wajib diisi.',
+            'email.email' => 'Format email tidak valid.',
+            'email.unique' => 'Email sudah digunakan oleh akun lain.',
+            'password.min' => 'Kata sandi minimal 6 karakter.',
         ]);
-
-        $username = $validated['username'];
-        $email = $validated['email'];
 
         $updateData = [
             'name' => $validated['name'],
-            'username' => $username,
-            'email' => $email,
-            'nip' => $validated['nip'] ?? '-',
-            'nuptk' => $validated['nuptk'] ?? '-',
+            'email' => $validated['email'],
             'jabatan' => $validated['jabatan'] ?? 'Guru BK',
             'phone' => $validated['wa'] ?? '-',
             'rombel' => $validated['rombelText'] ?? '-',
@@ -284,8 +273,8 @@ class AdminController extends Controller
                     'id' => $user->id,
                     'name' => $user->name,
                     'username' => $user->username,
-                    'nip' => $user->nip,
-                    'nuptk' => $user->nuptk,
+                    'avatar' => $user->avatar,
+                    'avatar_url' => $user->avatar_url,
                     'jabatan' => $user->jabatan,
                     'email' => $user->email,
                     'wa' => $user->phone,
@@ -318,27 +307,41 @@ class AdminController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:50',
             'level' => 'required|string|max:50',
-            'jurusan' => 'required|string|max:50',
+            'jurusan_id' => 'nullable|exists:majors,id',
+            'jurusan' => 'nullable|string|max:50',
             'waliKelas' => 'required|string|max:255',
             'guruBK' => 'nullable|string|max:255',
             'guruBkId' => 'nullable|exists:users,id',
         ]);
 
         $className = strtoupper(trim($validated['name']));
-        $majorCode = strtoupper(trim($validated['jurusan']));
 
-        // Otomatis pastikan jurusan terdaftar jika pengguna mengetik jurusan baru
-        Major::firstOrCreate(
-            ['code' => $majorCode],
-            ['name' => $majorCode, 'description' => 'Program Keahlian ' . $majorCode]
-        );
+        // Cari atau buat Jurusan
+        $jurusanId = null;
+        $majorCode = '';
+        if (!empty($validated['jurusan_id'])) {
+            $major = Major::find($validated['jurusan_id']);
+            if ($major) {
+                $jurusanId = $major->id;
+                $majorCode = $major->code;
+            }
+        }
 
-        // Cari Guru BK
+        if (empty($majorCode) && !empty($validated['jurusan'])) {
+            $majorCode = strtoupper(trim($validated['jurusan']));
+            $major = Major::firstOrCreate(
+                ['code' => $majorCode],
+                ['name' => $majorCode, 'description' => 'Program Keahlian ' . $majorCode]
+            );
+            $jurusanId = $major->id;
+        }
+
+        // Cari Guru BK yang valid (hanya user dengan role 'guru')
         $guruUser = null;
         if (!empty($validated['guruBkId'])) {
-            $guruUser = User::find($validated['guruBkId']);
+            $guruUser = User::where('id', $validated['guruBkId'])->where('role', 'guru')->first();
         } elseif (!empty($validated['guruBK'])) {
-            $guruUser = User::where('name', $validated['guruBK'])->first();
+            $guruUser = User::where('name', $validated['guruBK'])->where('role', 'guru')->first();
         }
 
         $classroom = Classroom::updateOrCreate(
@@ -346,9 +349,10 @@ class AdminController extends Controller
             [
                 'level' => $validated['level'],
                 'major' => $majorCode,
+                'jurusan_id' => $jurusanId,
                 'wali_kelas' => $validated['waliKelas'],
                 'guru_bk_id' => $guruUser ? $guruUser->id : null,
-                'guru_bk_name' => $guruUser ? $guruUser->name : ($validated['guruBK'] ?? null),
+                'guru_bk_name' => $guruUser ? $guruUser->name : null,
             ]
         );
 
@@ -369,6 +373,7 @@ class AdminController extends Controller
                     'name' => $classroom->name,
                     'level' => $classroom->level,
                     'jurusan' => $classroom->major,
+                    'jurusan_id' => $classroom->jurusan_id,
                     'waliKelas' => $classroom->wali_kelas,
                     'guruBK' => $classroom->guru_bk_name,
                     'guruBkId' => $classroom->guru_bk_id,
@@ -387,36 +392,54 @@ class AdminController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:50',
             'level' => 'required|string|max:50',
-            'jurusan' => 'required|string|max:50',
+            'jurusan_id' => 'nullable|exists:majors,id',
+            'jurusan' => 'nullable|string|max:50',
             'waliKelas' => 'required|string|max:255',
             'guruBK' => 'nullable|string|max:255',
             'guruBkId' => 'nullable|exists:users,id',
         ]);
 
         $className = strtoupper(trim($validated['name']));
-        $majorCode = strtoupper(trim($validated['jurusan']));
 
-        Major::firstOrCreate(
-            ['code' => $majorCode],
-            ['name' => $majorCode, 'description' => 'Program Keahlian ' . $majorCode]
-        );
+        // Cari atau buat Jurusan
+        $jurusanId = null;
+        $majorCode = '';
+        if (!empty($validated['jurusan_id'])) {
+            $major = Major::find($validated['jurusan_id']);
+            if ($major) {
+                $jurusanId = $major->id;
+                $majorCode = $major->code;
+            }
+        }
 
-        // Cari Guru BK
+        if (empty($majorCode) && !empty($validated['jurusan'])) {
+            $majorCode = strtoupper(trim($validated['jurusan']));
+            $major = Major::firstOrCreate(
+                ['code' => $majorCode],
+                ['name' => $majorCode, 'description' => 'Program Keahlian ' . $majorCode]
+            );
+            $jurusanId = $major->id;
+        }
+
+        // Cari Guru BK yang valid (hanya user dengan role 'guru')
         $guruUser = null;
         if (!empty($validated['guruBkId'])) {
-            $guruUser = User::find($validated['guruBkId']);
+            $guruUser = User::where('id', $validated['guruBkId'])->where('role', 'guru')->first();
         } elseif (!empty($validated['guruBK'])) {
-            $guruUser = User::where('name', $validated['guruBK'])->first();
+            $guruUser = User::where('name', $validated['guruBK'])->where('role', 'guru')->first();
         }
 
         $oldName = $classroom->name;
+        $oldGuruBkId = $classroom->guru_bk_id;
+
         $classroom->update([
             'name' => $className,
             'level' => $validated['level'],
-            'major' => $validated['jurusan'],
+            'major' => $majorCode,
+            'jurusan_id' => $jurusanId,
             'wali_kelas' => $validated['waliKelas'],
             'guru_bk_id' => $guruUser ? $guruUser->id : null,
-            'guru_bk_name' => $guruUser ? $guruUser->name : ($validated['guruBK'] ?? null),
+            'guru_bk_name' => $guruUser ? $guruUser->name : null,
         ]);
 
         // Sinkronisasi data siswa jika nama rombel kelas diperbarui
@@ -424,17 +447,29 @@ class AdminController extends Controller
             Student::where('class_name', $oldName)->update([
                 'class_name' => $className,
                 'level' => $validated['level'],
-                'major' => $validated['jurusan'],
+                'major' => $majorCode,
             ]);
         }
 
-        // Sinkronisasi rombel Guru BK
+        // Jika Guru BK berubah, bersihkan nama kelas dari rombel guru lama
+        if ($oldGuruBkId && (!$guruUser || $guruUser->id !== $oldGuruBkId)) {
+            $oldGuru = User::find($oldGuruBkId);
+            if ($oldGuru && !empty($oldGuru->rombel)) {
+                $oldRombels = array_map('trim', explode(',', $oldGuru->rombel));
+                $filtered = array_filter($oldRombels, fn($r) => $r !== $oldName && $r !== $className);
+                $oldGuru->update(['rombel' => implode(', ', array_values($filtered))]);
+            }
+        }
+
+        // Sinkronisasi rombel Guru BK baru
         if ($guruUser) {
             $currentRombels = !empty($guruUser->rombel) ? array_map('trim', explode(',', $guruUser->rombel)) : [];
+            // Ganti nama lama dengan nama baru jika ada
+            $currentRombels = array_map(fn($r) => ($r === $oldName ? $className : $r), $currentRombels);
             if (!in_array($className, $currentRombels)) {
                 $currentRombels[] = $className;
-                $guruUser->update(['rombel' => implode(', ', array_filter(array_unique($currentRombels)))]);
             }
+            $guruUser->update(['rombel' => implode(', ', array_filter(array_unique($currentRombels)))]);
         }
 
         if ($request->wantsJson()) {
@@ -472,15 +507,18 @@ class AdminController extends Controller
 
     public function storeStudent(Request $request)
     {
+        $rawNis = trim((string)($request->input('nis') ?: $request->input('nisn') ?: ''));
+        $request->merge(['nis' => $rawNis]);
+
         $request->validate([
-            'nisn' => 'required|string|max:50|unique:students,nisn',
+            'nis' => 'required|string|max:50|unique:students,nis',
             'name' => 'required|string|max:255',
             'className' => 'required|string|max:100',
             'gender' => 'required|in:L,P',
             'parentWa' => 'nullable|string|max:50',
         ], [
-            'nisn.required' => 'NISN wajib diisi.',
-            'nisn.unique' => 'NISN sudah terdaftar.',
+            'nis.required' => 'NIS wajib diisi.',
+            'nis.unique' => 'NIS sudah terdaftar.',
             'name.required' => 'Nama lengkap siswa wajib diisi.',
             'className.required' => 'Kelas rombel wajib dipilih.',
         ]);
@@ -513,8 +551,11 @@ class AdminController extends Controller
             ]
         );
 
+        $rombelParts = explode(' ', trim($className));
+        $rombel = end($rombelParts);
+
         $student = Student::create([
-            'nisn' => trim($request->input('nisn')),
+            'nis' => $rawNis,
             'name' => trim($request->input('name')),
             'class_name' => $className,
             'level' => $level,
@@ -523,7 +564,8 @@ class AdminController extends Controller
             'parent_phone' => $request->input('parentWa') ?: null,
             'parent_name' => 'Orang Tua ' . trim($request->input('name')),
             'total_violation_points' => 0,
-            'status' => 'Aman',
+            'rombel' => $rombel,
+            'status' => 'aktif',
         ]);
 
         if ($request->wantsJson()) {
@@ -537,16 +579,19 @@ class AdminController extends Controller
     {
         $student = Student::findOrFail($id);
 
+        $rawNis = trim((string)($request->input('nis') ?: $request->input('nisn') ?: $student->nis));
+        $request->merge(['nis' => $rawNis]);
+
         $request->validate([
-            'nisn' => 'required|string|max:50|unique:students,nisn,' . $student->id,
+            'nis' => 'required|string|max:50|unique:students,nis,' . $student->id,
             'name' => 'required|string|max:255',
             'className' => 'required|string|max:100',
             'gender' => 'required|in:L,P',
             'parentWa' => 'nullable|string|max:50',
             'poin' => 'nullable|integer|min:0',
         ], [
-            'nisn.required' => 'NISN wajib diisi.',
-            'nisn.unique' => 'NISN sudah digunakan oleh siswa lain.',
+            'nis.required' => 'NIS wajib diisi.',
+            'nis.unique' => 'NIS sudah digunakan oleh siswa lain.',
             'name.required' => 'Nama lengkap siswa wajib diisi.',
             'className.required' => 'Kelas rombel wajib dipilih.',
         ]);
@@ -579,8 +624,11 @@ class AdminController extends Controller
             ]
         );
 
+        $rombelParts = explode(' ', trim($className));
+        $rombel = end($rombelParts);
+
         $student->update([
-            'nisn' => trim($request->input('nisn')),
+            'nis' => $rawNis,
             'name' => trim($request->input('name')),
             'class_name' => $className,
             'level' => $level,
@@ -588,6 +636,7 @@ class AdminController extends Controller
             'gender' => $request->input('gender'),
             'parent_phone' => $request->input('parentWa') ?: null,
             'total_violation_points' => $request->has('poin') ? (int)$request->input('poin') : $student->total_violation_points,
+            'rombel' => $rombel,
         ]);
 
         if ($request->wantsJson()) {
@@ -666,7 +715,7 @@ class AdminController extends Controller
                 continue;
             }
 
-            $nisn = !empty($item['nisn']) ? trim((string)$item['nisn']) : 'NISN' . rand(10000000, 99999999);
+            $nis = !empty($item['nis']) ? trim((string)$item['nis']) : (!empty($item['nisn']) ? trim((string)$item['nisn']) : 'NIS' . rand(10000000, 99999999));
             
             $className = ($targetClass !== 'AUTO' && !empty($targetClass))
                 ? strtoupper(trim($targetClass))
@@ -702,8 +751,11 @@ class AdminController extends Controller
 
             $parentPhone = !empty($item['parentWa']) && $item['parentWa'] !== '-' ? $item['parentWa'] : ($item['parent_phone'] ?? null);
 
+            $rombelParts = explode(' ', trim($className));
+            $rombel = end($rombelParts);
+
             Student::updateOrCreate(
-                ['nisn' => $nisn],
+                ['nis' => $nis],
                 [
                     'name' => trim($item['name']),
                     'class_name' => $className,
@@ -712,7 +764,8 @@ class AdminController extends Controller
                     'gender' => in_array(strtoupper($item['gender'] ?? 'L'), ['L', 'P']) ? strtoupper($item['gender']) : 'L',
                     'parent_phone' => $parentPhone,
                     'parent_name' => $item['parent_name'] ?? ('Orang Tua ' . trim($item['name'])),
-                    'status' => 'Aman',
+                    'rombel' => $rombel,
+                    'status' => 'aktif',
                 ]
             );
 
@@ -1001,6 +1054,7 @@ class AdminController extends Controller
             }
 
             $students[] = [
+                'nis' => $nisn,
                 'nisn' => $nisn,
                 'name' => $name,
                 'className' => $className,
@@ -1088,9 +1142,10 @@ class AdminController extends Controller
         $oldCode = $major->code;
         $major->update($validated);
 
-        // Jika kode jurusan diubah, perbarui juga rombel kelas yang terikat
+        // Jika kode jurusan diubah, perbarui juga rombel kelas dan siswa yang terikat
         if ($oldCode !== $major->code) {
             Classroom::where('major', $oldCode)->update(['major' => $major->code]);
+            Student::where('major', $oldCode)->update(['major' => $major->code]);
         }
 
         if ($request->wantsJson()) {
@@ -1105,14 +1160,33 @@ class AdminController extends Controller
         $major = Major::findOrFail($id);
         $code = $major->code;
 
-        // Cek apakah masih digunakan oleh rombel kelas aktif
-        $usedCount = Classroom::where('major', $code)->count();
-        if ($usedCount > 0) {
-            return redirect()->back()->with('error', "Jurusan {$code} tidak dapat dihapus karena masih digunakan oleh {$usedCount} rombel kelas.");
+        // Cek apakah masih digunakan oleh rombel kelas aktif atau siswa
+        $usedClasses = $major->classrooms()->count();
+        $usedStudents = $major->students()->count();
+        if ($usedClasses > 0 || $usedStudents > 0) {
+            return redirect()->back()->with('error', "Jurusan {$code} tidak dapat dihapus karena masih digunakan oleh {$usedClasses} rombel kelas dan {$usedStudents} data siswa.");
         }
 
         $major->delete();
 
         return redirect()->back()->with('success', 'Jurusan ' . $code . ' berhasil dihapus.');
+    }
+
+    public function updateSettings(Request $request)
+    {
+        $validated = $request->validate([
+            'kepala_sekolah' => 'required|string|max:255',
+            'nip_kepala_sekolah' => 'nullable|string|max:50',
+            'semester' => 'required|string|max:100',
+            'tahun_ajaran' => 'required|string|max:50',
+            'school_name' => 'nullable|string|max:255',
+            'school_address' => 'nullable|string|max:500',
+        ]);
+
+        foreach ($validated as $key => $val) {
+            \App\Models\Setting::set($key, (string)$val);
+        }
+
+        return redirect()->back()->with('success', 'Pengaturan sekolah, kepala sekolah, dan semester berhasil disimpan.');
     }
 }

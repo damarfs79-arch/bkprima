@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\Student;
 use App\Models\Attendance;
 use App\Models\Classroom;
+use App\Models\Major;
 
 class AttendanceController extends Controller
 {
@@ -48,7 +49,7 @@ class AttendanceController extends Controller
         $today = now()->toDateString();
         $authorizedClasses = $this->getAuthorizedClasses();
 
-        $studentQuery = Student::with(['attendances' => function ($q) use ($today) {
+        $studentQuery = Student::active()->with(['attendances' => function ($q) use ($today) {
             $q->where('date', $today);
         }]);
 
@@ -70,9 +71,23 @@ class AttendanceController extends Controller
             'alphaToday' => Attendance::whereIn('student_id', $visibleStudentIds)->where('date', $today)->where('status', 'Alpa')->count(),
         ];
 
+        $dbRombels = Classroom::orderBy('level')->orderBy('name')->get()->map(function ($r) {
+            return [
+                'id' => $r->id,
+                'name' => $r->name,
+                'nama_rombel' => $r->name,
+                'level' => $r->level,
+                'major' => $r->major,
+                'wali_kelas' => $r->wali_kelas,
+                'guru_bk_name' => $r->guru_bk_name,
+            ];
+        });
+
         return Inertia::render('AttendanceList', [
             'dbStudents' => $students,
             'classes' => $classes,
+            'rombelList' => $dbRombels,
+            'rombels' => $dbRombels,
             'stats' => $stats,
             'todayDate' => now()->translatedFormat('l, d M Y'),
             'initialFilters' => [
@@ -117,6 +132,7 @@ class AttendanceController extends Controller
     public function importStudents(Request $request)
     {
         $studentsData = $request->input('students');
+        $targetRombelId = $request->input('target_rombel_id', 'AUTO');
 
         if (empty($studentsData) || !is_array($studentsData)) {
             return redirect()->back()->with('error', 'Tidak ada data siswa yang valid untuk diimpor.');
@@ -125,23 +141,62 @@ class AttendanceController extends Controller
         $user = Auth::user();
         $authorizedClasses = $this->getAuthorizedClasses();
 
+        // Cari rombel spesifik jika dipilih di dropdown
+        $specificClassroom = null;
+        if (!empty($targetRombelId) && $targetRombelId !== 'AUTO') {
+            $specificClassroom = is_numeric($targetRombelId)
+                ? Classroom::find($targetRombelId)
+                : Classroom::where('name', $targetRombelId)->first();
+        }
+
         $importedCount = 0;
         foreach ($studentsData as $item) {
             if (empty($item['name'])) {
                 continue;
             }
 
-            $className = !empty($item['className']) ? strtoupper(trim($item['className'])) : (!empty($authorizedClasses) ? $authorizedClasses[0] : 'X RPL 1');
-            
+            $targetClass = null;
+
+            if ($specificClassroom) {
+                // Mode spesifik: kaitkan ke rombel yang dipilih
+                $targetClass = $specificClassroom;
+            } else {
+                // Mode Otomatis: cocokkan nama kelas spreadsheet dengan nama rombel di master data
+                $className = !empty($item['className']) ? strtoupper(trim($item['className'])) : (!empty($authorizedClasses) ? $authorizedClasses[0] : 'X RPL 1');
+                $targetClass = Classroom::where('name', $className)->first();
+
+                if (!$targetClass) {
+                    $parts = explode(' ', $className);
+                    $level = '10';
+                    if (!empty($parts[0])) {
+                        $upper = strtoupper($parts[0]);
+                        if ($upper === 'X') $level = '10';
+                        elseif ($upper === 'XI') $level = '11';
+                        elseif ($upper === 'XII') $level = '12';
+                        elseif (is_numeric($parts[0])) $level = $parts[0];
+                    }
+                    $major = $parts[1] ?? 'RPL';
+
+                    $targetClass = Classroom::create([
+                        'name' => $className,
+                        'level' => "Kelas {$level} ({$parts[0]})",
+                        'major' => $major,
+                        'wali_kelas' => 'Wali Kelas ' . $className,
+                        'guru_bk_id' => $user ? $user->id : null,
+                        'guru_bk_name' => $user ? $user->name : null,
+                    ]);
+                }
+            }
+
             // Jika guru, pastikan kelas termasuk kelas binaannya
             if ($user && $user->role === 'guru' && !empty($authorizedClasses)) {
-                if (!in_array($className, $authorizedClasses)) {
+                if (!in_array($targetClass->name, $authorizedClasses)) {
                     continue; // Skip siswa di luar rombel binaan guru
                 }
             }
 
-            $nisn = !empty($item['nisn']) ? trim((string)$item['nisn']) : '00' . rand(10000000, 99999999);
-            
+            $className = $targetClass->name;
+            $classId = $targetClass->id;
             $parts = explode(' ', $className);
             $level = '10';
             if (!empty($parts[0])) {
@@ -151,23 +206,14 @@ class AttendanceController extends Controller
                 elseif ($upper === 'XII') $level = '12';
                 elseif (is_numeric($parts[0])) $level = $parts[0];
             }
-            $major = $parts[1] ?? 'RPL';
+            $major = $targetClass->major ?: ($parts[1] ?? 'RPL');
 
-            // Pastikan Classroom ada
-            Classroom::firstOrCreate(
-                ['name' => $className],
-                [
-                    'level' => "Kelas {$level} ({$parts[0]})",
-                    'major' => $major,
-                    'wali_kelas' => 'Wali Kelas ' . $className,
-                    'guru_bk_id' => $user ? $user->id : null,
-                    'guru_bk_name' => $user ? $user->name : null,
-                ]
-            );
+            $nis = !empty($item['nis']) ? trim((string)$item['nis']) : (!empty($item['nisn']) ? trim((string)$item['nisn']) : '00' . rand(10000000, 99999999));
 
             $student = Student::updateOrCreate(
-                ['nisn' => $nisn],
+                ['nis' => $nis],
                 [
+                    'classroom_id' => $classId,
                     'name' => trim($item['name']),
                     'class_name' => $className,
                     'level' => $level,
@@ -175,7 +221,8 @@ class AttendanceController extends Controller
                     'gender' => in_array(strtoupper($item['gender'] ?? 'L'), ['L', 'P']) ? strtoupper($item['gender']) : 'L',
                     'parent_phone' => $item['parentWa'] ?? ($item['parent_phone'] ?? null),
                     'parent_name' => $item['parent_name'] ?? ('Orang Tua ' . trim($item['name'])),
-                    'status' => 'Aman',
+                    'rombel' => end($parts),
+                    'status' => 'aktif',
                 ]
             );
 
@@ -201,13 +248,22 @@ class AttendanceController extends Controller
     public function storeStudent(Request $request)
     {
         $validated = $request->validate([
-            'nisn' => 'required|string|unique:students,nisn|max:20',
+            'nis' => 'nullable|string|max:50',
+            'nisn' => 'nullable|string|max:50',
             'name' => 'required|string|max:255',
             'class_name' => 'required|string|max:50',
             'gender' => 'required|in:L,P',
             'parent_name' => 'nullable|string|max:255',
             'parent_phone' => 'nullable|string|max:20',
         ]);
+
+        $nis = !empty($validated['nis']) ? trim($validated['nis']) : (!empty($validated['nisn']) ? trim($validated['nisn']) : '');
+        if (empty($nis)) {
+            return redirect()->back()->withErrors(['nis' => 'NIS wajib diisi.']);
+        }
+        if (Student::where('nis', $nis)->exists()) {
+            return redirect()->back()->withErrors(['nis' => 'NIS sudah terdaftar. Silakan gunakan NIS lain.']);
+        }
 
         $parts = explode(' ', trim($validated['class_name']));
         $level = '10';
@@ -220,8 +276,23 @@ class AttendanceController extends Controller
         }
         $major = $parts[1] ?? 'Umum';
 
+        Major::firstOrCreate(
+            ['code' => $major],
+            ['name' => $major, 'description' => 'Program Keahlian ' . $major]
+        );
+
+        $classroom = Classroom::firstOrCreate(
+            ['name' => $validated['class_name']],
+            [
+                'level' => "Kelas {$level} ({$parts[0]})",
+                'major' => $major,
+                'wali_kelas' => 'Wali Kelas ' . $validated['class_name'],
+            ]
+        );
+
         $student = Student::create([
-            'nisn' => $validated['nisn'],
+            'classroom_id' => $classroom->id,
+            'nis' => $nis,
             'name' => $validated['name'],
             'class_name' => $validated['class_name'],
             'level' => $level,
@@ -230,7 +301,8 @@ class AttendanceController extends Controller
             'parent_name' => $validated['parent_name'] ?? 'Bpk/Ibu ' . $validated['name'],
             'parent_phone' => $validated['parent_phone'] ?? '081234567890',
             'total_violation_points' => 0,
-            'status' => 'Aman',
+            'rombel' => end($parts),
+            'status' => 'aktif',
         ]);
 
         // Default record attendance today
@@ -250,13 +322,19 @@ class AttendanceController extends Controller
         $student = Student::findOrFail($id);
 
         $validated = $request->validate([
-            'nisn' => 'required|string|max:20|unique:students,nisn,' . $student->id,
+            'nis' => 'nullable|string|max:50',
+            'nisn' => 'nullable|string|max:50',
             'name' => 'required|string|max:255',
             'class_name' => 'required|string|max:50',
             'gender' => 'required|in:L,P',
             'parent_name' => 'nullable|string|max:255',
             'parent_phone' => 'nullable|string|max:20',
         ]);
+
+        $nis = !empty($validated['nis']) ? trim($validated['nis']) : (!empty($validated['nisn']) ? trim($validated['nisn']) : $student->nis);
+        if (Student::where('nis', $nis)->where('id', '!=', $student->id)->exists()) {
+            return redirect()->back()->withErrors(['nis' => 'NIS sudah digunakan oleh siswa lain.']);
+        }
 
         $parts = explode(' ', trim($validated['class_name']));
         $level = $student->level;
@@ -269,8 +347,23 @@ class AttendanceController extends Controller
         }
         $major = $parts[1] ?? $student->major;
 
+        Major::firstOrCreate(
+            ['code' => $major],
+            ['name' => $major, 'description' => 'Program Keahlian ' . $major]
+        );
+
+        $classroom = Classroom::firstOrCreate(
+            ['name' => $validated['class_name']],
+            [
+                'level' => "Kelas {$level} ({$parts[0]})",
+                'major' => $major,
+                'wali_kelas' => 'Wali Kelas ' . $validated['class_name'],
+            ]
+        );
+
         $student->update([
-            'nisn' => $validated['nisn'],
+            'classroom_id' => $classroom->id,
+            'nis' => $nis,
             'name' => $validated['name'],
             'class_name' => $validated['class_name'],
             'level' => $level,
@@ -292,19 +385,85 @@ class AttendanceController extends Controller
         return redirect()->back()->with('success', 'Siswa "' . $name . '" berhasil dihapus dari sistem!');
     }
 
+    public function clearClassStudents(Request $request)
+    {
+        $validated = $request->validate([
+            'class_name' => 'required|string|max:50',
+        ]);
+
+        $className = trim($validated['class_name']);
+        $students = Student::where('class_name', $className)->get();
+        $count = $students->count();
+
+        if ($count === 0) {
+            return redirect()->back()->with('error', "Tidak ada siswa yang terdaftar di kelas {$className}.");
+        }
+
+        foreach ($students as $student) {
+            $student->attendances()->delete();
+            $student->violations()->delete();
+            $student->delete();
+        }
+
+        return redirect()->back()->with('success', "Berhasil menghapus seluruh ({$count}) siswa di kelas {$className}!");
+    }
+
     public function stats(Request $request)
     {
+        // 1. Hitung ringkasan presensi aktual dari database
+        $totalAttendances = Attendance::count();
+        $hadirCount = Attendance::where('status', 'Hadir')->count();
+        $sakitCount = Attendance::where('status', 'Sakit')->count();
+        $izinCount = Attendance::where('status', 'Izin')->count();
+        $alphaCount = Attendance::where('status', 'Alpa')->count();
+
+        $hadirRate = $totalAttendances > 0 ? round(($hadirCount / $totalAttendances) * 100, 1) : 0;
+        $sakitRate = $totalAttendances > 0 ? round(($sakitCount / $totalAttendances) * 100, 1) : 0;
+        $izinRate = $totalAttendances > 0 ? round(($izinCount / $totalAttendances) * 100, 1) : 0;
+        $alphaRate = $totalAttendances > 0 ? round(($alphaCount / $totalAttendances) * 100, 1) : 0;
+
+        $summaryMetrics = [
+            'totalPresensi' => $totalAttendances,
+            'hadirCount' => $hadirCount,
+            'sakitCount' => $sakitCount,
+            'izinCount' => $izinCount,
+            'alphaCount' => $alphaCount,
+            'hadirRate' => $hadirRate,
+            'sakitRate' => $sakitRate,
+            'izinRate' => $izinRate,
+            'alphaRate' => $alphaRate,
+        ];
+
+        // 2. Hitung tren 6 bulan terakhir dari database aktual
+        $monthLabels = [];
+        $presentRateSeries = [];
+        $lateRateSeries = [];
+
+        for ($i = 5; $i >= 0; $i--) {
+            $monthDate = now()->subMonths($i);
+            $monthLabels[] = $monthDate->translatedFormat('F');
+            $year = $monthDate->year;
+            $month = $monthDate->month;
+
+            $monthTotal = Attendance::whereYear('date', $year)->whereMonth('date', $month)->count();
+            $monthHadir = Attendance::whereYear('date', $year)->whereMonth('date', $month)->where('status', 'Hadir')->count();
+            $monthLate = Attendance::whereYear('date', $year)->whereMonth('date', $month)->where('status', 'Terlambat')->count();
+
+            $presentRateSeries[] = $monthTotal > 0 ? round(($monthHadir / $monthTotal) * 100, 1) : 0;
+            $lateRateSeries[] = $monthTotal > 0 ? round(($monthLate / $monthTotal) * 100, 1) : 0;
+        }
+
         $monthlyStats = [
-            'labels' => ['Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'],
-            'presentRate' => [96.2, 95.8, 97.1, 96.5, 98.0, 97.4],
-            'lateRate' => [2.1, 2.5, 1.8, 2.0, 1.2, 1.5],
+            'labels' => $monthLabels,
+            'presentRate' => $presentRateSeries,
+            'lateRate' => $lateRateSeries,
         ];
 
         $oneWeekAgo = now()->subDays(7)->toDateString();
         $today = now()->toDateString();
 
-        // Cari siswa yang memiliki catatan Alpa >= 3 kali dalam 7 hari terakhir
-        $atRiskStudents = Student::with(['attendances' => function ($q) use ($oneWeekAgo, $today) {
+        // 3. Siswa yang memiliki catatan Alpa >= 3 kali dalam 7 hari terakhir dari database riil
+        $atRiskStudents = Student::active()->with(['attendances' => function ($q) use ($oneWeekAgo, $today) {
             $q->whereBetween('date', [$oneWeekAgo, $today])
               ->where('status', 'Alpa')
               ->orderBy('date', 'desc');
@@ -317,11 +476,12 @@ class AttendanceController extends Controller
             return [
                 'id' => $student->id,
                 'name' => $student->name,
-                'nisn' => $student->nisn,
+                'nis' => $student->nis,
+                'nisn' => $student->nis,
                 'class_name' => $student->class_name,
                 'major' => $student->major,
-                'parent_name' => $student->parent_name ?? 'Bpk/Ibu ' . $student->name,
-                'parent_phone' => $student->parent_phone ?? '081234567890',
+                'parent_name' => $student->parent_name ?? '-',
+                'parent_phone' => $student->parent_phone ?? '-',
                 'alpha_count' => $alphaCount,
                 'dates' => $alphaAttendances->pluck('date')->toArray(),
                 'risk_level' => $alphaCount >= 4 ? 'Tinggi (SP-2)' : 'Peringatan (SP-1)',
@@ -333,67 +493,10 @@ class AttendanceController extends Controller
         })
         ->values();
 
-        // Fallback data siswa berisiko realistis jika database attendances masih sedikit
-        if ($atRiskStudents->isEmpty()) {
-            $allDbStudents = Student::all();
-            $candidates = $allDbStudents->isNotEmpty() ? $allDbStudents : collect([
-                (object)[
-                    'id' => 1,
-                    'name' => 'Dimas Arya Pratama',
-                    'nisn' => '0061234564',
-                    'class_name' => 'X TSM 1',
-                    'major' => 'TSM',
-                    'parent_name' => 'Bpk. Supriyadi',
-                    'parent_phone' => '081298765435',
-                ],
-                (object)[
-                    'id' => 2,
-                    'name' => 'Farhan Maulana',
-                    'nisn' => '0061234566',
-                    'class_name' => 'XI TSM 1',
-                    'major' => 'TSM',
-                    'parent_name' => 'Bpk. Suwito',
-                    'parent_phone' => '081298765437',
-                ],
-                (object)[
-                    'id' => 3,
-                    'name' => 'Budi Santoso',
-                    'nisn' => '0061234562',
-                    'class_name' => 'X RPL 1',
-                    'major' => 'RPL',
-                    'parent_name' => 'Bpk. Santoso',
-                    'parent_phone' => '081298765433',
-                ]
-            ]);
-
-            $sampleDates = [
-                now()->subDays(1)->translatedFormat('d M Y'),
-                now()->subDays(2)->translatedFormat('d M Y'),
-                now()->subDays(4)->translatedFormat('d M Y'),
-                now()->subDays(5)->translatedFormat('d M Y')
-            ];
-
-            $atRiskStudents = $candidates->take(3)->values()->map(function ($s, $idx) use ($sampleDates) {
-                $count = 3 + ($idx % 2);
-                return [
-                    'id' => $s->id,
-                    'name' => $s->name,
-                    'nisn' => $s->nisn,
-                    'class_name' => $s->class_name,
-                    'major' => $s->major ?? 'Umum',
-                    'parent_name' => $s->parent_name ?? 'Bpk. ' . explode(' ', $s->name)[0],
-                    'parent_phone' => $s->parent_phone ?? '081234567890',
-                    'alpha_count' => $count,
-                    'dates' => array_slice($sampleDates, 0, $count),
-                    'risk_level' => $count >= 4 ? 'Tinggi (SP-2)' : 'Peringatan (SP-1)',
-                    'status_action' => 'Belum Dipanggil',
-                ];
-            });
-        }
-
         return Inertia::render('AttendanceStats', [
             'monthlyStats' => $monthlyStats,
-            'totalStudents' => Student::count(),
+            'summaryMetrics' => $summaryMetrics,
+            'totalStudents' => Student::active()->count(),
             'atRiskStudents' => $atRiskStudents,
         ]);
     }
@@ -421,7 +524,7 @@ class AttendanceController extends Controller
         $monthName = $monthCarbon->translatedFormat('F Y');
 
         // Query students in selected class
-        $students = Student::where('class_name', $selectedClass)
+        $students = Student::active()->where('class_name', $selectedClass)
             ->orderBy('name')
             ->get();
 
@@ -452,7 +555,6 @@ class AttendanceController extends Controller
 
         // Generate student attendance matrix
         $studentMatrix = [];
-        $fakerSeed = crc32($selectedMonth . $selectedClass);
 
         foreach ($students as $student) {
             $records = $attendances->get($student->id, collect())->keyBy('date');
@@ -482,7 +584,7 @@ class AttendanceController extends Controller
                         'Sakit' => 'S',
                         'Izin' => 'I',
                         'Alpa' => 'A',
-                        default => 'H'
+                        default => '-'
                     };
                     $daily[$d['day']] = [
                         'code' => $code,
@@ -490,30 +592,11 @@ class AttendanceController extends Controller
                         'time' => $att->check_in_time ?? '-',
                     ];
                 } else {
-                    // Realistic sample distribution if historical day is not yet seeded
-                    // Keep most days Hadir, with occasional realistic variation per student
-                    $seed = ($fakerSeed + $student->id * 31 + $d['day']) % 100;
-                    if ($seed > 95) {
-                        $code = 'A';
-                        $status = 'Alpa';
-                    } elseif ($seed > 91) {
-                        $code = 'I';
-                        $status = 'Izin';
-                    } elseif ($seed > 87) {
-                        $code = 'S';
-                        $status = 'Sakit';
-                    } elseif ($seed > 80) {
-                        $code = 'T';
-                        $status = 'Terlambat';
-                    } else {
-                        $code = 'H';
-                        $status = 'Hadir';
-                    }
-
+                    // Tidak ada data presensi untuk hari ini
                     $daily[$d['day']] = [
-                        'code' => $code,
-                        'status' => $status,
-                        'time' => ($code === 'H' ? '06:45' : ($code === 'T' ? '07:15' : '-')),
+                        'code' => '-',
+                        'status' => '-',
+                        'time' => '-',
                     ];
                 }
 
@@ -529,7 +612,7 @@ class AttendanceController extends Controller
             $totalPresensi = $hadirCount + $terlambatCount;
             $attendancePercentage = $effectiveDaysCount > 0 
                 ? round(($totalPresensi / $effectiveDaysCount) * 100, 1) 
-                : 100;
+                : 0;
 
             $studentMatrix[] = [
                 'id' => $student->id,
@@ -569,12 +652,14 @@ class AttendanceController extends Controller
             'monthName' => $monthName,
             'classStats' => $classStats,
             'schoolInfo' => [
-                'name' => 'SMK PGRI 05 JEMBER',
+                'name' => \App\Models\Setting::get('school_name', 'SMK PGRI 05 JEMBER'),
                 'npsn' => '20523821',
-                'address' => 'Jl. Krakatau No. 54 Tanggul, Kab. Jember - Jawa Timur',
+                'address' => \App\Models\Setting::get('school_address', 'Jl. Krakatau No. 54 Tanggul, Kab. Jember - Jawa Timur'),
                 'waliKelas' => $classroomObj?->wali_kelas ?? 'Bpk. Ahmad Fauzi, S.Kom',
                 'guruBk' => $classroomObj?->guru_bk_name ?? 'Dra. Hj. Nurul Hidayati, M.Pd',
-                'kepalaSekolah' => 'Drs. H. Saiful Bahri, M.Pd',
+                'kepalaSekolah' => \App\Models\Setting::get('kepala_sekolah', 'Drs. H. Saiful Bahri, M.Pd'),
+                'nipKepalaSekolah' => \App\Models\Setting::get('nip_kepala_sekolah', '19680315 199403 1 008'),
+                'tahunAjaran' => \App\Models\Setting::get('tahun_ajaran', '2024/2025'),
             ]
         ]);
     }

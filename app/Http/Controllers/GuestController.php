@@ -10,16 +10,17 @@ class GuestController extends Controller
 {
     public function index(Request $request)
     {
-        $nisn = $request->query('nisn');
+        $nis = $request->query('nis') ?: $request->query('nisn');
         $studentData = null;
 
-        if ($nisn) {
-            $studentData = Student::with(['violations', 'attendances'])->where('nisn', $nisn)->first();
+        if ($nis) {
+            $studentData = Student::with(['violations', 'attendances'])->where('nis', $nis)->first();
         }
 
         return Inertia::render('GuestPortal', [
             'searchedStudent' => $studentData,
-            'nisnQuery' => $nisn,
+            'nisQuery' => $nis,
+            'nisnQuery' => $nis,
         ]);
     }
 

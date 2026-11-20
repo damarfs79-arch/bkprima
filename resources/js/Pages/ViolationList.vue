@@ -5,18 +5,12 @@
       <!-- ============================================================ -->
       <!-- CARD 1: HEADER & STATS SUMMARY                               -->
       <!-- ============================================================ -->
-      <div class="bg-white rounded-xl p-5 sm:p-6 border border-slate-200 shadow-xs space-y-5">
+      <div class="bg-white rounded-xl p-5 sm:p-6 border border-slate-200 shadow-xs space-y-4">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <p class="text-xs font-semibold uppercase tracking-wider text-rose-600 mb-1">
-              Kedisiplinan &amp; Penanganan Kasus BK
-            </p>
             <h1 class="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight leading-snug">
-              Catatan Pelanggaran &amp; Pemanggilan Siswa
+              Catatan Pelanggaran
             </h1>
-            <p class="text-xs sm:text-sm text-slate-500 mt-0.5">
-              Rekapitulasi sanksi tata tertib, akumulasi poin &amp; penerbitan surat panggilan dinas orang tua (SP-1, SP-2, SP-3)
-            </p>
           </div>
 
           <div class="flex items-center gap-2 self-start sm:self-auto shrink-0">
@@ -27,16 +21,16 @@
               <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
               </svg>
-              <span>Panggil Ortu (SP)</span>
+              <span>Panggil Ortu</span>
             </button>
             <router-link
               to="/verifikasi"
-              class="inline-flex items-center justify-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded-lg text-xs transition cursor-pointer"
+              class="inline-flex items-center justify-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold px-3.5 py-2 rounded-lg text-xs transition cursor-pointer"
             >
               <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
               </svg>
-              <span>Catat Pelanggaran</span>
+              <span>Input Pelanggaran</span>
             </router-link>
           </div>
         </div>
@@ -49,13 +43,12 @@
             class="p-4 bg-white hover:bg-slate-50 rounded-xl border border-slate-200 cursor-pointer transition shadow-xs"
           >
             <div class="flex items-center justify-between text-slate-500 mb-1">
-              <span class="text-xs font-semibold uppercase tracking-wider">TOTAL KASUS</span>
+              <span class="text-xs font-semibold uppercase tracking-wider">Total Kasus</span>
               <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
             </div>
             <div class="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">{{ violations.length }}</div>
-            <span class="text-xs text-slate-500 font-medium">Bulan Oktober 2024</span>
           </div>
 
           <!-- Kasus Ringan -->
@@ -64,11 +57,10 @@
             class="p-4 bg-white hover:bg-slate-50 rounded-xl border border-slate-200 cursor-pointer transition shadow-xs"
           >
             <div class="flex items-center justify-between text-slate-500 mb-1">
-              <span class="text-xs font-semibold uppercase tracking-wider">KASUS RINGAN</span>
+              <span class="text-xs font-semibold uppercase tracking-wider">Kasus Ringan</span>
               <span class="text-xs font-medium text-slate-500 font-mono">+5 - +10</span>
             </div>
             <div class="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">4</div>
-            <span class="text-xs text-slate-500 font-medium">Teguran Lisan / Piket</span>
           </div>
 
           <!-- Kasus Sedang / SP -->
@@ -77,11 +69,10 @@
             class="p-4 bg-white hover:bg-slate-50 rounded-xl border border-slate-200 cursor-pointer transition shadow-xs"
           >
             <div class="flex items-center justify-between text-slate-500 mb-1">
-              <span class="text-xs font-semibold uppercase tracking-wider">PERINGATAN SP</span>
+              <span class="text-xs font-semibold uppercase tracking-wider">Peringatan SP</span>
               <span class="text-xs font-medium text-amber-600 font-mono">+15 - +25</span>
             </div>
             <div class="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">2</div>
-            <span class="text-xs text-slate-500 font-medium">Konseling &amp; Surat SP</span>
           </div>
 
           <!-- Kasus Berat / Panggilan Ortu -->
@@ -91,16 +82,10 @@
             :class="activeMainTab === 'panggilan' ? 'bg-slate-50 border-slate-300 ring-1 ring-slate-300' : 'bg-white hover:bg-slate-50 border-slate-200'"
           >
             <div class="flex items-center justify-between text-slate-500 mb-1">
-              <span class="text-xs font-semibold uppercase tracking-wider text-rose-600">PANGGILAN ORTU</span>
+              <span class="text-xs font-semibold uppercase tracking-wider text-rose-600">Panggilan Ortu</span>
               <span class="text-xs font-medium text-rose-600 font-mono">&ge; 30 Poin</span>
             </div>
             <div class="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">{{ summonsList.length }}</div>
-            <span class="text-xs text-rose-600 font-medium inline-flex items-center gap-1">
-              <span>Buka Layanan Surat SP</span>
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-              </svg>
-            </span>
           </div>
         </div>
       </div>
@@ -117,29 +102,29 @@
           <div class="flex items-center gap-1.5 bg-slate-100 p-1 rounded-lg border border-slate-200 self-start sm:self-auto">
             <button
               @click="activeMainTab = 'pelanggaran'"
-              class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-md text-xs font-semibold transition cursor-pointer"
+              class="inline-flex items-center gap-2 px-3 py-1.5 rounded-md text-xs font-semibold transition cursor-pointer"
               :class="activeMainTab === 'pelanggaran' ? 'bg-white text-blue-600 shadow-xs' : 'text-slate-600 hover:text-slate-900'"
             >
               <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
-              <span>Daftar Rekaman Pelanggaran</span>
-              <span class="px-1.5 py-0.2 rounded-full text-[10px] font-black" :class="activeMainTab === 'pelanggaran' ? 'bg-blue-100 text-blue-700' : 'bg-slate-200 text-slate-600'">
+              <span>Pelanggaran</span>
+              <span class="px-1.5 py-0.5 rounded text-[10px] font-semibold" :class="activeMainTab === 'pelanggaran' ? 'bg-blue-100 text-blue-700' : 'bg-slate-200 text-slate-600'">
                 {{ violations.length }}
               </span>
             </button>
 
             <button
               @click="activeMainTab = 'panggilan'"
-              class="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition cursor-pointer"
-              :class="activeMainTab === 'panggilan' ? 'bg-white text-rose-600 shadow-2xs' : 'text-slate-600 hover:text-slate-900'"
+              class="inline-flex items-center gap-2 px-3 py-1.5 rounded-md text-xs font-semibold transition cursor-pointer"
+              :class="activeMainTab === 'panggilan' ? 'bg-white text-rose-600 shadow-xs' : 'text-slate-600 hover:text-slate-900'"
             >
               <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
               </svg>
-              <span>Surat Pemanggilan Orang Tua</span>
-              <span class="px-1.5 py-0.2 rounded-full text-[10px] font-black" :class="activeMainTab === 'panggilan' ? 'bg-rose-100 text-rose-700' : 'bg-slate-200 text-slate-600'">
-                {{ summonsList.length }} SP
+              <span>Surat Panggilan (SP)</span>
+              <span class="px-1.5 py-0.5 rounded text-[10px] font-semibold" :class="activeMainTab === 'panggilan' ? 'bg-rose-100 text-rose-700' : 'bg-slate-200 text-slate-600'">
+                {{ summonsList.length }}
               </span>
             </button>
           </div>
@@ -475,14 +460,11 @@
       <!-- MODAL 1: FORM TERBITKAN SURAT PANGGILAN BARU                 -->
       <!-- ============================================================ -->
       <div v-if="showNewSummonsModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in">
-        <div class="bg-white rounded-3xl max-w-xl w-full border border-slate-200 shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200 max-h-[90vh] flex flex-col">
+        <div class="bg-white rounded-2xl max-w-xl w-full border border-slate-200 shadow-xl overflow-hidden animate-in zoom-in-95 duration-200 max-h-[90vh] flex flex-col">
           
-          <div class="p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50">
-            <div>
-              <h3 class="font-black text-slate-900 text-base">Terbitkan Surat Panggilan Orang Tua</h3>
-              <p class="text-xs text-slate-500">Penerbitan surat dinas resmi BK untuk siswa bermasalah</p>
-            </div>
-            <button @click="showNewSummonsModal = false" class="p-2 text-slate-400 hover:text-slate-700 rounded-xl cursor-pointer">
+          <div class="p-4 sm:p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50">
+            <h3 class="font-bold text-slate-900 text-base">Terbitkan Surat Panggilan Orang Tua</h3>
+            <button @click="showNewSummonsModal = false" class="p-1.5 text-slate-400 hover:text-slate-700 rounded-lg cursor-pointer">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
               </svg>
@@ -493,122 +475,119 @@
             
             <!-- Pilih Siswa -->
             <div>
-              <label class="block font-bold text-slate-700 mb-1">Pilih Siswa Bermasalah *</label>
+              <label class="block font-semibold text-slate-700 mb-1">Pilih Siswa Bermasalah *</label>
               <select
                 v-model="newSummons.studentId"
                 @change="onSelectStudentForSummons"
                 required
-                class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-slate-800 font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 cursor-pointer"
               >
-                <option value="" disabled>-- Pilih siswa dari daftar kasus disiplin --</option>
+                <option value="" disabled>Pilih siswa dari database...</option>
                 <option v-for="s in candidateStudents" :key="s.id" :value="s.id">
-                  {{ s.name }} ({{ s.className }}) &bull; Akumulasi: {{ s.points }} Poin
+                  {{ s.name }} ({{ s.className }}) &bull; Poin: {{ s.points }}
                 </option>
               </select>
             </div>
 
-            <!-- Tahap Surat & No Surat -->
-            <div class="grid grid-cols-2 gap-3">
+            <!-- Tahap Surat (INPUTAN TEKS SESUAI PERMINTAAN USER) & No Surat -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label class="block font-bold text-slate-700 mb-1">Tahap Panggilan (SP) *</label>
-                <select
+                <label class="block font-semibold text-slate-700 mb-1">Tahap Panggilan *</label>
+                <input
                   v-model="newSummons.stage"
+                  type="text"
+                  placeholder="Contoh: SP-1, SP-2, Panggilan 1..."
                   required
-                  class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
-                >
-                  <option value="SP-1">SP-1 (Klarifikasi &amp; Peringatan Awal)</option>
-                  <option value="SP-2">SP-2 (Peringatan Tertulis Keras)</option>
-                  <option value="SP-3">SP-3 (Konferensi Kasus Pleno / Skorsing)</option>
-                </select>
+                  class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                />
               </div>
               <div>
-                <label class="block font-bold text-slate-700 mb-1">No. Surat Resmi</label>
+                <label class="block font-semibold text-slate-700 mb-1">No. Surat Resmi</label>
                 <input
                   v-model="newSummons.letterNumber"
                   type="text"
-                  readonly
-                  class="w-full bg-slate-100 border border-slate-200 rounded-xl p-2.5 font-mono text-slate-600 cursor-not-allowed"
+                  placeholder="Nomor surat resmi..."
+                  class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 font-mono text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
                 />
               </div>
             </div>
 
             <!-- Alasan Pemanggilan -->
             <div>
-              <label class="block font-bold text-slate-700 mb-1">Alasan / Kasus Pelanggaran *</label>
+              <label class="block font-semibold text-slate-700 mb-1">Alasan / Kasus Pelanggaran *</label>
               <input
                 v-model="newSummons.caseTitle"
                 type="text"
-                placeholder="Contoh: Alpa 5 hari berturut-turut &amp; merokok di area sekolah"
+                placeholder="Tulis alasan pemanggilan orang tua..."
                 required
-                class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
               />
             </div>
 
             <!-- Jadwal Menghadap -->
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div>
-                <label class="block font-bold text-slate-700 mb-1">Hari &amp; Tanggal *</label>
+                <label class="block font-semibold text-slate-700 mb-1">Hari &amp; Tanggal *</label>
                 <input
                   v-model="newSummons.meetingDate"
                   type="text"
-                  placeholder="Senin, 28 Okt 2024"
+                  placeholder="Contoh: Senin, 28 Okt 2026"
                   required
-                  class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                  class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
                 />
               </div>
               <div>
-                <label class="block font-bold text-slate-700 mb-1">Waktu / Pukul *</label>
+                <label class="block font-semibold text-slate-700 mb-1">Waktu / Pukul *</label>
                 <input
                   v-model="newSummons.meetingTime"
                   type="text"
-                  placeholder="08.30 WIB"
+                  placeholder="Contoh: 08.30 WIB"
                   required
-                  class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                  class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
                 />
               </div>
               <div>
-                <label class="block font-bold text-slate-700 mb-1">Ruangan Pertemuan</label>
-                <select
+                <label class="block font-semibold text-slate-700 mb-1">Ruangan Pertemuan</label>
+                <input
                   v-model="newSummons.room"
-                  class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
-                >
-                  <option>Ruang BK Gedung A</option>
-                  <option>Ruang Sidang Tatib</option>
-                  <option>Ruang Kepala Sekolah</option>
-                </select>
+                  type="text"
+                  placeholder="Ruang BK"
+                  class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                />
               </div>
             </div>
 
             <!-- Wali Murid & No WA -->
-            <div class="grid grid-cols-2 gap-3">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label class="block font-bold text-slate-700 mb-1">Nama Orang Tua / Wali *</label>
+                <label class="block font-semibold text-slate-700 mb-1">Nama Orang Tua / Wali *</label>
                 <input
                   v-model="newSummons.parentName"
                   type="text"
+                  placeholder="Nama orang tua/wali"
                   required
-                  class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                  class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
                 />
               </div>
               <div>
-                <label class="block font-bold text-slate-700 mb-1">Nomor WhatsApp Wali *</label>
+                <label class="block font-semibold text-slate-700 mb-1">Nomor WhatsApp Wali *</label>
                 <input
                   v-model="newSummons.parentPhone"
                   type="text"
+                  placeholder="081234567890"
                   required
-                  class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-800 font-mono focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                  class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-slate-800 font-mono focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
                 />
               </div>
             </div>
 
             <!-- Guru BK Penanggung Jawab -->
             <div>
-              <label class="block font-bold text-slate-700 mb-1">Guru BK Penanggung Jawab</label>
+              <label class="block font-semibold text-slate-700 mb-1">Guru BK Penanggung Jawab</label>
               <input
                 v-model="newSummons.counselor"
                 type="text"
-                readonly
-                class="w-full bg-slate-100 border border-slate-200 rounded-xl p-2.5 text-slate-600 font-medium cursor-not-allowed"
+                class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-slate-700 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
               />
             </div>
 
@@ -616,23 +595,24 @@
               <button
                 type="button"
                 @click="showNewSummonsModal = false"
-                class="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl cursor-pointer"
+                class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-lg cursor-pointer transition text-xs"
               >
                 Batal
               </button>
               <button
                 type="submit"
-                class="px-5 py-2.5 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl shadow-md shadow-rose-600/20 cursor-pointer flex items-center gap-1.5"
+                :disabled="isSubmittingSummons"
+                class="px-4 py-2 bg-rose-600 hover:bg-rose-700 disabled:opacity-50 text-white font-semibold rounded-lg shadow-2xs transition cursor-pointer inline-flex items-center gap-1.5 text-xs"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                <svg v-if="isSubmittingSummons" class="animate-spin h-3.5 w-3.5 text-white" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
-                <span>Terbitkan &amp; Simpan</span>
+                <span>{{ isSubmittingSummons ? 'Menyimpan...' : 'Terbitkan & Simpan' }}</span>
               </button>
             </div>
 
           </form>
-
         </div>
       </div>
 
@@ -886,8 +866,9 @@
 
 <script setup>
 import AppLayout from '../Layouts/AppLayout.vue'
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
+import { router } from '@inertiajs/vue3'
 
 const route = useRoute()
 
@@ -897,6 +878,10 @@ const props = defineProps({
     default: () => []
   },
   dbStudents: {
+    type: Array,
+    default: () => []
+  },
+  dbSummons: {
     type: Array,
     default: () => []
   },
@@ -918,13 +903,18 @@ onMounted(() => {
   if (route.query.tab === 'panggilan' || props.initialTab === 'panggilan') {
     activeMainTab.value = 'panggilan'
   }
+  loadDbViolations()
+  loadDbSummons()
+})
+
+const loadDbViolations = () => {
   if (props.dbViolations && props.dbViolations.length > 0) {
-    const fromDb = props.dbViolations.map((v, i) => ({
+    violations.value = props.dbViolations.map((v, i) => ({
       id: v.id,
-      date: v.date || '24 Okt 2024',
+      date: v.date || (v.created_at ? new Date(v.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }) : 'Hari Ini'),
       time: v.time ? `${v.time} WIB` : '07:30 WIB',
       studentName: v.student_name,
-      nisn: v.student?.nisn || ('22231' + (1000 + i)),
+      nisn: v.student?.nis || v.student?.nisn || '-',
       className: v.student_class,
       category: v.category,
       note: v.notes || v.violation_name,
@@ -932,11 +922,14 @@ onMounted(() => {
       points: v.points,
       status: (v.points === null || v.points === undefined) ? 'Selesai Dibina' : (v.points >= 25 ? 'Panggilan Ortu' : (v.points >= 10 ? 'Dalam Pembinaan' : 'Selesai Dibina'))
     }))
-    // Merge new database violations ahead of defaults without duplicates
-    const existingIds = new Set(fromDb.map(d => d.id))
-    violations.value = [...fromDb, ...violations.value.filter(v => !existingIds.has(v.id))]
+  } else {
+    violations.value = []
   }
-})
+}
+
+watch(() => props.dbViolations, () => {
+  loadDbViolations()
+}, { deep: true })
 
 const searchQuery = ref('')
 const selectedStatus = ref('Semua')
@@ -945,92 +938,7 @@ const summonsFilter = ref('ALL')
 const statusFilters = ['Semua', 'Dalam Pembinaan', 'Panggilan Ortu', 'Selesai Dibina']
 
 // 1. VIOLATIONS DATA
-const violations = ref([
-  {
-    id: 1,
-    date: '24 Okt 2024',
-    time: '07:24 WIB',
-    studentName: 'Dimas Arya Pratama',
-    nisn: '22231063',
-    className: 'X RPL 1',
-    category: 'Terlambat Masuk Gerbang',
-    note: 'Bangun kesiangan, tiba di sekolah 07:24 WIB.',
-    points: 5,
-    status: 'Selesai Dibina'
-  },
-  {
-    id: 2,
-    date: '21 Okt 2024',
-    time: '09:45 WIB',
-    studentName: 'Andi Saputra',
-    nisn: '22231092',
-    className: 'XI TSM 1',
-    category: 'Seragam Tidak Rapi / Baju Dikeluarkan',
-    note: 'Teguran lisan oleh petugas piket.',
-    points: 5,
-    status: 'Selesai Dibina'
-  },
-  {
-    id: 3,
-    date: '19 Okt 2024',
-    time: '11:15 WIB',
-    studentName: 'Rania Zahra Putri',
-    nisn: '22231105',
-    className: 'X DKV 1',
-    category: 'Membawa HP saat Jam Pelajaran',
-    note: 'Bermain game di kelas saat jam Bahasa Indonesia.',
-    points: 10,
-    status: 'Dalam Pembinaan'
-  },
-  {
-    id: 4,
-    date: '17 Okt 2024',
-    time: '13:00 WIB',
-    studentName: 'Bagus Setiawan',
-    nisn: '22231044',
-    className: 'X RPL 1',
-    category: 'Merokok di Lingkungan Sekolah',
-    note: 'Kedapatan merokok di belakang kantin sekolah.',
-    points: 25,
-    status: 'Panggilan Ortu'
-  },
-  {
-    id: 5,
-    date: '14 Okt 2024',
-    time: '08:00 WIB',
-    studentName: 'Fajar Nugroho',
-    nisn: '22231018',
-    className: 'XII TKJ 1',
-    category: 'Membolos / Tidak Masuk Tanpa Izin',
-    note: 'Tidak hadir tanpa surat izin selama 3 hari berturut-turut.',
-    points: 15,
-    status: 'Panggilan Ortu'
-  },
-  {
-    id: 6,
-    date: '10 Okt 2024',
-    time: '10:30 WIB',
-    studentName: 'Zulfikar Ali Akbar',
-    nisn: '22231077',
-    className: 'XI TSM 1',
-    category: 'Berkelahi di Area Parkir Luar',
-    note: 'Perselisihan antarsiswa di luar gerbang sekolah.',
-    points: 30,
-    status: 'Panggilan Ortu'
-  },
-  {
-    id: 7,
-    date: '08 Okt 2024',
-    time: '07:35 WIB',
-    studentName: 'Cantika Dewi Lestari',
-    nisn: '22231088',
-    className: 'X RPL 1',
-    category: 'Terlambat Masuk Gerbang',
-    note: 'Terlambat 15 menit, diarahkan membersihkan koridor.',
-    points: 5,
-    status: 'Selesai Dibina'
-  }
-])
+const violations = ref([])
 
 const filteredViolations = computed(() => {
   return violations.value.filter(item => {
@@ -1050,72 +958,64 @@ const filteredViolations = computed(() => {
 })
 
 // 2. PARENT SUMMONS (SP) DATA
-const summonsList = ref([
-  {
-    id: 1,
-    letterNumber: '421.5/081/BK/SMK-PGRI5/X/2024',
-    issueDate: '23 Okt 2024',
-    studentName: 'Bagus Setiawan',
-    nisn: '22231044',
-    className: 'X RPL 1',
-    caseTitle: 'Merokok di Lingkungan Sekolah & Membawa Korek',
-    caseDescription: 'Akumulasi sanksi mencapai 35 poin, membutuhkan mediasi orang tua.',
-    points: 35,
-    stage: 'SP-1',
-    meetingDate: 'Kamis, 24 Okt 2024',
-    meetingTime: '09.00 WIB',
-    room: 'Ruang BK Gedung A',
-    parentName: 'Ibu Siti Khotimah',
-    parentPhone: '+62 821-9923-4100',
-    status: 'Menunggu Kehadiran',
-    counselor: 'Dra. Hj. Nurul Hidayati, M.Pd'
-  },
-  {
-    id: 2,
-    letterNumber: '421.5/079/BK/SMK-PGRI5/X/2024',
-    issueDate: '21 Okt 2024',
-    studentName: 'Fajar Nugroho',
-    nisn: '22231018',
-    className: 'XII TKJ 1',
-    caseTitle: 'Membolos 4 Hari Berturut-turut Tanpa Surat',
-    caseDescription: 'Tidak ada kabar dari wali murid, surat peringatan keras diterbitkan.',
-    points: 50,
-    stage: 'SP-2',
-    meetingDate: 'Jumat, 25 Okt 2024',
-    meetingTime: '08.30 WIB',
-    room: 'Ruang BK Gedung A',
-    parentName: 'Bpk. Joko Nugroho',
-    parentPhone: '+62 852-1100-3322',
-    status: 'Menunggu Kehadiran',
-    counselor: 'Bpk. Dwi Prasetyo, M.Pd'
-  },
-  {
-    id: 3,
-    letterNumber: '421.5/074/BK/SMK-PGRI5/X/2024',
-    issueDate: '18 Okt 2024',
-    studentName: 'Zulfikar Ali Akbar',
-    nisn: '22231077',
-    className: 'XI TSM 1',
-    caseTitle: 'Perkelahian Antar Siswa & Merusak Meja Ruang Kelas',
-    caseDescription: 'Akumulasi 85 poin, diperlukan sidang pleno bersama orang tua.',
-    points: 85,
-    stage: 'SP-3',
-    meetingDate: 'Senin, 21 Okt 2024',
-    meetingTime: '10.00 WIB',
-    room: 'Ruang Sidang Tatib',
-    parentName: 'Bpk. H. Akbar Maulana',
-    parentPhone: '+62 813-7721-0099',
-    status: 'Mediasi Selesai',
-    counselor: 'Bpk. Agus Wicaksono, S.Pd'
-  }
-])
+const summonsList = ref([])
 
-const candidateStudents = [
-  { id: 101, name: 'Bagus Setiawan', nisn: '22231044', className: 'X RPL 1', points: 35, parent: 'Ibu Siti Khotimah', phone: '+62 821-9923-4100' },
-  { id: 102, name: 'Fajar Nugroho', nisn: '22231018', className: 'XII TKJ 1', points: 50, parent: 'Bpk. Joko Nugroho', phone: '+62 852-1100-3322' },
-  { id: 103, name: 'Zulfikar Ali Akbar', nisn: '22231077', className: 'XI TSM 1', points: 85, parent: 'Bpk. H. Akbar Maulana', phone: '+62 813-7721-0099' },
-  { id: 104, name: 'Danendra Putra', nisn: '22231093', className: 'X RPL 2', points: 40, parent: 'Bpk. Danendra Sr', phone: '+62 812-3301-4491' }
-]
+const loadDbSummons = () => {
+  if (props.dbSummons && props.dbSummons.length > 0) {
+    summonsList.value = props.dbSummons.map(s => {
+      const studentClass = s.student?.classroom 
+        ? `${s.student.classroom.tingkat} ${s.student.classroom.jurusan} ${s.student.classroom.rombel}`
+        : (s.student?.class_name || (s.student?.tingkat ? `${s.student.tingkat} ${s.student.jurusan} ${s.student.rombel}` : (s.class_name || '-')))
+      return {
+        id: s.id,
+        letterNumber: s.letter_number,
+        issueDate: s.created_at ? new Date(s.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }) : 'Hari Ini',
+        studentId: s.student_id,
+        studentName: s.student?.name || s.student_name || '-',
+        nisn: s.student?.nis || s.student?.nisn || s.nis || '-',
+        className: studentClass,
+        caseTitle: s.case_title,
+        caseDescription: s.case_description || `Akumulasi ${s.points || 0} poin pelanggaran.`,
+        points: s.points || 0,
+        stage: s.stage || 'SP-1',
+        meetingDate: s.meeting_date || 'Senin, 28 Okt 2026',
+        meetingTime: s.meeting_time || '08.30 WIB',
+        room: s.room || 'Ruang BK Gedung A',
+        parentName: s.parent_name || 'Orang Tua / Wali Siswa',
+        parentPhone: s.parent_phone || '-',
+        status: s.status || 'Menunggu Kehadiran',
+        counselor: s.counselor || 'Guru BK',
+        mediationNote: s.mediation_notes || ''
+      }
+    })
+  } else {
+    summonsList.value = []
+  }
+}
+
+watch(() => props.dbSummons, () => {
+  loadDbSummons()
+}, { deep: true })
+
+const candidateStudents = computed(() => {
+  if (props.dbStudents && props.dbStudents.length > 0) {
+    return props.dbStudents.map(s => {
+      const cls = s.classroom 
+        ? `${s.classroom.tingkat} ${s.classroom.jurusan} ${s.classroom.rombel}` 
+        : (s.class_name || (s.tingkat ? `${s.tingkat} ${s.jurusan} ${s.rombel}` : '-'))
+      return {
+        id: s.id,
+        name: s.name,
+        nisn: s.nis || s.nisn || '',
+        className: cls,
+        points: s.total_violation_points || 0,
+        parent: s.parent_name || ('Wali dari ' + s.name),
+        phone: s.parent_phone || '-'
+      }
+    })
+  }
+  return []
+})
 
 const filteredSummons = computed(() => {
   return summonsList.value.filter(item => {
@@ -1141,6 +1041,7 @@ const filteredSummons = computed(() => {
 const showNewSummonsModal = ref(false)
 const showLetterModal = ref(false)
 const showMediationModal = ref(false)
+const isSubmittingSummons = ref(false)
 
 const selectedLetter = ref(summonsList.value[0])
 const activeMediationItem = ref(summonsList.value[0])
@@ -1152,10 +1053,10 @@ const newSummons = ref({
   nisn: '',
   className: '',
   stage: 'SP-1',
-  letterNumber: `421.5/0${82 + summonsList.value.length}/BK/SMK-PGRI5/X/2024`,
+  letterNumber: `421.5/0${82 + summonsList.value.length}/BK/SMK-PGRI5/X/2026`,
   caseTitle: '',
   points: 35,
-  meetingDate: 'Senin, 28 Okt 2024',
+  meetingDate: 'Senin, 28 Okt 2026',
   meetingTime: '08.30 WIB',
   room: 'Ruang BK Gedung A',
   parentName: '',
@@ -1164,25 +1065,27 @@ const newSummons = ref({
 })
 
 const openNewSummonsModal = () => {
-  newSummons.value.letterNumber = `421.5/0${82 + summonsList.value.length}/BK/SMK-PGRI5/X/2024`
+  newSummons.value.letterNumber = `421.5/0${82 + summonsList.value.length}/BK/SMK-PGRI5/X/2026`
   showNewSummonsModal.value = true
 }
 
 const prepareSummonsForStudent = (violation) => {
+  const match = candidateStudents.value.find(s => s.name === violation.studentName)
+  newSummons.value.studentId = match ? match.id : (violation.student_id || '')
   newSummons.value.studentName = violation.studentName
   newSummons.value.nisn = violation.nisn
   newSummons.value.className = violation.className
   newSummons.value.caseTitle = violation.category + ' - ' + violation.note
-  newSummons.value.points = violation.points
-  newSummons.value.parentName = 'Bpk/Ibu Wali ' + violation.studentName.split(' ')[0]
-  newSummons.value.parentPhone = '+62 812-3456-7890'
-  newSummons.value.stage = violation.points >= 50 ? 'SP-2' : 'SP-1'
-  newSummons.value.letterNumber = `421.5/0${82 + summonsList.value.length}/BK/SMK-PGRI5/X/2024`
+  newSummons.value.points = violation.points || 0
+  newSummons.value.parentName = match?.parent || ('Bpk/Ibu Wali ' + violation.studentName.split(' ')[0])
+  newSummons.value.parentPhone = match?.phone || '+62 812-3456-7890'
+  newSummons.value.stage = (violation.points || 0) >= 50 ? 'SP-2' : 'SP-1'
+  newSummons.value.letterNumber = `421.5/0${82 + summonsList.value.length}/BK/SMK-PGRI5/X/2026`
   showNewSummonsModal.value = true
 }
 
 const onSelectStudentForSummons = () => {
-  const selected = candidateStudents.find(s => s.id === Number(newSummons.value.studentId))
+  const selected = candidateStudents.value.find(s => s.id === Number(newSummons.value.studentId))
   if (selected) {
     newSummons.value.studentName = selected.name
     newSummons.value.nisn = selected.nisn
@@ -1194,29 +1097,78 @@ const onSelectStudentForSummons = () => {
 }
 
 const submitNewSummons = () => {
-  summonsList.value.unshift({
-    id: Date.now(),
-    letterNumber: newSummons.value.letterNumber,
-    issueDate: '24 Okt 2024',
-    studentName: newSummons.value.studentName,
-    nisn: newSummons.value.nisn,
-    className: newSummons.value.className,
-    caseTitle: newSummons.value.caseTitle,
-    caseDescription: `Akumulasi ${newSummons.value.points} poin pelanggaran tata tertib sekolah.`,
-    points: newSummons.value.points,
-    stage: newSummons.value.stage,
-    meetingDate: newSummons.value.meetingDate,
-    meetingTime: newSummons.value.meetingTime,
-    room: newSummons.value.room,
-    parentName: newSummons.value.parentName,
-    parentPhone: newSummons.value.parentPhone,
-    status: 'Menunggu Kehadiran',
-    counselor: newSummons.value.counselor
-  })
+  if (!newSummons.value.studentId && candidateStudents.value.length > 0) {
+    const match = candidateStudents.value.find(s => s.name === newSummons.value.studentName)
+    if (match) newSummons.value.studentId = match.id
+  }
 
-  showNewSummonsModal.value = false
-  activeMainTab.value = 'panggilan'
-  alert(`Surat Panggilan ${newSummons.value.stage} untuk siswa ${newSummons.value.studentName} berhasil diterbitkan!`)
+  isSubmittingSummons.value = true
+
+  const payload = {
+    student_id: newSummons.value.studentId,
+    letter_number: newSummons.value.letterNumber,
+    stage: newSummons.value.stage,
+    case_title: newSummons.value.caseTitle,
+    case_description: `Akumulasi ${newSummons.value.points} poin pelanggaran tata tertib sekolah.`,
+    points: newSummons.value.points,
+    meeting_date: newSummons.value.meetingDate,
+    meeting_time: newSummons.value.meetingTime,
+    room: newSummons.value.room,
+    parent_name: newSummons.value.parentName,
+    parent_phone: newSummons.value.parentPhone,
+    counselor: newSummons.value.counselor
+  }
+
+  // Jika student_id tersedia dan ada di database, kirim via Inertia router
+  if (payload.student_id && props.dbStudents.some(s => s.id === Number(payload.student_id))) {
+    router.post('/pelanggaran/panggilan', payload, {
+      preserveScroll: true,
+      onSuccess: () => {
+        isSubmittingSummons.value = false
+        showNewSummonsModal.value = false
+        activeMainTab.value = 'panggilan'
+      },
+      onError: () => {
+        isSubmittingSummons.value = false
+        // fallback unshift in-memory
+        summonsList.value.unshift({
+          id: Date.now(),
+          ...payload,
+          issueDate: 'Hari Ini',
+          studentName: newSummons.value.studentName,
+          nisn: newSummons.value.nisn,
+          className: newSummons.value.className,
+          status: 'Menunggu Kehadiran'
+        })
+        showNewSummonsModal.value = false
+        activeMainTab.value = 'panggilan'
+      }
+    })
+  } else {
+    // In-memory fallback jika menggunakan demo dummy student
+    isSubmittingSummons.value = false
+    summonsList.value.unshift({
+      id: Date.now(),
+      letterNumber: newSummons.value.letterNumber,
+      issueDate: 'Hari Ini',
+      studentName: newSummons.value.studentName,
+      nisn: newSummons.value.nisn,
+      className: newSummons.value.className,
+      caseTitle: newSummons.value.caseTitle,
+      caseDescription: `Akumulasi ${newSummons.value.points} poin pelanggaran tata tertib sekolah.`,
+      points: newSummons.value.points,
+      stage: newSummons.value.stage,
+      meetingDate: newSummons.value.meetingDate,
+      meetingTime: newSummons.value.meetingTime,
+      room: newSummons.value.room,
+      parentName: newSummons.value.parentName,
+      parentPhone: newSummons.value.parentPhone,
+      status: 'Menunggu Kehadiran',
+      counselor: newSummons.value.counselor
+    })
+    showNewSummonsModal.value = false
+    activeMainTab.value = 'panggilan'
+  }
 }
 
 const previewSummonsLetter = (item) => {
@@ -1226,13 +1178,27 @@ const previewSummonsLetter = (item) => {
 
 const openMediationModal = (item) => {
   activeMediationItem.value = item
-  mediationNote.value = `Telah hadir orang tua (${item.parentName}) dari siswa ${item.studentName}. Orang tua menyatakan komitmen membina anak di rumah dan menandatangani surat perjanjian disiplin.`
+  mediationNote.value = item.mediationNote || `Telah hadir orang tua (${item.parentName}) dari siswa ${item.studentName}. Orang tua menyatakan komitmen membina anak di rumah dan menandatangani surat perjanjian disiplin.`
   showMediationModal.value = true
 }
 
 const saveMediationNote = () => {
-  showMediationModal.value = false
-  alert(`Berita acara mediasi surat ${activeMediationItem.value.letterNumber} berhasil disimpan!`)
+  if (activeMediationItem.value && activeMediationItem.value.id && props.dbSummons.some(s => s.id === activeMediationItem.value.id)) {
+    router.patch(`/pelanggaran/panggilan/${activeMediationItem.value.id}`, {
+      status: activeMediationItem.value.status,
+      mediation_notes: mediationNote.value
+    }, {
+      preserveScroll: true,
+      onSuccess: () => {
+        showMediationModal.value = false
+      },
+      onError: () => {
+        showMediationModal.value = false
+      }
+    })
+  } else {
+    showMediationModal.value = false
+  }
 }
 
 const sendWhatsAppToParent = (item) => {

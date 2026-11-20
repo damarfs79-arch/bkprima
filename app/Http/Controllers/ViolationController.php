@@ -15,18 +15,20 @@ class ViolationController extends Controller
     public function index(Request $request)
     {
         $violations = Violation::with('student')->latest()->get();
-        $students = Student::all();
+        $students = Student::active()->get();
+        $summons = \App\Models\ParentSummon::with('student')->latest()->get();
 
         return Inertia::render('ViolationList', [
             'dbViolations' => $violations,
             'dbStudents' => $students,
+            'dbSummons' => $summons,
             'initialTab' => $request->query('tab', 'daftar'),
         ]);
     }
 
     public function create()
     {
-        $students = Student::orderBy('name')->get();
+        $students = Student::active()->orderBy('name')->get();
 
         return Inertia::render('InputViolation', [
             'studentsList' => $students,
@@ -48,6 +50,7 @@ class ViolationController extends Controller
 
         $validated['student_name'] = $cleanedName;
         $validated['student_class'] = $validated['student_class'] ?? $extractedClass;
+        $validated['class_snapshot'] = $validated['student_class'];
         $validated['violation_name'] = $validated['violation_name'] ?? $validated['category'];
         $validated['date'] = $validated['date'] ?? now()->toDateString();
         $validated['time'] = $validated['time'] ?? now()->format('H:i');
@@ -206,9 +209,77 @@ class ViolationController extends Controller
         $studentsWithSummons = Student::where('total_violation_points', '>=', 50)
             ->with('violations')
             ->get();
+        $summons = \App\Models\ParentSummon::with('student')->latest()->get();
 
         return Inertia::render('ParentSummons', [
             'students' => $studentsWithSummons,
+            'dbSummons' => $summons,
         ]);
+    }
+
+    public function storeSummons(Request $request)
+    {
+        $validated = $request->validate([
+            'student_id' => 'required|exists:students,id',
+            'stage' => 'required|string|max:100',
+            'case_title' => 'required|string|max:255',
+            'case_description' => 'nullable|string',
+            'points' => 'nullable|integer',
+            'letter_number' => 'nullable|string|max:100',
+            'meeting_date' => 'required|string|max:100',
+            'meeting_time' => 'required|string|max:50',
+            'room' => 'nullable|string|max:100',
+            'parent_name' => 'nullable|string|max:255',
+            'parent_phone' => 'nullable|string|max:50',
+            'counselor' => 'nullable|string|max:255',
+        ]);
+
+        $student = Student::find($validated['student_id']);
+        if (!$student) {
+            return redirect()->back()->with('error', 'Siswa tidak ditemukan.');
+        }
+
+        // Auto generate letter number jika belum ada
+        if (empty($validated['letter_number'])) {
+            $count = \App\Models\ParentSummon::count() + 1;
+            $validated['letter_number'] = sprintf("421.5/%03d/BK/SMK-PGRI5/%s/%s", $count, strtoupper(now()->format('M')), now()->format('Y'));
+        }
+
+        $validated['student_name'] = $student->name;
+        $validated['nis'] = $student->nis;
+        $validated['class_name'] = $student->class_name;
+        $validated['points'] = $validated['points'] ?? ($student->total_violation_points ?? 0);
+        $validated['parent_name'] = $validated['parent_name'] ?? $student->parent_name;
+        $validated['parent_phone'] = $validated['parent_phone'] ?? $student->parent_phone;
+        $validated['room'] = $validated['room'] ?? 'Ruang BK Gedung A';
+        $validated['status'] = 'Menunggu Kehadiran';
+        $validated['counselor'] = $validated['counselor'] ?? 'Dra. Hj. Nurul Hidayati, M.Pd';
+
+        \App\Models\ParentSummon::create($validated);
+
+        return redirect()->back()->with('success', 'Surat panggilan orang tua berhasil diterbitkan dan tersimpan di database.');
+    }
+
+    public function updateSummons(Request $request, $id)
+    {
+        $summon = \App\Models\ParentSummon::findOrFail($id);
+
+        $validated = $request->validate([
+            'status' => 'nullable|string|max:50',
+            'mediation_notes' => 'nullable|string',
+            'stage' => 'nullable|string|max:100',
+        ]);
+
+        $summon->update($validated);
+
+        return redirect()->back()->with('success', 'Status dan berita acara mediasi berhasil disimpan.');
+    }
+
+    public function destroySummons($id)
+    {
+        $summon = \App\Models\ParentSummon::findOrFail($id);
+        $summon->delete();
+
+        return redirect()->back()->with('success', 'Data surat panggilan berhasil dihapus.');
     }
 }

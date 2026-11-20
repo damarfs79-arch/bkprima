@@ -127,7 +127,7 @@
             REKAPITULASI PRESENSI KEHADIRAN SISWA BULANAN
           </h3>
           <p class="text-xs font-bold text-gray-700 mt-1">
-            BULAN: <span class="uppercase">{{ monthName }}</span> | ROMBEL: {{ selectedClass }} | TAHUN AJARAN 2024/2025
+            BULAN: <span class="uppercase">{{ monthName }}</span> | ROMBEL: {{ selectedClass }} | TAHUN AJARAN {{ schoolInfo.tahunAjaran || '2024/2025' }}
           </p>
         </div>
       </div>
@@ -262,8 +262,8 @@
             <p>Menyetujui,</p>
             <p class="font-bold">Kepala SMK PGRI 05 Jember</p>
             <div class="h-20"></div>
-            <p class="font-black underline">{{ schoolInfo.kepalaSekolah }}</p>
-            <p class="text-[10px]">NIP. 19680315 199403 1 008</p>
+            <p class="font-black underline">{{ schoolInfo.kepalaSekolah || 'Drs. H. Saiful Bahri, M.Pd' }}</p>
+            <p class="text-[10px]">NIP. {{ schoolInfo.nipKepalaSekolah || '19680315 199403 1 008' }}</p>
           </div>
 
           <!-- Kolom Wali Kelas -->
@@ -362,13 +362,36 @@ const getCellBg = (code, isWeekend) => {
 @media print {
   @page {
     size: A4 landscape;
-    margin: 8mm 8mm 8mm 8mm;
+    margin: 8mm;
   }
+
+  /* Sembunyikan seluruh shell web layout, navbar, floating footer, dan tombol */
+  aside,
+  header,
+  nav,
+  .print\:hidden,
+  [role="navigation"],
+  button,
+  .interactive-btn {
+    display: none !important;
+  }
+
+  html,
   body {
     background-color: #ffffff !important;
-    font-size: 9.5px;
+    background: #ffffff !important;
+    font-size: 9.5px !important;
+    margin: 0 !important;
+    padding: 0 !important;
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
+  }
+
+  main {
+    padding: 0 !important;
+    margin: 0 !important;
+    max-width: 100% !important;
+    width: 100% !important;
   }
 }
 </style>

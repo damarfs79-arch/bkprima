@@ -10,6 +10,8 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\GuestController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\PromotionController;
+use App\Http\Controllers\ArsipAlumniController;
 
 // 1. Splash Page
 Route::get('/', function () {
@@ -28,6 +30,7 @@ Route::get('/statistik', [AttendanceController::class, 'stats'])->name('attendan
 Route::post('/absensi/sync', [AttendanceController::class, 'sync'])->name('attendance.sync');
 Route::post('/absensi/status', [AttendanceController::class, 'updateStatus'])->name('attendance.updateStatus');
 Route::post('/absensi/import', [AttendanceController::class, 'importStudents'])->name('attendance.import');
+Route::post('/absensi/kelas/clear', [AttendanceController::class, 'clearClassStudents'])->name('attendance.clearClassStudents');
 Route::post('/siswa', [AttendanceController::class, 'storeStudent'])->name('students.store');
 Route::put('/siswa/{id}', [AttendanceController::class, 'updateStudent'])->name('students.update');
 Route::delete('/siswa/{id}', [AttendanceController::class, 'deleteStudent'])->name('students.delete');
@@ -40,6 +43,9 @@ Route::put('/pelanggaran/{id}', [ViolationController::class, 'update'])->name('v
 Route::delete('/pelanggaran/{id}', [ViolationController::class, 'destroy'])->name('violation.destroy');
 Route::get('/pelanggaran/detail', [ViolationController::class, 'show'])->name('violation.detail');
 Route::get('/pemanggilan', [ViolationController::class, 'summons'])->name('violation.summons');
+Route::post('/pelanggaran/panggilan', [ViolationController::class, 'storeSummons'])->name('violation.summons.store');
+Route::patch('/pelanggaran/panggilan/{id}', [ViolationController::class, 'updateSummons'])->name('violation.summons.update');
+Route::delete('/pelanggaran/panggilan/{id}', [ViolationController::class, 'destroySummons'])->name('violation.summons.destroy');
 
 // 5. Piket
 Route::get('/piket', [PiketController::class, 'index'])->name('piket.index');
@@ -55,6 +61,7 @@ Route::delete('/panduan/pemutihan/{id}', [RuleController::class, 'deleteDeductio
 // 7. Guru BK Profile
 Route::get('/profil', [ProfileController::class, 'index'])->name('profile.index');
 Route::post('/profil', [ProfileController::class, 'update'])->name('profile.update');
+Route::post('/profil/password', [ProfileController::class, 'changePassword'])->name('profile.password');
 
 // 8. Admin IT Panel
 Route::get('/admin', [AdminController::class, 'index'])->name('admin.index');
@@ -72,6 +79,7 @@ Route::put('/admin/siswa/{id}', [AdminController::class, 'updateStudent'])->name
 Route::delete('/admin/siswa/{id}', [AdminController::class, 'deleteStudent'])->name('admin.siswa.delete');
 Route::post('/admin/siswa/preview-import', [AdminController::class, 'previewImport'])->name('admin.siswa.previewImport');
 Route::post('/admin/siswa/import', [AdminController::class, 'importStudents'])->name('admin.siswa.import');
+Route::post('/admin/pengaturan', [AdminController::class, 'updateSettings'])->name('admin.settings.update');
 Route::patch('/admin/konsultasi/{id}', [AdminController::class, 'updateConsultationStatus'])->name('admin.consultation.update');
 Route::delete('/admin/konsultasi/{id}', [AdminController::class, 'deleteConsultation'])->name('admin.consultation.delete');
 
@@ -81,3 +89,11 @@ Route::post('/tamu/konsultasi', [GuestController::class, 'storeConsultation'])->
 Route::get('/portal-tamu', function () {
     return redirect('/tamu');
 });
+
+// 10. Master Admin Kenaikan Kelas & Kelulusan
+Route::get('/master/kenaikan-kelas/summary', [PromotionController::class, 'summary'])->name('master.promotion.summary');
+Route::post('/master/kenaikan-kelas', [PromotionController::class, 'promote'])->name('master.promotion.execute');
+
+// 11. Arsip Siswa Lulus (Alumni)
+Route::get('/arsip-lulus', [ArsipAlumniController::class, 'index'])->name('alumni.index');
+Route::get('/arsip-lulus/{id}/timeline', [ArsipAlumniController::class, 'showTimeline'])->name('alumni.timeline');

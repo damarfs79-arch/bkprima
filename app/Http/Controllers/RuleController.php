@@ -42,7 +42,7 @@ class RuleController extends Controller
 
         $rules = Rule::orderBy('type')->orderBy('points')->get();
         $deductions = PointDeduction::with('student', 'rule')->latest()->take(50)->get();
-        $students = Student::orderBy('class_name')->orderBy('name')->get(['id', 'nisn', 'name', 'class_name', 'total_violation_points', 'status']);
+        $students = Student::active()->orderBy('class_name')->orderBy('name')->get(['id', 'nis', 'name', 'class_name', 'total_violation_points', 'status']);
 
         return Inertia::render('RulePoints', [
             'rules' => $rules,

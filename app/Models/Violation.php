@@ -14,6 +14,7 @@ class Violation extends Model
         'student_id',
         'student_name',
         'student_class',
+        'class_snapshot',
         'category',
         'violation_name',
         'points',
@@ -39,6 +40,25 @@ class Violation extends Model
 
     protected static function booted()
     {
+        static::creating(function ($violation) {
+            if (empty($violation->class_snapshot)) {
+                if (!empty($violation->student_class)) {
+                    $violation->class_snapshot = $violation->student_class;
+                } elseif ($violation->student_id) {
+                    $student = Student::find($violation->student_id);
+                    if ($student) {
+                        $violation->class_snapshot = $student->class_name;
+                        if (empty($violation->student_class)) {
+                            $violation->student_class = $student->class_name;
+                        }
+                        if (empty($violation->student_name)) {
+                            $violation->student_name = $student->name;
+                        }
+                    }
+                }
+            }
+        });
+
         // Hapus file fisik bukti foto di storage saat data pelanggaran dihapus
         static::deleting(function ($violation) {
             $violation->deleteAttachedPhoto();
@@ -94,5 +114,15 @@ class Violation extends Model
     public function siswa()
     {
         return $this->student();
+    }
+
+    public function classroom()
+    {
+        return $this->belongsTo(Classroom::class, 'class_snapshot', 'name');
+    }
+
+    public function kelas()
+    {
+        return $this->classroom();
     }
 }

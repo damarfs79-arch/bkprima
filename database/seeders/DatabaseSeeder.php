@@ -4,9 +4,7 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use App\Models\User;
-use App\Models\Student;
-use App\Models\Violation;
-use App\Models\Attendance;
+use App\Models\Setting;
 use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
@@ -16,235 +14,82 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // 1. Create Default Users (Admin & Guru BK)
+        // 1. Akun Super Administrator Utama
         User::updateOrCreate(
             ['email' => 'admin@bkprima.sch.id'],
             [
                 'name' => 'Admin IT Sekolah',
                 'username' => 'admin_bkprima',
                 'role' => 'admin',
-                'password' => Hash::make('password123'),
+                'password' => Hash::make('admin2026!'),
             ]
         );
 
-        $guruBkSeeds = [
+        // 2. Akun Guru BK Damar
+        User::updateOrCreate(
+            ['username' => 'damar'],
             [
-                'name' => 'Dra. Hj. Nurul Hidayati, M.Pd',
-                'username' => 'nurul_bk',
-                'email' => 'nurul.hidayati@guru.smk.belajar.id',
-                'password' => Hash::make('password123'),
+                'name' => 'Damar',
+                'email' => 'damar@bkprima.sch.id',
+                'username' => 'damar',
                 'role' => 'guru',
-                'nip' => '19780415 200312 2 004',
-                'nuptk' => '8452 7566 5830 0012',
-                'jabatan' => 'Koordinator BK & Kedisiplinan',
-                'phone' => '+62 812-3456-7890',
-                'rombel' => 'X RPL 1, X RPL 2, XI RPL 1, XII DKV 1'
-            ],
-            [
-                'name' => 'Bpk. Agus Wicaksono, S.Pd',
-                'username' => 'agus_bk',
-                'email' => 'agus.wicaksono@guru.smk.belajar.id',
-                'password' => Hash::make('password123'),
-                'role' => 'guru',
-                'nip' => '19850612 201001 1 012',
-                'nuptk' => '6342 9821 4410 0034',
-                'jabatan' => 'Guru Pembimbing BK Kelas X',
-                'phone' => '+62 813-9876-5432',
-                'rombel' => 'X TSM 1, X TSM 2, X DKV 1'
-            ],
-            [
-                'name' => 'Ibu Ratih Anggraini, S.Psi',
-                'username' => 'ratih_bk',
-                'email' => 'ratih.anggraini@guru.smk.belajar.id',
-                'password' => Hash::make('password123'),
-                'role' => 'guru',
-                'nip' => '19910322 201802 2 005',
-                'nuptk' => '9120 4455 1209 0087',
-                'jabatan' => 'Guru Pembimbing BK Kelas XI',
-                'phone' => '+62 852-1122-3344',
-                'rombel' => 'XI DKV 1, XI DKV 2, XI TKJ 1'
-            ],
-            [
-                'name' => 'Bpk. Dwi Prasetyo, M.Pd',
-                'username' => 'dwi_bk',
-                'email' => 'dwi.prasetyo@guru.smk.belajar.id',
-                'password' => Hash::make('password123'),
-                'role' => 'guru',
-                'nip' => '19821105 200801 1 008',
-                'nuptk' => '4456 1238 9980 0045',
-                'jabatan' => 'Guru Pembimbing BK Kelas XII',
-                'phone' => '+62 878-5566-7788',
-                'rombel' => 'XII RPL 1, XII RPL 2, XII AKL 1'
+                'jabatan' => 'Guru BK',
+                'phone' => '08123456789',
+                'password' => Hash::make('damar123'),
+                'rombel' => 'Semua Rombel',
             ]
+        );
+
+        // 3. Data Kelas & Siswa
+        $classes = [
+            ['name' => 'X TKKR 1', 'level' => '10', 'major' => 'TKKR', 'wali_kelas' => 'Bpk. Ahmad Fauzi, S.Kom', 'guru_bk_name' => 'Damar'],
+            ['name' => 'X RPL 1', 'level' => '10', 'major' => 'RPL', 'wali_kelas' => 'Ibu Siti Aminah, S.Pd', 'guru_bk_name' => 'Damar'],
+            ['name' => 'XI RPL 1', 'level' => '11', 'major' => 'RPL', 'wali_kelas' => 'Bpk. Budi Santoso, S.Kom', 'guru_bk_name' => 'Damar'],
+            ['name' => 'XI TSM 1', 'level' => '11', 'major' => 'TSM', 'wali_kelas' => 'Bpk. Heru Wibowo, S.T', 'guru_bk_name' => 'Damar'],
+            ['name' => 'XII RPL 1', 'level' => '12', 'major' => 'RPL', 'wali_kelas' => 'Ibu Ratna Sari, M.Pd', 'guru_bk_name' => 'Damar'],
         ];
 
-        foreach ($guruBkSeeds as $g) {
-            User::updateOrCreate(['username' => $g['username']], $g);
+        foreach ($classes as $c) {
+            \App\Models\Classroom::updateOrCreate(['name' => $c['name']], $c);
         }
 
-        // 2. Create Students
-        $studentsData = [
-            [
-                'nisn' => '0061234561',
-                'name' => 'Ahmad Fajar Pratama',
-                'class_name' => 'X RPL 1',
-                'level' => '10',
-                'major' => 'RPL',
-                'gender' => 'L',
-                'phone' => '081234567890',
-                'parent_name' => 'Bambang Sugeng',
-                'parent_phone' => '081298765432',
-                'total_violation_points' => 15,
-                'status' => 'Peringatan 1',
-            ],
-            [
-                'nisn' => '0061234562',
-                'name' => 'Budi Santoso',
-                'class_name' => 'X RPL 1',
-                'level' => '10',
-                'major' => 'RPL',
-                'gender' => 'L',
-                'phone' => '081234567891',
-                'parent_name' => 'Santoso',
-                'parent_phone' => '081298765433',
-                'total_violation_points' => 5,
-                'status' => 'Aman',
-            ],
-            [
-                'nisn' => '0061234563',
-                'name' => 'Citra Dewi Lestari',
-                'class_name' => 'X RPL 1',
-                'level' => '10',
-                'major' => 'RPL',
-                'gender' => 'P',
-                'phone' => '081234567892',
-                'parent_name' => 'Hartono',
-                'parent_phone' => '081298765434',
-                'total_violation_points' => 0,
-                'status' => 'Aman',
-            ],
-            [
-                'nisn' => '0061234564',
-                'name' => 'Dimas Arya Putra',
-                'class_name' => 'X TSM 1',
-                'level' => '10',
-                'major' => 'TSM',
-                'gender' => 'L',
-                'phone' => '081234567893',
-                'parent_name' => 'Supriyadi',
-                'parent_phone' => '081298765435',
-                'total_violation_points' => 45,
-                'status' => 'SP 1',
-            ],
-            [
-                'nisn' => '0061234565',
-                'name' => 'Eka Rizky Wahyudi',
-                'class_name' => 'XI RPL 1',
-                'level' => '11',
-                'major' => 'RPL',
-                'gender' => 'L',
-                'phone' => '081234567894',
-                'parent_name' => 'Wahyudi',
-                'parent_phone' => '081298765436',
-                'total_violation_points' => 25,
-                'status' => 'Peringatan 2',
-            ],
-            [
-                'nisn' => '0061234566',
-                'name' => 'Farhan Maulana',
-                'class_name' => 'XI TSM 1',
-                'level' => '11',
-                'major' => 'TSM',
-                'gender' => 'L',
-                'phone' => '081234567895',
-                'parent_name' => 'Suwito',
-                'parent_phone' => '081298765437',
-                'total_violation_points' => 75,
-                'status' => 'Panggilan Orang Tua',
-            ],
-            [
-                'nisn' => '0061234567',
-                'name' => 'Gita Puspitasari',
-                'class_name' => 'XII RPL 1',
-                'level' => '12',
-                'major' => 'RPL',
-                'gender' => 'P',
-                'phone' => '081234567896',
-                'parent_name' => 'Surya Pratama',
-                'parent_phone' => '081298765438',
-                'total_violation_points' => 0,
-                'status' => 'Aman',
-            ],
+        $students = [
+            ['nis' => '00829101', 'name' => 'Muhammad Bagas Saputra', 'class_name' => 'X TKKR 1', 'rombel' => '1', 'level' => '10', 'major' => 'TKKR', 'gender' => 'L', 'parent_name' => 'Orang Tua Muhammad Bagas', 'parent_phone' => '+62 812-3344-5566', 'total_violation_points' => 0, 'status' => 'aktif'],
+            ['nis' => '00829102', 'name' => 'Nabila Putri Ayu', 'class_name' => 'X TKKR 1', 'rombel' => '1', 'level' => '10', 'major' => 'TKKR', 'gender' => 'P', 'parent_name' => 'Orang Tua Nabila Putri', 'parent_phone' => '+62 813-7788-9900', 'total_violation_points' => 0, 'status' => 'aktif'],
+            ['nis' => '00829103', 'name' => 'Rendy Wahyu Pratama', 'class_name' => 'X TKKR 1', 'rombel' => '1', 'level' => '10', 'major' => 'TKKR', 'gender' => 'L', 'parent_name' => 'Orang Tua Rendy Wahyu', 'parent_phone' => '+62 856-1122-3344', 'total_violation_points' => 5, 'status' => 'aktif'],
+            ['nis' => '0061234561', 'name' => 'Ahmad Fajar Prasetya', 'class_name' => 'X RPL 1', 'rombel' => '1', 'level' => '10', 'major' => 'RPL', 'gender' => 'L', 'parent_name' => 'Bambang Prasetya', 'parent_phone' => '081298765432', 'total_violation_points' => 15, 'status' => 'aktif'],
+            ['nis' => '0061234562', 'name' => 'Bayu Pratama Nugraha', 'class_name' => 'X RPL 1', 'rombel' => '1', 'level' => '10', 'major' => 'RPL', 'gender' => 'L', 'parent_name' => 'Joko Nugraha', 'parent_phone' => '081298765433', 'total_violation_points' => 0, 'status' => 'aktif'],
+            ['nis' => '0061234563', 'name' => 'Cantika Dewi Lestari', 'class_name' => 'X RPL 1', 'rombel' => '1', 'level' => '10', 'major' => 'RPL', 'gender' => 'P', 'parent_name' => 'Hartono', 'parent_phone' => '081298765434', 'total_violation_points' => 0, 'status' => 'aktif'],
+            ['nis' => '0061234564', 'name' => 'Dimas Arya Putra', 'class_name' => 'XI RPL 1', 'rombel' => '1', 'level' => '11', 'major' => 'RPL', 'gender' => 'L', 'parent_name' => 'Gunawan', 'parent_phone' => '081298765435', 'total_violation_points' => 35, 'status' => 'aktif'],
+            ['nis' => '0061234565', 'name' => 'Eka Rizky Wahyudi', 'class_name' => 'XI RPL 1', 'rombel' => '1', 'level' => '11', 'major' => 'RPL', 'gender' => 'L', 'parent_name' => 'Wahyudi', 'parent_phone' => '081298765436', 'total_violation_points' => 10, 'status' => 'aktif'],
+            ['nis' => '0061234566', 'name' => 'Farhan Maulana', 'class_name' => 'XI TSM 1', 'rombel' => '1', 'level' => '11', 'major' => 'TSM', 'gender' => 'L', 'parent_name' => 'Suwito', 'parent_phone' => '081298765437', 'total_violation_points' => 50, 'status' => 'aktif'],
+            ['nis' => '0061234567', 'name' => 'Gita Puspitasari', 'class_name' => 'XII RPL 1', 'rombel' => '1', 'level' => '12', 'major' => 'RPL', 'gender' => 'P', 'parent_name' => 'Surya Pratama', 'parent_phone' => '081298765438', 'total_violation_points' => 0, 'status' => 'aktif'],
         ];
 
-        foreach ($studentsData as $item) {
-            $student = Student::updateOrCreate(['nisn' => $item['nisn']], $item);
-
-            // Attendance today
-            Attendance::updateOrCreate(
-                [
-                    'student_id' => $student->id,
-                    'date' => now()->toDateString(),
-                ],
-                [
-                    'check_in_time' => '06:45:10',
-                    'check_out_time' => '14:30:00',
-                    'status' => 'Hadir',
-                    'notes' => 'Tepat waktu via mesin HadirMu',
-                ]
+        foreach ($students as $s) {
+            $student = \App\Models\Student::updateOrCreate(['nis' => $s['nis']], $s);
+            \App\Models\Attendance::updateOrCreate(
+                ['student_id' => $student->id, 'date' => now()->toDateString()],
+                ['status' => 'Hadir', 'check_in_time' => '06:45', 'class_snapshot' => $student->class_name, 'notes' => 'Tepat waktu']
             );
         }
 
-        // 3. Seed sample violations
-        $studentFajar = Student::where('nisn', '0061234561')->first();
-        if ($studentFajar) {
-            Violation::create([
-                'student_id' => $studentFajar->id,
-                'student_name' => $studentFajar->name,
-                'student_class' => $studentFajar->class_name,
-                'category' => 'Kedisiplinan',
-                'violation_name' => 'Terlambat Masuk Sekolah (> 15 Menit)',
-                'points' => 5,
-                'date' => now()->subDays(2)->toDateString(),
-                'time' => '07:18',
-                'reporter' => 'Bpk. Slamet Riyadi, S.T (Piket)',
-                'penalty_action' => 'Piket membersihkan halaman & pembinaan',
-                'status' => 'Selesai',
-                'notes' => 'Ban bocor di jalan, sudah lapor orang tua.',
-            ]);
+        // 4. Konfigurasi Dasar Pengaturan Sekolah
+        $defaultSettings = [
+            'school_name' => 'SMK PGRI 05 JEMBER',
+            'school_address' => 'Jl. Krakatau No. 54 Tanggul, Jember - Jawa Timur',
+            'school_npsn' => '20523801',
+            'school_status' => 'Terakreditasi A (Unggul)',
+            'school_email' => 'smkpgri5jember@yahoo.co.id',
+            'school_website' => 'www.smkpgri05jember.sch.id',
+            'headmaster_name' => 'Drs. H. Saiful Bahri, M.Pd',
+            'headmaster_nip' => '196802151994031003',
+            'academic_year' => '2026/2027',
+            'semester' => 'Semester Genap 2026/2027',
+        ];
 
-            Violation::create([
-                'student_id' => $studentFajar->id,
-                'student_name' => $studentFajar->name,
-                'student_class' => $studentFajar->class_name,
-                'category' => 'Kerapian',
-                'violation_name' => 'Rambut Tidak Sesuai Ketentuan (Melebihi Kerah)',
-                'points' => 10,
-                'date' => now()->subDay()->toDateString(),
-                'time' => '07:30',
-                'reporter' => 'Dra. Hj. Nurul Hidayati, M.Pd (BK)',
-                'penalty_action' => 'Diberi tenggat waktu 3 hari untuk merapikan rambut',
-                'status' => 'Ditindaklanjuti',
-                'notes' => 'Diingatkan secara lisan dan dicatat pada buku pembinaan.',
-            ]);
-        }
-
-        $studentFarhan = Student::where('nisn', '0061234566')->first();
-        if ($studentFarhan) {
-            Violation::create([
-                'student_id' => $studentFarhan->id,
-                'student_name' => $studentFarhan->name,
-                'student_class' => $studentFarhan->class_name,
-                'category' => 'Kepribadian & Berat',
-                'violation_name' => 'Merokok / Membawa Rokok di Lingkungan Sekolah',
-                'points' => 50,
-                'date' => now()->subDays(3)->toDateString(),
-                'time' => '10:15',
-                'reporter' => 'Bpk. Agus Wicaksono, S.Pd',
-                'penalty_action' => 'Surat Pemanggilan Orang Tua Tahap 1 & Skorsing 3 Hari',
-                'status' => 'Ditindaklanjuti',
-                'notes' => 'Ditemukan di area belakang bengkel TSM saat jam istirahat pertama.',
-            ]);
+        foreach ($defaultSettings as $key => $value) {
+            Setting::set($key, $value);
         }
     }
 }

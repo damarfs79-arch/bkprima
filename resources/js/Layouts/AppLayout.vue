@@ -1,6 +1,6 @@
 <template>
-  <div class="min-h-screen bg-slate-50 flex flex-col lg:flex-row font-sans text-gray-800 relative">
-    <aside class="hidden lg:flex w-64 xl:w-72 flex-col bg-white border-r border-gray-200/80 min-h-screen sticky top-0 h-screen shrink-0 z-30 shadow-xs select-none">
+  <div class="min-h-screen bg-slate-50 flex flex-col lg:flex-row font-sans text-gray-800 relative print:bg-white print:block">
+    <aside class="print:hidden hidden lg:flex w-64 xl:w-72 flex-col bg-white border-r border-gray-200/80 min-h-screen sticky top-0 h-screen shrink-0 z-30 shadow-xs select-none">
       
       <!-- Brand Logo Header -->
       <div class="p-4 sm:p-5 border-b border-gray-100">
@@ -33,12 +33,34 @@
           </div>
           <span class="flex-1">{{ item.label }}</span>
         </router-link>
+
+        <!-- Divider & ARSIP & REFERENSI -->
+        <div class="pt-3 mt-2 border-t border-slate-100">
+          <p class="px-3 text-[11px] font-semibold text-slate-400 mb-2 uppercase tracking-wider">Arsip &amp; Referensi</p>
+          <router-link
+            to="/arsip-lulus"
+            class="interactive-btn flex items-center gap-3 px-3 py-2 rounded-lg text-xs font-medium cursor-pointer"
+            :class="isRouteActive('alumni') ? 'bg-blue-50 text-blue-700 font-semibold shadow-2xs' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'"
+          >
+            <div
+              class="transition"
+              :class="isRouteActive('alumni') ? 'text-blue-600' : 'text-slate-400 group-hover:text-slate-600'"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 14l9-5-9-5-9 5 9 5z" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 14v7" />
+              </svg>
+            </div>
+            <span class="flex-1">Arsip Siswa Lulus</span>
+          </router-link>
+        </div>
       </nav>
 
       <!-- Sidebar Footer -->
       <div class="p-4 border-t border-gray-100 space-y-2.5">
         <div class="px-3 py-2 bg-slate-50 border border-slate-200/80 rounded-lg text-xs font-medium text-slate-600">
-          <span class="truncate">Semester Genap 24/25</span>
+          <span class="truncate">{{ activeSemester }}</span>
         </div>
         <button
           type="button"
@@ -57,7 +79,7 @@
     <!-- ============================================================ -->
     <!-- 2. MOBILE TOP BAR (Exact Hamburger Button as Image 1)       -->
     <!-- ============================================================ -->
-    <div class="lg:hidden bg-white border-b border-gray-200/90 px-4 py-2.5 sticky top-0 z-30 flex items-center justify-between shadow-2xs">
+    <div class="print:hidden lg:hidden bg-white border-b border-gray-200/90 px-4 py-2.5 sticky top-0 z-30 flex items-center justify-between shadow-2xs">
       
       <!-- Left: Hamburger Button (Exact Image 1 Replica) -->
       <div class="flex items-center gap-2.5">
@@ -98,7 +120,7 @@
     <!-- ============================================================ -->
     <!-- 3. MOBILE SLIDE-OVER DRAWER (Full Sidebar on Mobile)         -->
     <!-- ============================================================ -->
-    <div v-if="mobileDrawerOpen" class="fixed inset-0 z-50 lg:hidden flex">
+    <div v-if="mobileDrawerOpen" class="print:hidden fixed inset-0 z-50 lg:hidden flex">
       <!-- Backdrop -->
       <div @click="mobileDrawerOpen = false" class="fixed inset-0 bg-black/40 backdrop-blur-xs transition-opacity animate-in fade-in"></div>
 
@@ -135,9 +157,29 @@
             <component :is="item.icon" class="w-4 h-4" :class="isRouteActive(item.key) ? 'text-blue-600' : 'text-slate-400'" />
             <span class="flex-1">{{ item.label }}</span>
           </router-link>
+
+          <div class="pt-3 mt-2 border-t border-slate-100">
+            <p class="px-3 text-[10px] font-semibold text-slate-400 mb-1 uppercase tracking-wider">Arsip &amp; Referensi</p>
+            <router-link
+              to="/arsip-lulus"
+              @click="mobileDrawerOpen = false"
+              class="flex items-center gap-3 px-3 py-2 rounded-lg text-xs font-medium transition"
+              :class="isRouteActive('alumni') ? 'bg-blue-50 text-blue-700 font-semibold' : 'text-slate-700 hover:bg-slate-50'"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" :class="isRouteActive('alumni') ? 'text-blue-600' : 'text-slate-400'" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 14l9-5-9-5-9 5 9 5z" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 14v7" />
+              </svg>
+              <span class="flex-1">Arsip Siswa Lulus</span>
+            </router-link>
+          </div>
         </nav>
 
-        <div class="p-4 border-t border-gray-100">
+        <div class="p-4 border-t border-gray-100 space-y-2">
+          <div class="px-3 py-2 bg-slate-50 border border-slate-200/80 rounded-lg text-xs font-medium text-slate-600 text-center">
+            <span>{{ activeSemester }}</span>
+          </div>
           <button
             type="button"
             @click="mobileDrawerOpen = false; handleLogout()"
@@ -155,10 +197,10 @@
     <!-- ============================================================ -->
     <!-- 4. MAIN CONTENT WRAPPER                                      -->
     <!-- ============================================================ -->
-    <div class="flex-1 flex flex-col min-w-0">
+    <div class="flex-1 flex flex-col min-w-0 print:block print:w-full print:p-0 print:m-0">
       
       <!-- Desktop Top Bar -->
-      <header class="hidden lg:flex items-center justify-between px-8 py-3.5 bg-white border-b border-slate-200/80 sticky top-0 z-20">
+      <header class="print:hidden hidden lg:flex items-center justify-between px-8 py-3.5 bg-white border-b border-slate-200/80 sticky top-0 z-20">
         <div class="flex items-center gap-2 text-xs font-medium text-slate-500">
           <button v-if="showBack" @click="handleBack" class="inline-flex items-center gap-1 p-1 text-slate-500 hover:text-slate-800 rounded cursor-pointer mr-1">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -186,7 +228,7 @@
       </header>
 
       <!-- Main Content Slot -->
-      <main class="flex-1 p-3 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full pb-32 lg:pb-10">
+      <main class="flex-1 p-3 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full pb-32 lg:pb-10 print:p-0 print:m-0 print:max-w-none print:w-full">
         <slot />
       </main>
     </div>
@@ -194,7 +236,7 @@
     <!-- ============================================================ -->
     <!-- 5. MOBILE BOTTOM NAVIGATION (ANIMATED SLIDING CIRCLE)        -->
     <!-- ============================================================ -->
-    <nav class="lg:hidden fixed bottom-4 left-4 right-4 z-40 max-w-sm mx-auto">
+    <nav class="print:hidden lg:hidden fixed bottom-4 left-4 right-4 z-40 max-w-sm mx-auto">
       <div class="bg-blue-600 rounded-3xl shadow-xl shadow-blue-600/35 h-[68px] px-1 flex items-center relative select-none">
         
         <!-- Sliding Elevated Animated Indicator (Geser & Naik ke Atas / Tidak Sejajar) -->
@@ -305,10 +347,15 @@
 <script setup>
 import { ref, computed, h } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { router as inertiaRouter } from '@inertiajs/vue3'
+import { router as inertiaRouter, usePage } from '@inertiajs/vue3'
 
 const router = useRouter()
 const route = useRoute()
+const page = usePage()
+
+const activeSemester = computed(() => {
+  return page.props?.appSettings?.semester || 'Semester Genap 24/25'
+})
 
 
 
@@ -402,35 +449,11 @@ const menuItems = [
     ])
   },
   {
-    key: 'piket',
-    label: 'Piket Harian',
-    path: '/piket',
-    icon: () => h('svg', { xmlns: 'http://www.w3.org/2000/svg', class: 'h-4 w-4', fill: 'none', viewBox: '0 0 24 24', stroke: 'currentColor', 'stroke-width': '2' }, [
-      h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', d: 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z' })
-    ])
-  },
-  {
-    key: 'panduan',
-    label: 'Tata Tertib & Poin',
-    path: '/panduan',
-    icon: () => h('svg', { xmlns: 'http://www.w3.org/2000/svg', class: 'h-4 w-4', fill: 'none', viewBox: '0 0 24 24', stroke: 'currentColor', 'stroke-width': '2' }, [
-      h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', d: 'M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253' })
-    ])
-  },
-  {
     key: 'profil',
     label: 'Profil Guru BK',
     path: '/profil',
     icon: () => h('svg', { xmlns: 'http://www.w3.org/2000/svg', class: 'h-4 w-4', fill: 'none', viewBox: '0 0 24 24', stroke: 'currentColor', 'stroke-width': '2' }, [
       h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', d: 'M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z' })
-    ])
-  },
-  {
-    key: 'tamu',
-    label: 'Portal Tamu (Siswa/Wali)',
-    path: '/tamu',
-    icon: () => h('svg', { xmlns: 'http://www.w3.org/2000/svg', class: 'h-4 w-4', fill: 'none', viewBox: '0 0 24 24', stroke: 'currentColor', 'stroke-width': '2' }, [
-      h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', d: 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z' })
     ])
   }
 ]
@@ -444,9 +467,8 @@ const isRouteActive = (key) => {
   if (key === 'pemanggilan' && route.path === '/pemanggilan') return true
   if (key === 'verifikasi' && route.path === '/verifikasi') return true
   if (key === 'statistik' && route.path === '/statistik') return true
-  if (key === 'piket' && route.path === '/piket') return true
-  if (key === 'panduan' && route.path === '/panduan') return true
   if (key === 'profil' && route.path === '/profil') return true
+  if (key === 'alumni' && (route.path === '/arsip-lulus' || route.path.startsWith('/arsip-lulus/'))) return true
   return false
 }
 
@@ -458,9 +480,8 @@ const currentTitle = computed(() => {
   if (route.path === '/pemanggilan') return 'Pemanggilan Orang Tua'
   if (route.path === '/verifikasi') return 'Input Pelanggaran'
   if (route.path === '/statistik') return 'Statistik Siswa'
-  if (route.path === '/piket') return 'Piket Harian'
-  if (route.path === '/panduan') return 'Tata Tertib & Poin'
   if (route.path === '/profil') return 'Profil Guru BK'
+  if (route.path === '/arsip-lulus' || route.path.startsWith('/arsip-lulus')) return 'Arsip Siswa Lulus'
   return 'Dashboard'
 })
 

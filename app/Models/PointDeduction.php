@@ -31,9 +31,19 @@ class PointDeduction extends Model
         return $this->belongsTo(Student::class);
     }
 
+    public function siswa()
+    {
+        return $this->student();
+    }
+
     public function rule()
     {
         return $this->belongsTo(Rule::class);
+    }
+
+    public function aturan()
+    {
+        return $this->rule();
     }
 }
 
