@@ -493,11 +493,13 @@ class AttendanceController extends Controller
         // 1. Hitung ringkasan presensi aktual dari database
         $totalAttendances = Attendance::count();
         $hadirCount = Attendance::where('status', 'Hadir')->count();
+        $terlambatCount = Attendance::where('status', 'Terlambat')->count();
         $sakitCount = Attendance::where('status', 'Sakit')->count();
         $izinCount = Attendance::where('status', 'Izin')->count();
         $alphaCount = Attendance::where('status', 'Alpa')->count();
 
         $hadirRate = $totalAttendances > 0 ? round(($hadirCount / $totalAttendances) * 100, 1) : 0;
+        $terlambatRate = $totalAttendances > 0 ? round(($terlambatCount / $totalAttendances) * 100, 1) : 0;
         $sakitRate = $totalAttendances > 0 ? round(($sakitCount / $totalAttendances) * 100, 1) : 0;
         $izinRate = $totalAttendances > 0 ? round(($izinCount / $totalAttendances) * 100, 1) : 0;
         $alphaRate = $totalAttendances > 0 ? round(($alphaCount / $totalAttendances) * 100, 1) : 0;
@@ -505,10 +507,12 @@ class AttendanceController extends Controller
         $summaryMetrics = [
             'totalPresensi' => $totalAttendances,
             'hadirCount' => $hadirCount,
+            'terlambatCount' => $terlambatCount,
             'sakitCount' => $sakitCount,
             'izinCount' => $izinCount,
             'alphaCount' => $alphaCount,
             'hadirRate' => $hadirRate,
+            'terlambatRate' => $terlambatRate,
             'sakitRate' => $sakitRate,
             'izinRate' => $izinRate,
             'alphaRate' => $alphaRate,
@@ -539,19 +543,33 @@ class AttendanceController extends Controller
             'lateRate' => $lateRateSeries,
         ];
 
-        $oneWeekAgo = now()->subDays(7)->toDateString();
-        $today = now()->toDateString();
+        // 3. Rekap Statistik Semua Siswa Aktif beserta Catatan Presensi & Pelanggaran
+        $students = Student::active()->with(['attendances', 'violations'])->get()->map(function ($student) {
+            $attendances = $student->attendances;
+            $hadir = $attendances->where('status', 'Hadir')->count();
+            $terlambat = $attendances->where('status', 'Terlambat')->count();
+            $sakit = $attendances->where('status', 'Sakit')->count();
+            $izin = $attendances->where('status', 'Izin')->count();
+            $alpa = $attendances->where('status', 'Alpa')->count();
+            $total = $attendances->count();
 
-        // 3. Siswa yang memiliki catatan Alpa >= 3 kali dalam 7 hari terakhir dari database riil
-        $atRiskStudents = Student::active()->with(['attendances' => function ($q) use ($oneWeekAgo, $today) {
-            $q->whereBetween('date', [$oneWeekAgo, $today])
-              ->where('status', 'Alpa')
-              ->orderBy('date', 'desc');
-        }])
-        ->get()
-        ->map(function ($student) {
-            $alphaAttendances = $student->attendances;
-            $alphaCount = $alphaAttendances->count();
+            $rate = $total > 0 ? round((($hadir + $terlambat) / $total) * 100, 1) : 100.0;
+            $violationPoints = (int) ($student->violations->sum('points') ?: ($student->total_violation_points ?? 0));
+
+            // Klasifikasi Tingkat Atensi / Risiko
+            if ($alpa >= 3 || $violationPoints >= 50) {
+                $riskLevel = 'Kritis (SP-2)';
+                $badgeType = 'critical';
+            } elseif ($alpa >= 1 || $terlambat >= 3 || $violationPoints >= 25) {
+                $riskLevel = 'Peringatan (SP-1)';
+                $badgeType = 'warning';
+            } elseif ($terlambat >= 1 || $violationPoints > 0) {
+                $riskLevel = 'Perhatian';
+                $badgeType = 'attention';
+            } else {
+                $riskLevel = 'Tertib';
+                $badgeType = 'good';
+            }
 
             return [
                 'id' => $student->id,
@@ -560,24 +578,44 @@ class AttendanceController extends Controller
                 'nisn' => $student->nis,
                 'class_name' => $student->class_name,
                 'major' => $student->major,
+                'level' => $student->level ?? (preg_match('/^(X|XI|XII)\b/i', $student->class_name, $m) ? ($m[1] === 'XII' ? '12' : ($m[1] === 'XI' ? '11' : '10')) : '10'),
                 'parent_name' => $student->parent_name ?? '-',
                 'parent_phone' => $student->parent_phone ?? '-',
-                'alpha_count' => $alphaCount,
-                'dates' => $alphaAttendances->pluck('date')->toArray(),
-                'risk_level' => $alphaCount >= 4 ? 'Tinggi (SP-2)' : 'Peringatan (SP-1)',
-                'status_action' => 'Belum Dipanggil',
+                'hadir_count' => $hadir,
+                'terlambat_count' => $terlambat,
+                'sakit_count' => $sakit,
+                'izin_count' => $izin,
+                'alpha_count' => $alpa,
+                'total_presensi' => $total,
+                'rate' => $rate,
+                'violation_points' => $violationPoints,
+                'risk_level' => $riskLevel,
+                'badge_type' => $badgeType,
+                'status_action' => $alpa >= 3 ? 'Perlu Pemanggilan' : 'Tercatat',
             ];
+        });
+
+        // Siswa yang butuh perhatian/atensi BK (Alpa, Terlambat, atau Pelanggaran)
+        $atRiskStudents = $students->filter(function ($s) {
+            return $s['alpha_count'] >= 1 || $s['terlambat_count'] >= 1 || $s['violation_points'] > 0;
         })
-        ->filter(function ($s) {
-            return $s['alpha_count'] >= 3;
+        ->sortByDesc(function ($s) {
+            return ($s['alpha_count'] * 100) + ($s['violation_points'] * 2) + ($s['terlambat_count'] * 5);
         })
         ->values();
+
+        // Opsi Tingkat dan Jurusan dari database riil
+        $availableMajors = Student::active()->whereNotNull('major')->where('major', '!=', '')->distinct()->pluck('major')->sort()->values();
+        $availableLevels = collect(['10', '11', '12']);
 
         return Inertia::render('AttendanceStats', [
             'monthlyStats' => $monthlyStats,
             'summaryMetrics' => $summaryMetrics,
             'totalStudents' => Student::active()->count(),
             'atRiskStudents' => $atRiskStudents,
+            'allStudents' => $students->values(),
+            'availableMajors' => $availableMajors,
+            'availableLevels' => $availableLevels,
         ]);
     }
 
