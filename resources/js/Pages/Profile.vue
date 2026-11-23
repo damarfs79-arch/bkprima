@@ -253,7 +253,7 @@
           </div>
           <div>
             <p class="text-xs font-bold text-slate-800 leading-tight">Keamanan Akun &amp; Kata Sandi</p>
-            <p class="text-[11px] text-slate-400">Perbarui kata sandi masuk Guru BK</p>
+            <p class="text-[11px] text-slate-400">Pembaruan kata sandi masuk Guru BK dengan autentikasi dua faktor (OTP WhatsApp)</p>
           </div>
         </div>
 
@@ -287,13 +287,62 @@
           </div>
         </div>
 
+        <!-- Section: Verifikasi Keamanan OTP WhatsApp -->
+        <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-3">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="text-xs font-bold text-slate-800">Verifikasi Kode OTP WhatsApp</span>
+                <span class="text-[10px] font-semibold text-slate-500 bg-white border border-slate-200 px-2 py-0.5 rounded">2FA Keamanan</span>
+              </div>
+              <p class="text-[11px] text-slate-500 mt-0.5">
+                <span v-if="maskedPhone">Kode 6 digit akan dikirimkan ke nomor WhatsApp terdaftar: <strong class="text-slate-700 font-mono">{{ maskedPhone }}</strong></span>
+                <span v-else class="text-amber-600 font-medium">Nomor WhatsApp belum disimpan. Isi nomor WhatsApp pada bagian Kontak di atas terlebih dahulu.</span>
+              </p>
+            </div>
+
+            <!-- Tombol Minta OTP -->
+            <button
+              type="button"
+              @click="requestPasswordOtp"
+              :disabled="isRequestingOtp || otpCountdown > 0 || !maskedPhone"
+              class="inline-flex items-center justify-center gap-1.5 px-3 py-2 bg-white hover:bg-slate-100 disabled:opacity-50 border border-slate-300 rounded-lg text-xs font-semibold text-slate-700 transition cursor-pointer shrink-0"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+              </svg>
+              <span>{{ isRequestingOtp ? 'Mengirim...' : (otpCountdown > 0 ? `Kirim Ulang (${otpCountdown}s)` : (otpSent ? 'Kirim Ulang OTP' : 'Minta Kode OTP')) }}</span>
+            </button>
+          </div>
+
+          <!-- Input Kode OTP -->
+          <div v-if="otpSent" class="pt-2 border-t border-slate-200/60 flex flex-col sm:flex-row sm:items-center gap-3">
+            <div class="w-full sm:w-48">
+              <label class="block text-[11px] font-semibold text-slate-600 mb-1">Masukkan 6 Digit OTP *</label>
+              <input
+                v-model="passwordForm.otp"
+                type="text"
+                maxlength="6"
+                placeholder="000000"
+                class="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-center text-sm font-bold tracking-widest font-mono text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-300 focus:border-slate-500 transition"
+              />
+            </div>
+            <div class="text-[11px] text-slate-500 flex-1 space-y-1">
+              <p>{{ otpMessage }}</p>
+              <div v-if="otpSimulationCode" class="inline-flex items-center gap-1.5 px-2 py-0.5 bg-blue-50 border border-blue-200 rounded text-blue-700 text-[10px] font-mono">
+                <span>Simulasi OTP Pengembangan: <strong>{{ otpSimulationCode }}</strong></span>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <div class="flex justify-end pt-1">
           <button
             @click="changePassword"
-            :disabled="isChangingPassword"
-            class="px-4 py-2 bg-slate-800 hover:bg-slate-700 disabled:opacity-60 text-white font-semibold rounded-lg text-xs flex items-center gap-1.5 transition cursor-pointer"
+            :disabled="isChangingPassword || !passwordForm.otp || passwordForm.otp.length !== 6"
+            class="px-4 py-2 bg-slate-800 hover:bg-slate-700 disabled:opacity-50 text-white font-semibold rounded-lg text-xs flex items-center gap-1.5 transition cursor-pointer"
           >
-            <span>{{ isChangingPassword ? 'Memperbarui...' : 'Perbarui Password' }}</span>
+            <span>{{ isChangingPassword ? 'Memverifikasi...' : 'Verifikasi OTP & Perbarui Password' }}</span>
           </button>
         </div>
       </div>
@@ -327,7 +376,7 @@
 
 <script setup>
 import AppLayout from '../Layouts/AppLayout.vue'
-import { ref, onMounted, nextTick } from 'vue'
+import { ref, computed, onMounted, nextTick } from 'vue'
 import { router } from '@inertiajs/vue3'
 
 const props = defineProps({
@@ -361,8 +410,71 @@ const form = ref({
 const passwordForm = ref({
   current_password: '',
   password: '',
-  password_confirmation: ''
+  password_confirmation: '',
+  otp: ''
 })
+
+const isRequestingOtp = ref(false)
+const otpSent = ref(false)
+const otpCountdown = ref(0)
+const otpMessage = ref('')
+const otpDirectUrl = ref('')
+const otpSimulationCode = ref('')
+let countdownTimer = null
+
+const maskedPhone = computed(() => {
+  const p = form.value.wa || props.profileUser?.phone || ''
+  if (!p) return ''
+  if (p.length <= 7) return p
+  return p.slice(0, 4) + '****' + p.slice(-3)
+})
+
+const requestPasswordOtp = async () => {
+  if (!form.value.wa && !props.profileUser?.phone) {
+    alert('Nomor WhatsApp belum terdaftar. Silakan lengkapi nomor WhatsApp pada bagian Kontak di atas terlebih dahulu.')
+    return
+  }
+
+  isRequestingOtp.value = true
+  otpMessage.value = ''
+
+  try {
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+    const res = await fetch('/profil/otp/request', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'X-Requested-With': 'XMLHttpRequest',
+        'X-CSRF-TOKEN': csrfToken
+      }
+    })
+
+    const data = await res.json()
+    if (res.ok && data.success) {
+      otpSent.value = true
+      otpMessage.value = data.message || 'Kode OTP telah dibuat.'
+      otpDirectUrl.value = data.directWaUrl || ''
+      otpSimulationCode.value = data.otpPreview || ''
+
+      otpCountdown.value = data.cooldown || 60
+      if (countdownTimer) clearInterval(countdownTimer)
+      countdownTimer = setInterval(() => {
+        if (otpCountdown.value > 0) {
+          otpCountdown.value--
+        } else {
+          clearInterval(countdownTimer)
+        }
+      }, 1000)
+    } else {
+      alert(data.message || 'Gagal mengirim kode OTP.')
+    }
+  } catch (err) {
+    alert('Terjadi kesalahan jaringan saat meminta kode OTP.')
+  } finally {
+    isRequestingOtp.value = false
+  }
+}
 
 onMounted(() => {
   if (props.profileUser) {
@@ -463,18 +575,29 @@ const changePassword = () => {
     alert('Konfirmasi password baru tidak cocok.')
     return
   }
+  if (!passwordForm.value.otp || passwordForm.value.otp.trim().length !== 6) {
+    alert('Kode OTP 6 digit verifikasi WhatsApp wajib diisi.')
+    return
+  }
 
   isChangingPassword.value = true
   router.post('/profil/password', {
     current_password: passwordForm.value.current_password,
     password: passwordForm.value.password,
     password_confirmation: passwordForm.value.password_confirmation,
+    otp: passwordForm.value.otp.trim(),
   }, {
     onSuccess: () => {
       passwordForm.value.current_password = ''
       passwordForm.value.password = ''
       passwordForm.value.password_confirmation = ''
-      toastMessage.value = 'Password akun berhasil diperbarui!'
+      passwordForm.value.otp = ''
+      otpSent.value = false
+      otpMessage.value = ''
+      otpSimulationCode.value = ''
+      if (countdownTimer) clearInterval(countdownTimer)
+      otpCountdown.value = 0
+      toastMessage.value = 'Kata sandi akun Guru BK berhasil diperbarui dengan verifikasi OTP!'
       showToast.value = true
       setTimeout(() => { showToast.value = false }, 3500)
     },

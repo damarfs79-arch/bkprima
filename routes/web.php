@@ -59,6 +59,7 @@ Route::delete('/panduan/pemutihan/{id}', [RuleController::class, 'deleteDeductio
 // 7. Guru BK Profile
 Route::get('/profil', [ProfileController::class, 'index'])->name('profile.index');
 Route::post('/profil', [ProfileController::class, 'update'])->name('profile.update');
+Route::post('/profil/otp/request', [ProfileController::class, 'requestOtp'])->name('profile.otp.request');
 Route::post('/profil/password', [ProfileController::class, 'changePassword'])->name('profile.password');
 
 // 8. Admin IT Panel

@@ -91,6 +91,57 @@ class InertiaRoutesTest extends TestCase
         $response->assertStatus(302);
     }
 
+    public function test_profile_otp_and_password_change(): void
+    {
+        $user = \App\Models\User::where('role', 'guru')->first();
+        if (!$user) {
+            $user = \App\Models\User::create([
+                'name' => 'Guru Penguji',
+                'email' => 'guru.test@bkprima.sch.id',
+                'username' => 'gurutest',
+                'role' => 'guru',
+                'password' => \Illuminate\Support\Facades\Hash::make('password123'),
+                'phone' => '081234567890',
+            ]);
+        } else {
+            $user->update(['phone' => '081234567890', 'password' => \Illuminate\Support\Facades\Hash::make('password123')]);
+        }
+
+        $this->actingAs($user);
+
+        // 1. Request OTP
+        $otpRes = $this->postJson('/profil/otp/request');
+        $otpRes->assertStatus(200)
+            ->assertJson([
+                'success' => true,
+            ]);
+
+        $cacheData = \Illuminate\Support\Facades\Cache::get("otp_change_pw_{$user->id}");
+        $this->assertNotNull($cacheData);
+        $otp = $cacheData['code'];
+
+        // 2. Change password with wrong OTP -> Fails
+        $failRes = $this->postJson('/profil/password', [
+            'current_password' => 'password123',
+            'password' => 'newpassword123',
+            'password_confirmation' => 'newpassword123',
+            'otp' => '999999',
+        ]);
+        $failRes->assertStatus(422)
+            ->assertJsonValidationErrors('otp');
+
+        // 3. Change password with valid OTP -> Succeeds
+        $successRes = $this->postJson('/profil/password', [
+            'current_password' => 'password123',
+            'password' => 'newpassword123',
+            'password_confirmation' => 'newpassword123',
+            'otp' => $otp,
+        ]);
+        $successRes->assertStatus(200);
+        $user->refresh();
+        $this->assertTrue(\Illuminate\Support\Facades\Hash::check('newpassword123', $user->password));
+    }
+
     public function test_guest_portal_searches_by_nisn(): void
     {
         $response = $this->get('/tamu');
