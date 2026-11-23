@@ -719,7 +719,7 @@
                 </tr>
                 <tr>
                   <td class="font-bold pr-4 py-0.5">Menghadap</td>
-                  <td>: Dra. Hj. Nurul Hidayati, M.Pd (Koord. Guru BK) &amp; Wali Kelas</td>
+                  <td>: {{ selectedLetter.counselor || 'Guru BK' }} &amp; Wali Kelas</td>
                 </tr>
               </table>
 
@@ -737,8 +737,8 @@
                 <div class="h-16 flex items-center justify-center text-slate-300 italic font-mono text-[10px]">
                   [ Tanda Tangan &amp; Stempel ]
                 </div>
-                <p class="font-bold underline">Drs. H. Saiful Bahri, M.M</p>
-                <p class="text-[10px] text-slate-500">NIP. 19680815 199403 1 008</p>
+                <p class="font-bold underline">Drs. H. Saiful Bahri, M.Pd</p>
+                <p class="text-[10px] text-slate-500">NIP. 19680215 199403 1 003</p>
               </div>
 
               <div>
@@ -747,8 +747,8 @@
                 <div class="h-16 flex items-center justify-center text-slate-300 italic font-mono text-[10px]">
                   [ Tanda Tangan Digital ]
                 </div>
-                <p class="font-bold underline">Dra. Hj. Nurul Hidayati, M.Pd</p>
-                <p class="text-[10px] text-slate-500">NIP. 19710420 199802 2 003</p>
+                <p class="font-bold underline">{{ selectedLetter.counselor || 'Guru BK' }}</p>
+                <p class="text-[10px] text-slate-500">Guru Pembimbing BK</p>
               </div>
             </div>
 
@@ -868,9 +868,10 @@
 import AppLayout from '../Layouts/AppLayout.vue'
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
-import { router } from '@inertiajs/vue3'
+import { router, usePage } from '@inertiajs/vue3'
 
 const route = useRoute()
+const page = usePage()
 
 const props = defineProps({
   dbViolations: {
@@ -1056,12 +1057,12 @@ const newSummons = ref({
   letterNumber: `421.5/0${82 + summonsList.value.length}/BK/SMK-PGRI5/X/2026`,
   caseTitle: '',
   points: 35,
-  meetingDate: 'Senin, 28 Okt 2026',
+  meetingDate: '',
   meetingTime: '08.30 WIB',
   room: 'Ruang BK Gedung A',
   parentName: '',
   parentPhone: '',
-  counselor: 'Dra. Hj. Nurul Hidayati, M.Pd'
+  counselor: page.props.auth?.user?.name || 'Guru BK'
 })
 
 const openNewSummonsModal = () => {
@@ -1119,56 +1120,19 @@ const submitNewSummons = () => {
     counselor: newSummons.value.counselor
   }
 
-  // Jika student_id tersedia dan ada di database, kirim via Inertia router
-  if (payload.student_id && props.dbStudents.some(s => s.id === Number(payload.student_id))) {
-    router.post('/pelanggaran/panggilan', payload, {
-      preserveScroll: true,
-      onSuccess: () => {
-        isSubmittingSummons.value = false
-        showNewSummonsModal.value = false
-        activeMainTab.value = 'panggilan'
-      },
-      onError: () => {
-        isSubmittingSummons.value = false
-        // fallback unshift in-memory
-        summonsList.value.unshift({
-          id: Date.now(),
-          ...payload,
-          issueDate: 'Hari Ini',
-          studentName: newSummons.value.studentName,
-          nisn: newSummons.value.nisn,
-          className: newSummons.value.className,
-          status: 'Menunggu Kehadiran'
-        })
-        showNewSummonsModal.value = false
-        activeMainTab.value = 'panggilan'
-      }
-    })
-  } else {
-    // In-memory fallback jika menggunakan demo dummy student
-    isSubmittingSummons.value = false
-    summonsList.value.unshift({
-      id: Date.now(),
-      letterNumber: newSummons.value.letterNumber,
-      issueDate: 'Hari Ini',
-      studentName: newSummons.value.studentName,
-      nisn: newSummons.value.nisn,
-      className: newSummons.value.className,
-      caseTitle: newSummons.value.caseTitle,
-      caseDescription: `Akumulasi ${newSummons.value.points} poin pelanggaran tata tertib sekolah.`,
-      points: newSummons.value.points,
-      stage: newSummons.value.stage,
-      meetingDate: newSummons.value.meetingDate,
-      meetingTime: newSummons.value.meetingTime,
-      room: newSummons.value.room,
-      parentName: newSummons.value.parentName,
-      parentPhone: newSummons.value.parentPhone,
-      status: 'Menunggu Kehadiran',
-      counselor: newSummons.value.counselor
-    })
-    showNewSummonsModal.value = false
-    activeMainTab.value = 'panggilan'
-  }
+  // Kirim via Inertia router
+  router.post('/pelanggaran/panggilan', payload, {
+    preserveScroll: true,
+    onSuccess: () => {
+      isSubmittingSummons.value = false
+      showNewSummonsModal.value = false
+      activeMainTab.value = 'panggilan'
+    },
+    onError: () => {
+      isSubmittingSummons.value = false
+      alert('Gagal menerbitkan surat panggilan. Silakan periksa kembali formulir.')
+    }
+  })
 }
 
 const previewSummonsLetter = (item) => {
@@ -1183,22 +1147,24 @@ const openMediationModal = (item) => {
 }
 
 const saveMediationNote = () => {
-  if (activeMediationItem.value && activeMediationItem.value.id && props.dbSummons.some(s => s.id === activeMediationItem.value.id)) {
-    router.patch(`/pelanggaran/panggilan/${activeMediationItem.value.id}`, {
-      status: activeMediationItem.value.status,
-      mediation_notes: mediationNote.value
-    }, {
-      preserveScroll: true,
-      onSuccess: () => {
-        showMediationModal.value = false
-      },
-      onError: () => {
-        showMediationModal.value = false
-      }
-    })
-  } else {
+  if (!activeMediationItem.value || !activeMediationItem.value.id) {
     showMediationModal.value = false
+    return
   }
+
+  router.patch(`/pelanggaran/panggilan/${activeMediationItem.value.id}`, {
+    status: activeMediationItem.value.status || 'Mediasi Selesai',
+    mediation_notes: mediationNote.value
+  }, {
+    preserveScroll: true,
+    onSuccess: () => {
+      showMediationModal.value = false
+    },
+    onError: () => {
+      alert('Gagal menyimpan berita acara mediasi.')
+      showMediationModal.value = false
+    }
+  })
 }
 
 const sendWhatsAppToParent = (item) => {

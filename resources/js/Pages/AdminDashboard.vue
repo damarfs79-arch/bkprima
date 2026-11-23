@@ -2962,54 +2962,13 @@ const clearHoverPoint = () => {
 const showGuruPassword = ref(false)
 const showEditGuruPassword = ref(false)
 
-const defaultGuruBkList = [
-  {
-    id: 1,
-    name: 'Dra. Hj. Nurul Hidayati, M.Pd',
-    username: 'nurul_bk',
-    nip: '19780415 200312 2 004',
-    nuptk: '8452 7566 5830 0012',
-    jabatan: 'Koordinator BK & Kedisiplinan',
-    email: 'nurul.hidayati@guru.smk.belajar.id',
-    wa: '+62 812-3456-7890',
-    rombel: ['X RPL 1', 'X RPL 2', 'XI RPL 1', 'XII DKV 1']
-  },
-  {
-    id: 2,
-    name: 'Bpk. Agus Wicaksono, S.Pd',
-    username: 'agus_bk',
-    nip: '19850612 201001 1 012',
-    nuptk: '6342 9821 4410 0034',
-    jabatan: 'Guru Pembimbing BK Kelas X',
-    email: 'agus.wicaksono@guru.smk.belajar.id',
-    wa: '+62 813-9876-5432',
-    rombel: ['X TSM 1', 'X TSM 2', 'X DKV 1']
-  },
-  {
-    id: 3,
-    name: 'Ibu Ratih Anggraini, S.Psi',
-    username: 'ratih_bk',
-    nip: '19910322 201802 2 005',
-    nuptk: '9120 4455 1209 0087',
-    jabatan: 'Guru Pembimbing BK Kelas XI',
-    email: 'ratih.anggraini@guru.smk.belajar.id',
-    wa: '+62 852-1122-3344',
-    rombel: ['XI DKV 1', 'XI DKV 2', 'XI TKJ 1']
-  },
-  {
-    id: 4,
-    name: 'Bpk. Dwi Prasetyo, M.Pd',
-    username: 'dwi_bk',
-    nip: '19821105 200801 1 008',
-    nuptk: '4456 1238 9980 0045',
-    jabatan: 'Guru Pembimbing BK Kelas XII',
-    email: 'dwi.prasetyo@guru.smk.belajar.id',
-    wa: '+62 878-5566-7788',
-    rombel: ['XII RPL 1', 'XII RPL 2', 'XII AKL 1']
-  }
-]
+const guruBkList = ref(props.initialGuruBkList ? [...props.initialGuruBkList] : [])
 
-const guruBkList = ref(props.initialGuruBkList && props.initialGuruBkList.length > 0 ? [...props.initialGuruBkList] : defaultGuruBkList)
+watch(() => props.initialGuruBkList, (newVal) => {
+  if (newVal) {
+    guruBkList.value = [...newVal]
+  }
+}, { deep: true })
 
 const formGuru = ref({
   name: '',
@@ -3135,8 +3094,12 @@ const confirmDeleteGuru = (g) => {
       router.delete(`/admin/guru/${g.id}`, {
         preserveScroll: true,
         preserveState: true,
-        onSuccess: () => {
-          showToast(`Akun Guru BK ${g.name} berhasil dihapus.`)
+        onSuccess: (page) => {
+          if (page.props.flash?.error) {
+            showToast(page.props.flash.error)
+          } else {
+            showToast(`Akun Guru BK ${g.name} berhasil dihapus.`)
+          }
         },
         onError: () => {
           showToast('Gagal menghapus akun Guru BK.')
@@ -3433,8 +3396,15 @@ const confirmDeleteKelas = (k) => {
       router.delete(`/admin/kelas/${k.id}`, {
         preserveScroll: true,
         preserveState: true,
-        onSuccess: () => {
-          showToast(`Rombel ${k.name} berhasil dihapus.`)
+        onSuccess: (page) => {
+          if (page.props.flash?.error) {
+            showToast(page.props.flash.error)
+          } else {
+            showToast(`Rombel ${k.name} berhasil dihapus.`)
+          }
+        },
+        onError: () => {
+          showToast('Gagal menghapus rombel kelas.')
         }
       })
     }

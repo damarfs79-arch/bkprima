@@ -9,6 +9,7 @@ use App\Models\Violation;
 use App\Http\Requests\StoreViolationRequest;
 use App\Http\Requests\UpdateViolationRequest;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Auth;
 
 class ViolationController extends Controller
 {
@@ -259,7 +260,7 @@ class ViolationController extends Controller
         $validated['parent_phone'] = $validated['parent_phone'] ?? $student->parent_phone;
         $validated['room'] = $validated['room'] ?? 'Ruang BK Gedung A';
         $validated['status'] = 'Menunggu Kehadiran';
-        $validated['counselor'] = $validated['counselor'] ?? 'Dra. Hj. Nurul Hidayati, M.Pd';
+        $validated['counselor'] = $validated['counselor'] ?? (Auth::user()?->name ?? 'Guru BK');
 
         \App\Models\ParentSummon::create($validated);
 

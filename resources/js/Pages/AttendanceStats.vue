@@ -435,16 +435,22 @@ const period = ref('tahun')
 const showSummonsModal = ref(false)
 const selectedStudent = ref({})
 
+const getDefaultMeetingDate = () => {
+  const d = new Date()
+  d.setDate(d.getDate() + 2)
+  return d.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'short', year: 'numeric' })
+}
+
 const summonsForm = ref({
   stage: 'SP-1',
   letterNumber: '',
   caseTitle: '',
-  meetingDate: 'Rabu, 04 Nov 2026',
+  meetingDate: getDefaultMeetingDate(),
   meetingTime: '08.30 WIB',
   room: 'Ruang BK Gedung A',
   parentName: '',
   parentPhone: '',
-  counselor: 'Dra. Hj. Nurul Hidayati, M.Pd'
+  counselor: 'Guru BK'
 })
 
 const openQuickSummonsModal = (student) => {
@@ -452,54 +458,59 @@ const openQuickSummonsModal = (student) => {
   const randomNum = Math.floor(100 + Math.random() * 900)
   summonsForm.value = {
     stage: student.alpha_count >= 4 ? 'SP-2' : 'SP-1',
-    letterNumber: `421.5/${randomNum}/BK/SMK-PGRI5/XI/2026`,
+    letterNumber: `421.5/${randomNum}/BK/SMK-PGRI5/${new Date().getFullYear()}`,
     caseTitle: `Tidak Hadir Tanpa Keterangan (Alpa) Selama ${student.alpha_count} Hari dalam 1 Minggu`,
-    meetingDate: 'Rabu, 04 Nov 2026',
+    meetingDate: getDefaultMeetingDate(),
     meetingTime: '08.30 WIB',
     room: 'Ruang BK Gedung A',
     parentName: student.parent_name || `Bpk/Ibu ${student.name}`,
     parentPhone: student.parent_phone || '081234567890',
-    counselor: 'Dra. Hj. Nurul Hidayati, M.Pd'
+    counselor: 'Guru BK'
   }
   showSummonsModal.value = true
 }
 
+const isSubmittingSummons = ref(false)
+
 const submitSummons = () => {
-  // Arahkan ke modul pemanggilan dengan query parameter agar tersimpan di riwayat pemanggilan
-  showSummonsModal.value = false
-  router.visit('/pemanggilan', {
-    data: {
-      nama: selectedStudent.value.name,
-      nisn: selectedStudent.value.nisn,
-      kelas: selectedStudent.value.class_name,
-      alasan: summonsForm.value.caseTitle,
-      stage: summonsForm.value.stage,
-      wali: summonsForm.value.parentName,
-      phone: summonsForm.value.parentPhone
+  if (!selectedStudent.value?.id) return
+  isSubmittingSummons.value = true
+
+  router.post('/pelanggaran/panggilan', {
+    student_id: selectedStudent.value.id,
+    stage: summonsForm.value.stage,
+    case_title: summonsForm.value.caseTitle,
+    meeting_date: summonsForm.value.meetingDate,
+    meeting_time: summonsForm.value.meetingTime,
+    room: summonsForm.value.room,
+    parent_name: summonsForm.value.parentName,
+    parent_phone: summonsForm.value.parentPhone,
+    counselor: summonsForm.value.counselor
+  }, {
+    preserveScroll: true,
+    onSuccess: () => {
+      isSubmittingSummons.value = false
+      showSummonsModal.value = false
+      router.visit('/pemanggilan')
+    },
+    onError: () => {
+      isSubmittingSummons.value = false
+      alert('Gagal menerbitkan surat panggilan.')
     }
   })
 }
 
 const goToFullSummonsPage = () => {
   showSummonsModal.value = false
-  router.visit('/pemanggilan', {
-    data: {
-      nama: selectedStudent.value.name,
-      nisn: selectedStudent.value.nisn,
-      kelas: selectedStudent.value.class_name,
-      alasan: summonsForm.value.caseTitle,
-      stage: summonsForm.value.stage,
-      wali: summonsForm.value.parentName,
-      phone: summonsForm.value.parentPhone
-    }
-  })
+  router.visit('/pemanggilan')
 }
 
 const sendWhatsAppWarning = (student) => {
   if (!student.parent_phone) return
   const phone = student.parent_phone.replace(/[^0-9]/g, '')
+  const parent = student.parent_name || 'Orang Tua / Wali'
   const text = encodeURIComponent(
-    `Yth. Bapak/Ibu ${student.parent_name} (Wali dari ${student.name} - ${student.class_name}), kami dari Tim Bimbingan & Konseling SMK PGRI 05 JEMBER menginformasikan bahwa ananda telah tercatat ALPA (tanpa keterangan) sebanyak ${student.alpha_count} kali dalam 1 minggu terakhir. Kami memohon kehadiran Bapak/Ibu di Ruang BK pada hari Rabu, 04 Nov 2026 pukul 08.30 WIB untuk koordinasi pembinaan. Terima kasih atas kerja samanya.`
+    `Yth. Bapak/Ibu ${parent} (Wali dari ${student.name} - ${student.class_name}), kami dari Tim Bimbingan & Konseling SMK PGRI 05 JEMBER menginformasikan bahwa ananda telah tercatat ALPA (tanpa keterangan) sebanyak ${student.alpha_count} kali. Mohon kesediaan Bapak/Ibu untuk berkoordinasi dengan pihak sekolah di Ruang BK demi pembinaan ananda. Terima kasih atas perhatian dan kerja samanya.`
   )
   window.open(`https://wa.me/${phone.startsWith('0') ? '62' + phone.slice(1) : phone}?text=${text}`, '_blank')
 }

@@ -493,7 +493,7 @@ class AdminController extends Controller
         $name = $classroom->name;
 
         // Proteksi jika masih ada siswa yang terdaftar di kelas ini
-        $studentCount = Student::where('class_name', $name)->count();
+        $studentCount = Student::where('classroom_id', $classroom->id)->orWhere('class_name', $name)->count();
         if ($studentCount > 0) {
             return redirect()->back()->with('error', "Rombel Kelas {$name} tidak dapat dihapus karena masih digunakan oleh {$studentCount} siswa aktif. Hapus atau pindahkan data siswa terlebih dahulu.");
         }

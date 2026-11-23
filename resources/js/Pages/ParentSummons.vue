@@ -252,6 +252,15 @@
                       </svg>
                       <span>Notula</span>
                     </button>
+                    <button
+                      @click="deleteSummons(item)"
+                      class="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg border border-slate-200 cursor-pointer transition"
+                      title="Hapus Surat Panggilan"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                      </svg>
+                    </button>
                   </div>
                 </td>
               </tr>
@@ -536,7 +545,7 @@
                 </tr>
                 <tr>
                   <td class="font-bold pr-4 py-0.5">Menghadap</td>
-                  <td>: Dra. Hj. Nurul Hidayati, M.Pd (Koord. Guru BK) &amp; Wali Kelas</td>
+                  <td>: {{ selectedLetter.counselor || 'Guru BK' }} &amp; Wali Kelas</td>
                 </tr>
               </table>
 
@@ -555,8 +564,8 @@
                 <div class="h-16 flex items-center justify-center text-slate-300 italic font-mono text-[10px]">
                   [ Tanda Tangan &amp; Stempel Resmi ]
                 </div>
-                <p class="font-bold underline">Drs. H. Saiful Bahri, M.M</p>
-                <p class="text-[10px] text-slate-500">NIP. 19680815 199403 1 008</p>
+                <p class="font-bold underline">Drs. H. Saiful Bahri, M.Pd</p>
+                <p class="text-[10px] text-slate-500">NIP. 19680215 199403 1 003</p>
               </div>
 
               <div>
@@ -565,8 +574,8 @@
                 <div class="h-16 flex items-center justify-center text-slate-300 italic font-mono text-[10px]">
                   [ Tanda Tangan Digital ]
                 </div>
-                <p class="font-bold underline">Dra. Hj. Nurul Hidayati, M.Pd</p>
-                <p class="text-[10px] text-slate-500">NIP. 19710420 199802 2 003</p>
+                <p class="font-bold underline">{{ selectedLetter.counselor || 'Guru BK' }}</p>
+                <p class="text-[10px] text-slate-500">Guru Pembimbing BK</p>
               </div>
             </div>
 
@@ -792,19 +801,18 @@ const newSummons = ref({
   className: '',
   gradeLevel: 'X',
   stage: 'SP-1',
-  letterNumber: `421.5/0${82 + summonsList.value.length}/BK/SMK-PGRI5/X/2024`,
+  letterNumber: '',
   caseTitle: '',
-  points: 40,
-  meetingDate: 'Senin, 28 Okt 2024',
+  points: 0,
+  meetingDate: '',
   meetingTime: '08.30 WIB',
-  room: 'Ruang BK Gedung A',
+  room: 'Ruang BK',
   parentName: '',
   parentPhone: '',
-  counselor: 'Dra. Hj. Nurul Hidayati, M.Pd'
+  counselor: 'Guru BK'
 })
 
 const openNewSummonsModal = () => {
-  newSummons.value.letterNumber = `421.5/0${82 + summonsList.value.length}/BK/SMK-PGRI5/X/2024`
   showNewModal.value = true
 }
 
@@ -821,30 +829,38 @@ const onSelectStudentForSummons = () => {
   }
 }
 
-const submitNewSummons = () => {
-  summonsList.value.unshift({
-    id: Date.now(),
-    letterNumber: newSummons.value.letterNumber,
-    issueDate: '24 Okt 2024',
-    studentName: newSummons.value.studentName,
-    nisn: newSummons.value.nisn,
-    className: newSummons.value.className,
-    gradeLevel: newSummons.value.gradeLevel,
-    caseTitle: newSummons.value.caseTitle,
-    caseDescription: `Akumulasi ${newSummons.value.points} poin pelanggaran tata tertib sekolah.`,
-    points: newSummons.value.points,
-    stage: newSummons.value.stage,
-    meetingDate: newSummons.value.meetingDate,
-    meetingTime: newSummons.value.meetingTime,
-    room: newSummons.value.room,
-    parentName: newSummons.value.parentName,
-    parentPhone: newSummons.value.parentPhone,
-    status: 'Menunggu Kehadiran',
-    counselor: newSummons.value.counselor
-  })
+const isSubmittingSummons = ref(false)
 
-  showNewModal.value = false
-  alert(`Surat Panggilan ${newSummons.value.stage} untuk siswa ${newSummons.value.studentName} berhasil diterbitkan!`)
+const submitNewSummons = () => {
+  if (!newSummons.value.studentId) {
+    alert('Silakan pilih siswa terlebih dahulu.')
+    return
+  }
+  isSubmittingSummons.value = true
+
+  router.post('/pelanggaran/panggilan', {
+    student_id: newSummons.value.studentId,
+    stage: newSummons.value.stage,
+    letter_number: newSummons.value.letterNumber || undefined,
+    case_title: newSummons.value.caseTitle || `Akumulasi ${newSummons.value.points} poin pelanggaran tata tertib sekolah`,
+    points: newSummons.value.points,
+    meeting_date: newSummons.value.meetingDate || 'Menyesuaikan Jadwal',
+    meeting_time: newSummons.value.meetingTime || '08.30 WIB',
+    room: newSummons.value.room || 'Ruang BK',
+    parent_name: newSummons.value.parentName,
+    parent_phone: newSummons.value.parentPhone,
+    counselor: newSummons.value.counselor
+  }, {
+    preserveScroll: true,
+    onSuccess: () => {
+      isSubmittingSummons.value = false
+      showNewModal.value = false
+    },
+    onError: () => {
+      isSubmittingSummons.value = false
+      alert('Gagal menerbitkan surat panggilan. Silakan periksa kembali formulir.')
+    }
+  })
 }
 
 const previewLetter = (item) => {
@@ -854,13 +870,41 @@ const previewLetter = (item) => {
 
 const openMediationModal = (item) => {
   activeMediationItem.value = item
-  mediationNote.value = `Telah menghadap orang tua (${item.parentName}) dari siswa ${item.studentName}. Orang tua sepakat untuk meningkatkan pengawasan di rumah serta menyetujui sanksi edukatif pembersihan laboratorium dan penugasan tatib.`
+  mediationNote.value = `Telah menghadap orang tua (${item.parentName}) dari siswa ${item.studentName}. Orang tua sepakat untuk meningkatkan pengawasan di rumah serta menyetujui pembinaan siswa.`
   showMediationModal.value = true
 }
 
+const isSavingMediation = ref(false)
+
 const saveMediationNote = () => {
-  showMediationModal.value = false
-  alert(`Berita acara mediasi untuk surat ${activeMediationItem.value.letterNumber} berhasil disimpan!`)
+  if (!activeMediationItem.value) return
+  isSavingMediation.value = true
+
+  router.patch(`/pelanggaran/panggilan/${activeMediationItem.value.id}`, {
+    status: 'Mediasi Selesai',
+    mediation_notes: mediationNote.value
+  }, {
+    preserveScroll: true,
+    onSuccess: () => {
+      isSavingMediation.value = false
+      showMediationModal.value = false
+    },
+    onError: () => {
+      isSavingMediation.value = false
+      alert('Gagal menyimpan berita acara mediasi.')
+    }
+  })
+}
+
+const deleteSummons = (item) => {
+  if (!confirm(`Hapus data surat panggilan ${item.letterNumber}?`)) return
+
+  router.delete(`/pelanggaran/panggilan/${item.id}`, {
+    preserveScroll: true,
+    onError: () => {
+      alert('Gagal menghapus surat panggilan.')
+    }
+  })
 }
 
 const sendWhatsApp = (item) => {

@@ -16,7 +16,7 @@ android {
 
     defaultConfig {
         applicationId = "com.smkpgri05jember.bkprima.bkprima_mobile"
-        minSdk = 21
+        minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName

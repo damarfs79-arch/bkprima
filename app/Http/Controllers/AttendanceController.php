@@ -656,13 +656,13 @@ class AttendanceController extends Controller
             'classStats' => $classStats,
             'schoolInfo' => [
                 'name' => \App\Models\Setting::get('school_name', 'SMK PGRI 05 JEMBER'),
-                'npsn' => '20523821',
+                'npsn' => \App\Models\Setting::get('school_npsn', '20523801'),
                 'address' => \App\Models\Setting::get('school_address', 'Jl. Krakatau No. 54 Tanggul, Kab. Jember - Jawa Timur'),
-                'waliKelas' => $classroomObj?->wali_kelas ?? 'Bpk. Ahmad Fauzi, S.Kom',
-                'guruBk' => $classroomObj?->guru_bk_name ?? 'Dra. Hj. Nurul Hidayati, M.Pd',
+                'waliKelas' => $classroomObj?->wali_kelas ?? ('Wali Kelas ' . $selectedClass),
+                'guruBk' => $classroomObj?->guru_bk_name ?? ($user?->name ?? 'Guru BK'),
                 'kepalaSekolah' => \App\Models\Setting::get('kepala_sekolah', 'Drs. H. Saiful Bahri, M.Pd'),
-                'nipKepalaSekolah' => \App\Models\Setting::get('nip_kepala_sekolah', '19680315 199403 1 008'),
-                'tahunAjaran' => \App\Models\Setting::get('tahun_ajaran', '2024/2025'),
+                'nipKepalaSekolah' => \App\Models\Setting::get('nip_kepala_sekolah', '196802151994031003'),
+                'tahunAjaran' => \App\Models\Setting::get('tahun_ajaran', \App\Models\Setting::get('academic_year', '2026/2027')),
             ]
         ]);
     }

@@ -38,12 +38,14 @@ class Student extends Model
     protected static function booted()
     {
         static::saving(function ($student) {
-            if (empty($student->classroom_id) && !empty($student->class_name)) {
-                $cls = Classroom::where('name', $student->class_name)->first();
-                if ($cls) {
-                    $student->classroom_id = $cls->id;
+            if ($student->isDirty('class_name') || empty($student->classroom_id)) {
+                if (!empty($student->class_name)) {
+                    $cls = Classroom::where('name', $student->class_name)->first();
+                    if ($cls) {
+                        $student->classroom_id = $cls->id;
+                    }
                 }
-            } elseif (!empty($student->classroom_id) && empty($student->class_name)) {
+            } elseif ($student->isDirty('classroom_id') && !empty($student->classroom_id)) {
                 $cls = Classroom::find($student->classroom_id);
                 if ($cls) {
                     $student->class_name = $cls->name;

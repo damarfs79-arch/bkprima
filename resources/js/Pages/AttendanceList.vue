@@ -1539,36 +1539,6 @@ const levelOptions = computed(() => {
   ].filter(l => levels.size === 0 || levels.has(l.value))
 })
 
-// Data referensi master rombel, wali kelas, guru BK (fallback data)
-const rombelDirectory = [
-  // Kelas 10 (X)
-  { level: '10', jurusan: 'RPL', name: 'X RPL 1', waliKelas: 'Bpk. Kurniawan, S.Kom', guruBK: 'Dra. Hj. Nurul Hidayati, M.Pd' },
-  { level: '10', jurusan: 'RPL', name: 'X RPL 2', waliKelas: 'Ibu Sri Wahyuni, S.Kom', guruBK: 'Dra. Hj. Nurul Hidayati, M.Pd' },
-  { level: '10', jurusan: 'RPL', name: 'X RPL 3', waliKelas: 'Bpk. Bayu Hendra, M.Kom', guruBK: 'Dra. Hj. Nurul Hidayati, M.Pd' },
-  { level: '10', jurusan: 'TSM', name: 'X TSM 1', waliKelas: 'Bpk. Slamet Riyadi, S.T', guruBK: 'Bpk. Agus Wicaksono, S.Pd' },
-  { level: '10', jurusan: 'TSM', name: 'X TSM 2', waliKelas: 'Bpk. Joko Susilo, S.Pd', guruBK: 'Bpk. Agus Wicaksono, S.Pd' },
-  { level: '10', jurusan: 'DKV', name: 'X DKV 1', waliKelas: 'Ibu Dewi Larasati, S.Sn', guruBK: 'Bpk. Agus Wicaksono, S.Pd' },
-  { level: '10', jurusan: 'DKV', name: 'X DKV 2', waliKelas: 'Bpk. Danang Prasetya, M.Sn', guruBK: 'Bpk. Agus Wicaksono, S.Pd' },
-  { level: '10', jurusan: 'TKJ', name: 'X TKJ 1', waliKelas: 'Bpk. Ridwan Hakim, S.T', guruBK: 'Ibu Ratih Anggraini, S.Psi' },
-  { level: '10', jurusan: 'AKL', name: 'X AKL 1', waliKelas: 'Ibu Nur Aini, S.E', guruBK: 'Bpk. Dwi Prasetyo, M.Pd' },
-  { level: '10', jurusan: 'OTKP', name: 'X OTKP 1', waliKelas: 'Ibu Endang Sulastri, S.Pd', guruBK: 'Bpk. Dwi Prasetyo, M.Pd' },
-
-  // Kelas 11 (XI)
-  { level: '11', jurusan: 'RPL', name: 'XI RPL 1', waliKelas: 'Bpk. Eko Sujarwo, S.Kom', guruBK: 'Dra. Hj. Nurul Hidayati, M.Pd' },
-  { level: '11', jurusan: 'RPL', name: 'XI RPL 2', waliKelas: 'Ibu Rahmawati, S.Kom', guruBK: 'Dra. Hj. Nurul Hidayati, M.Pd' },
-  { level: '11', jurusan: 'TSM', name: 'XI TSM 1', waliKelas: 'Bpk. Bambang Irawan, S.T', guruBK: 'Bpk. Agus Wicaksono, S.Pd' },
-  { level: '11', jurusan: 'DKV', name: 'XI DKV 1', waliKelas: 'Ibu Fitria Kusuma, S.Pd', guruBK: 'Ibu Ratih Anggraini, S.Psi' },
-  { level: '11', jurusan: 'TKJ', name: 'XI TKJ 1', waliKelas: 'Bpk. Arif Wibowo, S.Kom', guruBK: 'Ibu Ratih Anggraini, S.Psi' },
-  { level: '11', jurusan: 'AKL', name: 'XI AKL 1', waliKelas: 'Ibu Siti Aminah, S.E', guruBK: 'Bpk. Dwi Prasetyo, M.Pd' },
-
-  // Kelas 12 (XII)
-  { level: '12', jurusan: 'RPL', name: 'XII RPL 1', waliKelas: 'Bpk. Hendro Santoso, M.Kom', guruBK: 'Bpk. Dwi Prasetyo, M.Pd' },
-  { level: '12', jurusan: 'RPL', name: 'XII RPL 2', waliKelas: 'Ibu Maya Indah, S.Kom', guruBK: 'Bpk. Dwi Prasetyo, M.Pd' },
-  { level: '12', jurusan: 'TSM', name: 'XII TSM 1', waliKelas: 'Bpk. Taufik Hidayat, S.T', guruBK: 'Bpk. Agus Wicaksono, S.Pd' },
-  { level: '12', jurusan: 'DKV', name: 'XII DKV 1', waliKelas: 'Ibu Anisa Putri, S.Pd', guruBK: 'Ibu Ratih Anggraini, S.Psi' },
-  { level: '12', jurusan: 'TKJ', name: 'XII TKJ 1', waliKelas: 'Bpk. Ferry Anggara, S.Kom', guruBK: 'Ibu Ratih Anggraini, S.Psi' }
-]
-
 const todayDateShort = computed(() => {
   const d = new Date()
   const day = String(d.getDate()).padStart(2, '0')
@@ -1639,10 +1609,14 @@ const onClassChange = (newClass) => {
 
   // Auto-sync level and jurusan if a specific rombel is selected
   if (newClass !== 'ALL') {
-    const found = rombelDirectory.find(r => r.name === newClass)
+    const found = availableRombels.value.find(r => r.name === newClass)
     if (found) {
-      selectedLevel.value = found.level
-      selectedJurusan.value = found.jurusan
+      if (found.level) {
+        selectedLevel.value = found.level.includes('12') || found.level.includes('XII') ? '12' : (found.level.includes('11') || found.level.includes('XI') ? '11' : '10')
+      }
+      if (found.major) {
+        selectedJurusan.value = found.major
+      }
     }
   }
   updateUrlAndNavigate()
@@ -1659,11 +1633,12 @@ const resetFilters = () => {
 // Active Rombel Card Banner info
 const activeRombelInfo = computed(() => {
   if (selectedClass.value !== 'ALL') {
-    const meta = rombelDirectory.find(r => r.name === selectedClass.value) || {
+    const found = availableRombels.value.find(r => r.name === selectedClass.value)
+    const meta = {
       name: selectedClass.value,
-      jurusan: selectedJurusan.value !== 'ALL' ? selectedJurusan.value : 'Umum',
-      waliKelas: 'Bpk/Ibu Wali Kelas',
-      guruBK: 'Guru BK Pembimbing'
+      jurusan: found?.major || (selectedJurusan.value !== 'ALL' ? selectedJurusan.value : 'Umum'),
+      waliKelas: found?.wali_kelas || ('Wali Kelas ' + selectedClass.value),
+      guruBK: found?.guru_bk_name || 'Guru BK Pendamping'
     }
 
     const students = filteredStudents.value
@@ -1689,7 +1664,7 @@ const activeRombelInfo = computed(() => {
       name: `${levelLabel} • ${jurLabel}`,
       jurusan: selectedJurusan.value !== 'ALL' ? selectedJurusan.value : 'Semua Jurusan',
       waliKelas: 'Koordinator Jurusan',
-      guruBK: 'Dra. Hj. Nurul Hidayati, M.Pd',
+      guruBK: 'Guru BK Pendamping',
       attendanceRate: rate
     }
   }

@@ -149,7 +149,7 @@ class ApiController extends Controller
         if ($search) {
             $studentsQuery->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('nisn', 'like', "%{$search}%");
+                  ->orWhere('nis', 'like', "%{$search}%");
             });
         }
 
