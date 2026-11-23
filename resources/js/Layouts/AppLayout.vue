@@ -33,28 +33,6 @@
           </div>
           <span class="flex-1">{{ item.label }}</span>
         </router-link>
-
-        <!-- Divider & ARSIP & REFERENSI -->
-        <div class="pt-3 mt-2 border-t border-slate-100">
-          <p class="px-3 text-[11px] font-semibold text-slate-400 mb-2 uppercase tracking-wider">Arsip &amp; Referensi</p>
-          <router-link
-            to="/arsip-lulus"
-            class="interactive-btn flex items-center gap-3 px-3 py-2 rounded-lg text-xs font-medium cursor-pointer"
-            :class="isRouteActive('alumni') ? 'bg-blue-50 text-blue-700 font-semibold shadow-2xs' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'"
-          >
-            <div
-              class="transition"
-              :class="isRouteActive('alumni') ? 'text-blue-600' : 'text-slate-400 group-hover:text-slate-600'"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 14l9-5-9-5-9 5 9 5z" />
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 14v7" />
-              </svg>
-            </div>
-            <span class="flex-1">Arsip Siswa Lulus</span>
-          </router-link>
-        </div>
       </nav>
 
       <!-- Sidebar Footer -->
@@ -157,23 +135,6 @@
             <component :is="item.icon" class="w-4 h-4" :class="isRouteActive(item.key) ? 'text-blue-600' : 'text-slate-400'" />
             <span class="flex-1">{{ item.label }}</span>
           </router-link>
-
-          <div class="pt-3 mt-2 border-t border-slate-100">
-            <p class="px-3 text-[10px] font-semibold text-slate-400 mb-1 uppercase tracking-wider">Arsip &amp; Referensi</p>
-            <router-link
-              to="/arsip-lulus"
-              @click="mobileDrawerOpen = false"
-              class="flex items-center gap-3 px-3 py-2 rounded-lg text-xs font-medium transition"
-              :class="isRouteActive('alumni') ? 'bg-blue-50 text-blue-700 font-semibold' : 'text-slate-700 hover:bg-slate-50'"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" :class="isRouteActive('alumni') ? 'text-blue-600' : 'text-slate-400'" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 14l9-5-9-5-9 5 9 5z" />
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 14v7" />
-              </svg>
-              <span class="flex-1">Arsip Siswa Lulus</span>
-            </router-link>
-          </div>
         </nav>
 
         <div class="p-4 border-t border-gray-100 space-y-2">
@@ -433,6 +394,14 @@ const menuItems = [
     ])
   },
   {
+    key: 'pemanggilan',
+    label: 'Surat Panggilan Ortu',
+    path: '/pemanggilan',
+    icon: () => h('svg', { xmlns: 'http://www.w3.org/2000/svg', class: 'h-4 w-4', fill: 'none', viewBox: '0 0 24 24', stroke: 'currentColor', 'stroke-width': '2' }, [
+      h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', d: 'M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z' })
+    ])
+  },
+  {
     key: 'verifikasi',
     label: 'Input Pelanggaran',
     path: '/verifikasi',
@@ -446,6 +415,16 @@ const menuItems = [
     path: '/statistik',
     icon: () => h('svg', { xmlns: 'http://www.w3.org/2000/svg', class: 'h-4 w-4', fill: 'none', viewBox: '0 0 24 24', stroke: 'currentColor', 'stroke-width': '2' }, [
       h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', d: 'M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z' })
+    ])
+  },
+  {
+    key: 'alumni',
+    label: 'Arsip Siswa Lulus',
+    path: '/arsip-lulus',
+    icon: () => h('svg', { xmlns: 'http://www.w3.org/2000/svg', class: 'h-4 w-4', fill: 'none', viewBox: '0 0 24 24', stroke: 'currentColor', 'stroke-width': '2' }, [
+      h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', d: 'M12 14l9-5-9-5-9 5 9 5z' }),
+      h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', d: 'M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z' }),
+      h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', d: 'M12 14v7' })
     ])
   },
   {

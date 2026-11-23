@@ -58,7 +58,7 @@
           </span>
         </button>
 
-        <div class="pt-4 mt-4 border-t border-slate-800">
+        <div class="pt-4 mt-4 border-t border-slate-800 space-y-1">
           <p class="px-3 text-xs font-semibold text-slate-400 mb-2">Akses Cepat</p>
           <router-link
             to="/absensi"
@@ -67,7 +67,17 @@
             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-slate-400 group-hover:text-slate-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
             </svg>
-            <span>Pratinjau Portal Guru BK</span>
+            <span>Portal Guru BK</span>
+          </router-link>
+          <router-link
+            to="/arsip-lulus"
+            class="flex items-center gap-3 px-3 py-2 rounded-lg text-xs font-medium text-slate-400 hover:bg-slate-800/60 hover:text-slate-200 transition group"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-slate-400 group-hover:text-slate-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M12 14l9-5-9-5-9 5 9 5z" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
+            </svg>
+            <span>Arsip Siswa Lulus</span>
           </router-link>
         </div>
       </nav>
@@ -136,6 +146,30 @@
             <component :is="item.icon" class="w-4 h-4" />
             <span>{{ item.label }}</span>
           </button>
+
+          <div class="pt-3 border-t border-slate-800 space-y-1">
+            <router-link
+              to="/absensi"
+              @click="mobileDrawerOpen = false"
+              class="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-xs font-medium text-slate-300 hover:bg-slate-800 transition"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+              </svg>
+              <span>Portal Guru BK</span>
+            </router-link>
+            <router-link
+              to="/arsip-lulus"
+              @click="mobileDrawerOpen = false"
+              class="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-xs font-medium text-slate-300 hover:bg-slate-800 transition"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M12 14l9-5-9-5-9 5 9 5z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
+              </svg>
+              <span>Arsip Siswa Lulus</span>
+            </router-link>
+          </div>
         </nav>
         <button
           type="button"

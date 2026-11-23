@@ -74,7 +74,24 @@ class DatabaseSeeder extends Seeder
             );
         }
 
-        // 4. Konfigurasi Dasar Pengaturan Sekolah
+        // 4. Data Arsip Siswa Lulus (Alumni)
+        $alumniData = [
+            ['nis' => '00511001', 'name' => 'Rian Hidayat, S.Kom', 'class_name' => 'XII RPL 1', 'last_class_name' => 'XII RPL 1', 'rombel' => '1', 'level' => '12', 'major' => 'RPL', 'gender' => 'L', 'parent_name' => 'Hidayatullah', 'parent_phone' => '081234567801', 'total_violation_points' => 0, 'status' => 'lulus', 'graduation_year' => 2025, 'academic_year' => '2024/2025'],
+            ['nis' => '00511002', 'name' => 'Siti Nurhaliza', 'class_name' => 'XII RPL 1', 'last_class_name' => 'XII RPL 1', 'rombel' => '1', 'level' => '12', 'major' => 'RPL', 'gender' => 'P', 'parent_name' => 'H. Halim Santoso', 'parent_phone' => '081234567802', 'total_violation_points' => 0, 'status' => 'lulus', 'graduation_year' => 2025, 'academic_year' => '2024/2025'],
+            ['nis' => '00511003', 'name' => 'Aditya Pratama Putra', 'class_name' => 'XII TSM 1', 'last_class_name' => 'XII TSM 1', 'rombel' => '1', 'level' => '12', 'major' => 'TSM', 'gender' => 'L', 'parent_name' => 'Slamet Widodo', 'parent_phone' => '081234567803', 'total_violation_points' => 15, 'status' => 'lulus', 'graduation_year' => 2025, 'academic_year' => '2024/2025'],
+            ['nis' => '00511004', 'name' => 'Dwi Lestari Handayani', 'class_name' => 'XII TKKR 1', 'last_class_name' => 'XII TKKR 1', 'rombel' => '1', 'level' => '12', 'major' => 'TKKR', 'gender' => 'P', 'parent_name' => 'Bambang Irawan', 'parent_phone' => '081234567804', 'total_violation_points' => 0, 'status' => 'lulus', 'graduation_year' => 2025, 'academic_year' => '2024/2025'],
+            ['nis' => '00411005', 'name' => 'Fajar Ramadhan', 'class_name' => 'XII RPL 1', 'last_class_name' => 'XII RPL 1', 'rombel' => '1', 'level' => '12', 'major' => 'RPL', 'gender' => 'L', 'parent_name' => 'Agus Ramadhan', 'parent_phone' => '081234567805', 'total_violation_points' => 0, 'status' => 'lulus', 'graduation_year' => 2024, 'academic_year' => '2023/2024'],
+            ['nis' => '00411006', 'name' => 'Hendra Setiawan', 'class_name' => 'XII TSM 1', 'last_class_name' => 'XII TSM 1', 'rombel' => '1', 'level' => '12', 'major' => 'TSM', 'gender' => 'L', 'parent_name' => 'Supriyadi', 'parent_phone' => '081234567806', 'total_violation_points' => 25, 'status' => 'lulus', 'graduation_year' => 2024, 'academic_year' => '2023/2024'],
+            ['nis' => '00411007', 'name' => 'Maya Anggraini', 'class_name' => 'XII TKKR 1', 'last_class_name' => 'XII TKKR 1', 'rombel' => '1', 'level' => '12', 'major' => 'TKKR', 'gender' => 'P', 'parent_name' => 'Mulyadi', 'parent_phone' => '081234567807', 'total_violation_points' => 0, 'status' => 'lulus', 'graduation_year' => 2024, 'academic_year' => '2023/2024'],
+            ['nis' => '00611008', 'name' => 'Rizky Fauzi Rahman', 'class_name' => 'XII RPL 1', 'last_class_name' => 'XII RPL 1', 'rombel' => '1', 'level' => '12', 'major' => 'RPL', 'gender' => 'L', 'parent_name' => 'Fauzi Rahman', 'parent_phone' => '081234567808', 'total_violation_points' => 0, 'status' => 'lulus', 'graduation_year' => 2026, 'academic_year' => '2025/2026'],
+            ['nis' => '00611009', 'name' => 'Yuliana Sari Dewi', 'class_name' => 'XII TSM 1', 'last_class_name' => 'XII TSM 1', 'rombel' => '1', 'level' => '12', 'major' => 'TSM', 'gender' => 'P', 'parent_name' => 'Dwi Santoso', 'parent_phone' => '081234567809', 'total_violation_points' => 0, 'status' => 'lulus', 'graduation_year' => 2026, 'academic_year' => '2025/2026'],
+        ];
+
+        foreach ($alumniData as $alumni) {
+            \App\Models\Student::updateOrCreate(['nis' => $alumni['nis']], $alumni);
+        }
+
+        // 5. Konfigurasi Dasar Pengaturan Sekolah
         $defaultSettings = [
             'school_name' => 'SMK PGRI 05 JEMBER',
             'school_address' => 'Jl. Krakatau No. 54 Tanggul, Jember - Jawa Timur',
