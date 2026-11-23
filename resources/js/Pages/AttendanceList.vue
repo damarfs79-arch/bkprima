@@ -508,8 +508,8 @@
       <!-- ============================================================ -->
       <!-- MODAL CARD: KONFIRMASI HAPUS SISWA                           -->
       <!-- ============================================================ -->
-      <div v-if="showDeleteStudentModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs">
-        <div class="bg-white rounded-xl max-w-sm w-full border border-slate-200 shadow-xl overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+      <div v-if="showDeleteStudentModal" @click.self="showDeleteStudentModal = false" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs overflow-y-auto">
+        <div class="bg-white rounded-xl max-w-sm w-full border border-slate-200 shadow-xl overflow-hidden animate-in fade-in zoom-in-95 duration-150 my-auto">
           <div class="p-4 border-b border-slate-100 flex items-center justify-between bg-white">
             <div class="flex items-center gap-3">
               <div class="w-9 h-9 rounded-lg bg-rose-50 text-rose-600 border border-rose-200 flex items-center justify-center shrink-0">
@@ -577,8 +577,8 @@
       <!-- ============================================================ -->
       <!-- MODAL: HAPUS 1 KELAS SECARA LANGSUNG                         -->
       <!-- ============================================================ -->
-      <div v-if="showDeleteClassModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
-        <div class="bg-white rounded-2xl max-w-md w-full border border-slate-200 shadow-xl overflow-hidden">
+      <div v-if="showDeleteClassModal" @click.self="showDeleteClassModal = false" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto">
+        <div class="bg-white rounded-2xl max-w-md w-full border border-slate-200 shadow-xl overflow-hidden my-auto">
           <div class="p-5 border-b border-slate-100 flex items-center justify-between bg-rose-50/50">
             <div class="flex items-center gap-3">
               <div class="w-9 h-9 rounded-lg bg-rose-100 text-rose-700 flex items-center justify-center shrink-0">
@@ -591,7 +591,7 @@
                 <p class="text-xs text-slate-500">Hapus rombel kelas dan seluruh data siswa di dalamnya</p>
               </div>
             </div>
-            <button @click="showDeleteClassModal = false" class="p-1 text-slate-400 hover:text-slate-700 rounded-lg cursor-pointer">
+            <button type="button" @click="showDeleteClassModal = false" class="p-1 text-slate-400 hover:text-slate-700 rounded-lg cursor-pointer">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
               </svg>
@@ -655,156 +655,167 @@
       <!-- ============================================================ -->
       <!-- MODAL 1: TAMBAH SISWA BARU (CREATE)                          -->
       <!-- ============================================================ -->
-      <div v-if="showAddModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
-        <div class="bg-white rounded-2xl max-w-md w-full border border-slate-200 shadow-xl overflow-hidden">
-          <div class="p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50">
+      <div
+        v-if="showAddModal"
+        @click.self="closeAddStudentModal"
+        class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto"
+      >
+        <div class="bg-white rounded-2xl max-w-md w-full border border-slate-200 shadow-2xl overflow-hidden flex flex-col max-h-[92vh] my-auto">
+          <div class="p-4 sm:p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50 shrink-0">
             <div>
               <h3 class="font-bold text-slate-900 text-base">Tambah Siswa Baru</h3>
               <p class="text-xs text-slate-500">Pendaftaran data induk siswa ke database</p>
             </div>
-            <button @click="showAddModal = false" class="p-1 text-slate-400 hover:text-slate-700 rounded-lg cursor-pointer">
+            <button
+              type="button"
+              @click="closeAddStudentModal"
+              class="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-200/60 rounded-lg cursor-pointer transition"
+              title="Tutup / Batal (Esc)"
+            >
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
           </div>
 
-          <form @submit.prevent="submitAddStudent" class="p-5 space-y-3.5 text-xs">
-            <div>
-              <label class="block font-semibold text-slate-700 mb-1">Nomor Induk Siswa (NIS) *</label>
-              <input
-                v-model="addForm.nis"
-                required
-                type="text"
-                placeholder="Contoh: 10452"
-                class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-slate-800 font-mono focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
-              />
-            </div>
-
-            <div>
-              <label class="block font-semibold text-slate-700 mb-1">Nama Lengkap Siswa *</label>
-              <input
-                v-model="addForm.name"
-                required
-                type="text"
-                placeholder="Masukkan nama lengkap siswa"
-                class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
-              />
-            </div>
-
-            <!-- Pilih Cepat Kelas Terdaftar (Opsional) -->
-            <div>
-              <div class="flex items-center justify-between mb-1">
-                <label class="block font-semibold text-slate-700 text-xs">Pilih Cepat dari Kelas Terdaftar</label>
-                <span class="text-[11px] text-slate-400">Atau tentukan rincian di bawah</span>
-              </div>
-              <select
-                :value="addForm.class_name"
-                @change="selectExistingClassForAdd($event.target.value)"
-                class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 cursor-pointer"
-              >
-                <option v-for="cls in allClasses" :key="cls" :value="cls">{{ cls }}</option>
-              </select>
-            </div>
-
-            <!-- Rincian Terstruktur: Tingkat -> Jurusan -> Rombel -->
-            <div class="p-3 bg-slate-50/80 rounded-xl border border-slate-200 space-y-2.5">
-              <span class="block text-[11px] font-bold uppercase tracking-wider text-slate-500">
-                Rincian Tingkat, Jurusan &amp; Rombel
-              </span>
-              <div class="grid grid-cols-3 gap-2">
-                <div>
-                  <label class="block font-semibold text-slate-700 mb-1 text-[11px]">Tingkat *</label>
-                  <select
-                    v-model="addForm.level"
-                    @change="syncAddFormClassName"
-                    required
-                    class="w-full bg-white border border-slate-200 rounded-lg p-2 text-slate-800 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 cursor-pointer"
-                  >
-                    <option value="10">Kelas 10 (X)</option>
-                    <option value="11">Kelas 11 (XI)</option>
-                    <option value="12">Kelas 12 (XII)</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label class="block font-semibold text-slate-700 mb-1 text-[11px]">Jurusan *</label>
-                  <select
-                    v-model="addForm.major"
-                    @change="syncAddFormClassName"
-                    required
-                    class="w-full bg-white border border-slate-200 rounded-lg p-2 text-slate-800 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 cursor-pointer"
-                  >
-                    <option v-for="jur in jurusanOptions" :key="jur.code" :value="jur.code">
-                      {{ jur.code }}
-                    </option>
-                  </select>
-                </div>
-
-                <div>
-                  <label class="block font-semibold text-slate-700 mb-1 text-[11px]">Rombel *</label>
-                  <input
-                    v-model="addForm.rombel"
-                    @input="syncAddFormClassName"
-                    required
-                    type="text"
-                    placeholder="1, 2, dll."
-                    class="w-full bg-white border border-slate-200 rounded-lg p-2 text-slate-800 font-mono text-xs focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
-                  />
-                </div>
+          <form @submit.prevent="submitAddStudent" class="flex flex-col min-h-0 flex-1">
+            <div class="p-4 sm:p-5 space-y-3.5 text-xs overflow-y-auto flex-1">
+              <div>
+                <label class="block font-semibold text-slate-700 mb-1">Nomor Induk Siswa (NIS) *</label>
+                <input
+                  v-model="addForm.nis"
+                  required
+                  type="text"
+                  placeholder="Contoh: 10452"
+                  class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-slate-800 font-mono focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                />
               </div>
 
-              <!-- Output Nama Rombel -->
-              <div class="flex items-center justify-between text-xs px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-slate-700">
-                <span class="text-[11px] text-slate-500">Nama Kelas Terbentuk:</span>
-                <span class="font-bold text-blue-700 font-mono">{{ addForm.class_name }}</span>
+              <div>
+                <label class="block font-semibold text-slate-700 mb-1">Nama Lengkap Siswa *</label>
+                <input
+                  v-model="addForm.name"
+                  required
+                  type="text"
+                  placeholder="Masukkan nama lengkap siswa"
+                  class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                />
+              </div>
+
+              <!-- Pilih Cepat Kelas Terdaftar (Opsional) -->
+              <div>
+                <div class="flex items-center justify-between mb-1">
+                  <label class="block font-semibold text-slate-700 text-xs">Pilih Cepat dari Kelas Terdaftar</label>
+                  <span class="text-[11px] text-slate-400">Atau tentukan rincian di bawah</span>
+                </div>
+                <select
+                  :value="addForm.class_name"
+                  @change="selectExistingClassForAdd($event.target.value)"
+                  class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 cursor-pointer"
+                >
+                  <option v-for="cls in allClasses" :key="cls" :value="cls">{{ cls }}</option>
+                </select>
+              </div>
+
+              <!-- Rincian Terstruktur: Tingkat -> Jurusan -> Rombel -->
+              <div class="p-3 bg-slate-50/80 rounded-xl border border-slate-200 space-y-2.5">
+                <span class="block text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                  Rincian Tingkat, Jurusan &amp; Rombel
+                </span>
+                <div class="grid grid-cols-3 gap-2">
+                  <div>
+                    <label class="block font-semibold text-slate-700 mb-1 text-[11px]">Tingkat *</label>
+                    <select
+                      v-model="addForm.level"
+                      @change="syncAddFormClassName"
+                      required
+                      class="w-full bg-white border border-slate-200 rounded-lg p-2 text-slate-800 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 cursor-pointer"
+                    >
+                      <option value="10">Kelas 10 (X)</option>
+                      <option value="11">Kelas 11 (XI)</option>
+                      <option value="12">Kelas 12 (XII)</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label class="block font-semibold text-slate-700 mb-1 text-[11px]">Jurusan *</label>
+                    <select
+                      v-model="addForm.major"
+                      @change="syncAddFormClassName"
+                      required
+                      class="w-full bg-white border border-slate-200 rounded-lg p-2 text-slate-800 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 cursor-pointer"
+                    >
+                      <option v-for="jur in jurusanOptions" :key="jur.code" :value="jur.code">
+                        {{ jur.code }}
+                      </option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label class="block font-semibold text-slate-700 mb-1 text-[11px]">Rombel *</label>
+                    <input
+                      v-model="addForm.rombel"
+                      @input="syncAddFormClassName"
+                      required
+                      type="text"
+                      placeholder="1, 2, dll."
+                      class="w-full bg-white border border-slate-200 rounded-lg p-2 text-slate-800 font-mono text-xs focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                    />
+                  </div>
+                </div>
+
+                <!-- Output Nama Rombel -->
+                <div class="flex items-center justify-between text-xs px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-slate-700">
+                  <span class="text-[11px] text-slate-500">Nama Kelas Terbentuk:</span>
+                  <span class="font-bold text-blue-700 font-mono">{{ addForm.class_name }}</span>
+                </div>
+              </div>
+
+              <div>
+                <label class="block font-semibold text-slate-700 mb-1">Jenis Kelamin *</label>
+                <select
+                  v-model="addForm.gender"
+                  required
+                  class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                >
+                  <option value="L">Laki-laki (L)</option>
+                  <option value="P">Perempuan (P)</option>
+                </select>
+              </div>
+
+              <div>
+                <label class="block font-semibold text-slate-700 mb-1">Nama Orang Tua / Wali</label>
+                <input
+                  v-model="addForm.parent_name"
+                  type="text"
+                  placeholder="Contoh: Bpk. Santoso"
+                  class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                />
+              </div>
+
+              <div>
+                <label class="block font-semibold text-slate-700 mb-1">Nomor WhatsApp Orang Tua / Wali</label>
+                <input
+                  v-model="addForm.parent_phone"
+                  type="text"
+                  placeholder="Contoh: 081234567890"
+                  class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-slate-800 font-mono focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                />
               </div>
             </div>
 
-            <div>
-              <label class="block font-semibold text-slate-700 mb-1">Jenis Kelamin *</label>
-              <select
-                v-model="addForm.gender"
-                required
-                class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
-              >
-                <option value="L">Laki-laki (L)</option>
-                <option value="P">Perempuan (P)</option>
-              </select>
-            </div>
-
-            <div>
-              <label class="block font-semibold text-slate-700 mb-1">Nama Orang Tua / Wali</label>
-              <input
-                v-model="addForm.parent_name"
-                type="text"
-                placeholder="Contoh: Bpk. Santoso"
-                class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
-              />
-            </div>
-
-            <div>
-              <label class="block font-semibold text-slate-700 mb-1">Nomor WhatsApp Orang Tua / Wali</label>
-              <input
-                v-model="addForm.parent_phone"
-                type="text"
-                placeholder="Contoh: 081234567890"
-                class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-slate-800 font-mono focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
-              />
-            </div>
-
-            <div class="pt-3 border-t border-slate-100 flex items-center justify-end gap-2">
+            <div class="p-4 border-t border-slate-100 bg-slate-50/75 flex items-center justify-end gap-2 shrink-0">
               <button
                 type="button"
-                @click="showAddModal = false"
-                class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-lg cursor-pointer"
+                @click="closeAddStudentModal"
+                class="px-4 py-2 bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 font-semibold rounded-lg cursor-pointer transition text-xs"
               >
                 Batal
               </button>
               <button
                 type="submit"
                 :disabled="isSubmitting"
-                class="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-semibold rounded-lg cursor-pointer inline-flex items-center gap-1.5"
+                class="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-semibold rounded-lg cursor-pointer inline-flex items-center gap-1.5 shadow-xs transition text-xs"
               >
                 <span>{{ isSubmitting ? 'Menyimpan...' : 'Simpan Siswa' }}</span>
               </button>
@@ -816,8 +827,8 @@
       <!-- ============================================================ -->
       <!-- MODAL 2: UBAH STATUS PRESENSI                                -->
       <!-- ============================================================ -->
-      <div v-if="showStatusModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
-        <div class="bg-white rounded-2xl max-w-md w-full border border-slate-200 shadow-xl overflow-hidden">
+      <div v-if="showStatusModal" @click.self="showStatusModal = false" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto">
+        <div class="bg-white rounded-2xl max-w-md w-full border border-slate-200 shadow-xl overflow-hidden my-auto">
           <div class="p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50">
             <div>
               <h3 class="font-bold text-slate-900 text-base">Ubah Status Presensi</h3>
@@ -897,152 +908,163 @@
       <!-- ============================================================ -->
       <!-- MODAL 3: EDIT PROFIL SISWA (UPDATE)                          -->
       <!-- ============================================================ -->
-      <div v-if="showEditStudentModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
-        <div class="bg-white rounded-2xl max-w-md w-full border border-slate-200 shadow-xl overflow-hidden">
-          <div class="p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50">
+      <div
+        v-if="showEditStudentModal"
+        @click.self="showEditStudentModal = false"
+        class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto"
+      >
+        <div class="bg-white rounded-2xl max-w-md w-full border border-slate-200 shadow-2xl overflow-hidden flex flex-col max-h-[92vh] my-auto">
+          <div class="p-4 sm:p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50 shrink-0">
             <div>
               <h3 class="font-bold text-slate-900 text-base">Edit Data Siswa</h3>
               <p class="text-xs text-slate-500">Perbarui identitas atau data wali siswa</p>
             </div>
-            <button @click="showEditStudentModal = false" class="p-1 text-slate-400 hover:text-slate-700 rounded-lg cursor-pointer">
+            <button
+              type="button"
+              @click="showEditStudentModal = false"
+              class="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-200/60 rounded-lg cursor-pointer transition"
+              title="Tutup / Batal (Esc)"
+            >
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
           </div>
 
-          <form @submit.prevent="submitEditStudent" class="p-5 space-y-3.5 text-xs">
-            <div>
-              <label class="block font-semibold text-slate-700 mb-1">NIS *</label>
-              <input
-                v-model="editStudentForm.nis"
-                required
-                type="text"
-                class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-slate-800 font-mono focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
-              />
-            </div>
-
-            <div>
-              <label class="block font-semibold text-slate-700 mb-1">Nama Lengkap Siswa *</label>
-              <input
-                v-model="editStudentForm.name"
-                required
-                type="text"
-                class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
-              />
-            </div>
-
-            <!-- Pilih Cepat Kelas Terdaftar (Opsional) -->
-            <div>
-              <div class="flex items-center justify-between mb-1">
-                <label class="block font-semibold text-slate-700 text-xs">Pilih Cepat dari Kelas Terdaftar</label>
-                <span class="text-[11px] text-slate-400">Atau ubah rincian di bawah</span>
-              </div>
-              <select
-                :value="editStudentForm.class_name"
-                @change="selectExistingClassForEdit($event.target.value)"
-                class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 cursor-pointer"
-              >
-                <option v-for="cls in allClasses" :key="cls" :value="cls">{{ cls }}</option>
-              </select>
-            </div>
-
-            <!-- Rincian Terstruktur: Tingkat -> Jurusan -> Rombel -->
-            <div class="p-3 bg-slate-50/80 rounded-xl border border-slate-200 space-y-2.5">
-              <span class="block text-[11px] font-bold uppercase tracking-wider text-slate-500">
-                Rincian Tingkat, Jurusan &amp; Rombel
-              </span>
-              <div class="grid grid-cols-3 gap-2">
-                <div>
-                  <label class="block font-semibold text-slate-700 mb-1 text-[11px]">Tingkat *</label>
-                  <select
-                    v-model="editStudentForm.level"
-                    @change="syncEditFormClassName"
-                    required
-                    class="w-full bg-white border border-slate-200 rounded-lg p-2 text-slate-800 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 cursor-pointer"
-                  >
-                    <option value="10">Kelas 10 (X)</option>
-                    <option value="11">Kelas 11 (XI)</option>
-                    <option value="12">Kelas 12 (XII)</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label class="block font-semibold text-slate-700 mb-1 text-[11px]">Jurusan *</label>
-                  <select
-                    v-model="editStudentForm.major"
-                    @change="syncEditFormClassName"
-                    required
-                    class="w-full bg-white border border-slate-200 rounded-lg p-2 text-slate-800 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 cursor-pointer"
-                  >
-                    <option v-for="jur in jurusanOptions" :key="jur.code" :value="jur.code">
-                      {{ jur.code }}
-                    </option>
-                  </select>
-                </div>
-
-                <div>
-                  <label class="block font-semibold text-slate-700 mb-1 text-[11px]">Rombel *</label>
-                  <input
-                    v-model="editStudentForm.rombel"
-                    @input="syncEditFormClassName"
-                    required
-                    type="text"
-                    placeholder="1, 2, dll."
-                    class="w-full bg-white border border-slate-200 rounded-lg p-2 text-slate-800 font-mono text-xs focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
-                  />
-                </div>
+          <form @submit.prevent="submitEditStudent" class="flex flex-col min-h-0 flex-1">
+            <div class="p-4 sm:p-5 space-y-3.5 text-xs overflow-y-auto flex-1">
+              <div>
+                <label class="block font-semibold text-slate-700 mb-1">NIS *</label>
+                <input
+                  v-model="editStudentForm.nis"
+                  required
+                  type="text"
+                  class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-slate-800 font-mono focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                />
               </div>
 
-              <!-- Output Nama Rombel -->
-              <div class="flex items-center justify-between text-xs px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-slate-700">
-                <span class="text-[11px] text-slate-500">Nama Kelas Terbentuk:</span>
-                <span class="font-bold text-blue-700 font-mono">{{ editStudentForm.class_name }}</span>
+              <div>
+                <label class="block font-semibold text-slate-700 mb-1">Nama Lengkap Siswa *</label>
+                <input
+                  v-model="editStudentForm.name"
+                  required
+                  type="text"
+                  class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                />
+              </div>
+
+              <!-- Pilih Cepat Kelas Terdaftar (Opsional) -->
+              <div>
+                <div class="flex items-center justify-between mb-1">
+                  <label class="block font-semibold text-slate-700 text-xs">Pilih Cepat dari Kelas Terdaftar</label>
+                  <span class="text-[11px] text-slate-400">Atau ubah rincian di bawah</span>
+                </div>
+                <select
+                  :value="editStudentForm.class_name"
+                  @change="selectExistingClassForEdit($event.target.value)"
+                  class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 cursor-pointer"
+                >
+                  <option v-for="cls in allClasses" :key="cls" :value="cls">{{ cls }}</option>
+                </select>
+              </div>
+
+              <!-- Rincian Terstruktur: Tingkat -> Jurusan -> Rombel -->
+              <div class="p-3 bg-slate-50/80 rounded-xl border border-slate-200 space-y-2.5">
+                <span class="block text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                  Rincian Tingkat, Jurusan &amp; Rombel
+                </span>
+                <div class="grid grid-cols-3 gap-2">
+                  <div>
+                    <label class="block font-semibold text-slate-700 mb-1 text-[11px]">Tingkat *</label>
+                    <select
+                      v-model="editStudentForm.level"
+                      @change="syncEditFormClassName"
+                      required
+                      class="w-full bg-white border border-slate-200 rounded-lg p-2 text-slate-800 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 cursor-pointer"
+                    >
+                      <option value="10">Kelas 10 (X)</option>
+                      <option value="11">Kelas 11 (XI)</option>
+                      <option value="12">Kelas 12 (XII)</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label class="block font-semibold text-slate-700 mb-1 text-[11px]">Jurusan *</label>
+                    <select
+                      v-model="editStudentForm.major"
+                      @change="syncEditFormClassName"
+                      required
+                      class="w-full bg-white border border-slate-200 rounded-lg p-2 text-slate-800 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 cursor-pointer"
+                    >
+                      <option v-for="jur in jurusanOptions" :key="jur.code" :value="jur.code">
+                        {{ jur.code }}
+                      </option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label class="block font-semibold text-slate-700 mb-1 text-[11px]">Rombel *</label>
+                    <input
+                      v-model="editStudentForm.rombel"
+                      @input="syncEditFormClassName"
+                      required
+                      type="text"
+                      placeholder="1, 2, dll."
+                      class="w-full bg-white border border-slate-200 rounded-lg p-2 text-slate-800 font-mono text-xs focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                    />
+                  </div>
+                </div>
+
+                <!-- Output Nama Rombel -->
+                <div class="flex items-center justify-between text-xs px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-slate-700">
+                  <span class="text-[11px] text-slate-500">Nama Kelas Terbentuk:</span>
+                  <span class="font-bold text-blue-700 font-mono">{{ editStudentForm.class_name }}</span>
+                </div>
+              </div>
+
+              <div>
+                <label class="block font-semibold text-slate-700 mb-1">Jenis Kelamin *</label>
+                <select
+                  v-model="editStudentForm.gender"
+                  required
+                  class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                >
+                  <option value="L">Laki-laki (L)</option>
+                  <option value="P">Perempuan (P)</option>
+                </select>
+              </div>
+
+              <div>
+                <label class="block font-semibold text-slate-700 mb-1">Nama Orang Tua / Wali</label>
+                <input
+                  v-model="editStudentForm.parent_name"
+                  type="text"
+                  class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                />
+              </div>
+
+              <div>
+                <label class="block font-semibold text-slate-700 mb-1">Nomor WhatsApp Orang Tua / Wali</label>
+                <input
+                  v-model="editStudentForm.parent_phone"
+                  type="text"
+                  class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-slate-800 font-mono focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                />
               </div>
             </div>
 
-            <div>
-              <label class="block font-semibold text-slate-700 mb-1">Jenis Kelamin *</label>
-              <select
-                v-model="editStudentForm.gender"
-                required
-                class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
-              >
-                <option value="L">Laki-laki (L)</option>
-                <option value="P">Perempuan (P)</option>
-              </select>
-            </div>
-
-            <div>
-              <label class="block font-semibold text-slate-700 mb-1">Nama Orang Tua / Wali</label>
-              <input
-                v-model="editStudentForm.parent_name"
-                type="text"
-                class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
-              />
-            </div>
-
-            <div>
-              <label class="block font-semibold text-slate-700 mb-1">Nomor WhatsApp Orang Tua / Wali</label>
-              <input
-                v-model="editStudentForm.parent_phone"
-                type="text"
-                class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-slate-800 font-mono focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
-              />
-            </div>
-
-            <div class="pt-3 border-t border-slate-100 flex items-center justify-end gap-2">
+            <div class="p-4 border-t border-slate-100 bg-slate-50/75 flex items-center justify-end gap-2 shrink-0">
               <button
                 type="button"
                 @click="showEditStudentModal = false"
-                class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-lg cursor-pointer"
+                class="px-4 py-2 bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 font-semibold rounded-lg cursor-pointer transition text-xs"
               >
                 Batal
               </button>
               <button
                 type="submit"
                 :disabled="isSubmitting"
-                class="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-semibold rounded-lg cursor-pointer"
+                class="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-semibold rounded-lg cursor-pointer transition text-xs shadow-xs"
               >
                 <span>{{ isSubmitting ? 'Memperbarui...' : 'Simpan Perubahan' }}</span>
               </button>
@@ -1478,7 +1500,7 @@
 
 <script setup>
 import AppLayout from '../Layouts/AppLayout.vue'
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { router, Link, usePage } from '@inertiajs/vue3'
 
 const page = usePage()
@@ -2017,6 +2039,32 @@ const openAddStudentModal = () => {
   }
   showAddModal.value = true
 }
+
+const closeAddStudentModal = () => {
+  showAddModal.value = false
+  isSubmitting.value = false
+}
+
+// Handler tombol Escape keyboard untuk membatalkan/menutup modal yang sedang terbuka
+const handleGlobalModalEsc = (e) => {
+  if (e.key === 'Escape') {
+    if (showAddModal.value) closeAddStudentModal()
+    if (showEditStudentModal.value) showEditStudentModal.value = false
+    if (showStatusModal.value) showStatusModal.value = false
+    if (showDeleteStudentModal.value) showDeleteStudentModal.value = false
+    if (showDeleteClassModal.value) showDeleteClassModal.value = false
+    if (showImportModal.value) showImportModal.value = false
+    if (showPromotionModal.value) showPromotionModal.value = false
+  }
+}
+
+onMounted(() => {
+  window.addEventListener('keydown', handleGlobalModalEsc)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('keydown', handleGlobalModalEsc)
+})
 
 const submitAddStudent = () => {
   syncAddFormClassName()
