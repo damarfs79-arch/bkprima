@@ -20,6 +20,7 @@ class StatsScreen extends StatefulWidget {
 
 class _StatsScreenState extends State<StatsScreen> {
   bool _isLoading = false;
+  String? _errorMessage;
   Map<String, dynamic>? _masterData;
   List<MonthlyTrendPoint>? _monthlyTrend;
 
@@ -32,6 +33,7 @@ class _StatsScreenState extends State<StatsScreen> {
   Future<void> _fetchMasterStats() async {
     setState(() {
       _isLoading = true;
+      _errorMessage = null;
     });
 
     try {
@@ -46,16 +48,25 @@ class _StatsScreenState extends State<StatsScreen> {
             _masterData = data;
             _monthlyTrend = parsedTrend;
             _isLoading = false;
+            _errorMessage = null;
           });
         }
         return;
+      } else {
+        if (mounted) {
+          setState(() {
+            _isLoading = false;
+            _errorMessage = res['message']?.toString() ?? 'Gagal memuat data statistik';
+          });
+        }
       }
-    } catch (_) {}
-
-    if (mounted) {
-      setState(() {
-        _isLoading = false;
-      });
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+          _errorMessage = 'Gagal terhubung ke server: $e';
+        });
+      }
     }
   }
 
@@ -64,23 +75,110 @@ class _StatsScreenState extends State<StatsScreen> {
     final att = context.watch<AttendanceProvider>();
     final vio = context.watch<ViolationProvider>();
 
-    // Metrik Keseluruhan Master Admin (1.500 Siswa)
+    // Initial loading state
+    if (_isLoading && _masterData == null) {
+      return Container(
+        color: AppTheme.background,
+        child: const Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SizedBox(
+                width: 24,
+                height: 24,
+                child: CircularProgressIndicator(strokeWidth: 2.5, color: AppTheme.primary),
+              ),
+              SizedBox(height: 12),
+              Text(
+                'Memuat data statistik...',
+                style: TextStyle(
+                  fontFamily: AppTheme.fontFamily,
+                  fontSize: 12,
+                  color: AppTheme.textSecondary,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    // Error state when no data is cached yet
+    if (_masterData == null && _errorMessage != null) {
+      return Container(
+        color: AppTheme.background,
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.cloud_off_outlined, size: 44, color: AppTheme.textMuted),
+                const SizedBox(height: 12),
+                Text(
+                  _errorMessage!,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontFamily: AppTheme.fontFamily,
+                    fontSize: 13,
+                    color: AppTheme.textSecondary,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                OutlinedButton.icon(
+                  onPressed: _fetchMasterStats,
+                  icon: const Icon(Icons.refresh, size: 16),
+                  label: const Text('Coba Lagi'),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: AppTheme.primary,
+                    side: const BorderSide(color: AppTheme.border),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    // Metrik Keseluruhan dari API Database Real
     final summary = _masterData?['summary'] as Map<String, dynamic>?;
     final benchmark = _masterData?['benchmark'] as Map<String, dynamic>?;
 
-    final hadirRate = (summary?['hadir_rate'] as num?)?.toDouble() ?? 94.8;
-    final hadirCount = (summary?['hadir_count'] as num?)?.toInt() ?? 1422;
-    final totalStudents = (summary?['total_students'] as num?)?.toInt() ?? 1500;
+    final hadirRate = (summary?['hadir_rate'] as num?)?.toDouble() ?? 0.0;
+    final hadirCount = (summary?['hadir_count'] as num?)?.toInt() ?? 0;
+    final totalStudents = (summary?['total_students'] as num?)?.toInt() ?? 0;
 
-    final terlambatRate = (summary?['terlambat_rate'] as num?)?.toDouble() ?? 2.8;
-    final terlambatCount = (summary?['terlambat_count'] as num?)?.toInt() ?? 42;
+    final terlambatRate = (summary?['terlambat_rate'] as num?)?.toDouble() ?? 0.0;
+    final terlambatCount = (summary?['terlambat_count'] as num?)?.toInt() ?? 0;
 
-    final totalViolations = (summary?['total_violations'] as num?)?.toInt() ?? (vio.stats?.totalKasus ?? 3);
-    final spCasesCount = (summary?['sp_cases'] as num?)?.toInt() ?? (vio.stats?.panggilanOrtu ?? 2);
+    final totalViolations = (summary?['total_violations'] as num?)?.toInt() ?? (vio.stats?.totalKasus ?? vio.violations.length);
+    final spCasesCount = (summary?['sp_cases'] as num?)?.toInt() ?? (vio.stats?.panggilanOrtu ?? vio.suratPanggilan.length);
 
-    final avg2026 = (benchmark?['avg_2026'] as num?)?.toDouble() ?? 91.3;
-    final avg2025 = (benchmark?['avg_2025'] as num?)?.toDouble() ?? 88.2;
     final targetRate = (benchmark?['target_rate'] as num?)?.toDouble() ?? 90.0;
+
+    // Distribusi Kategori Pelanggaran (dari API atau fallback hitung langsung dari data lokal)
+    final rawDist = _masterData?['category_distribution'] as List?;
+    List<CategoryDistribution> distribution = [];
+    if (rawDist != null && rawDist.isNotEmpty) {
+      distribution = rawDist.map((e) => CategoryDistribution.fromJson(e)).toList();
+    } else if (vio.violations.isNotEmpty) {
+      final Map<String, int> catCounts = {};
+      for (final v in vio.violations) {
+        catCounts[v.category] = (catCounts[v.category] ?? 0) + 1;
+      }
+      final total = vio.violations.length;
+      distribution = catCounts.entries.map((e) {
+        final pct = total > 0 ? (e.value / total) * 100 : 0.0;
+        return CategoryDistribution(
+          name: e.key,
+          count: e.value,
+          percentage: pct,
+          ratio: total > 0 ? e.value / total : 0.0,
+        );
+      }).toList();
+    }
 
     // Siswa Tahap SP (Seluruh Sekolah)
     final List spRaw = _masterData?['surat_panggilan'] ?? [];
@@ -88,6 +186,15 @@ class _StatsScreenState extends State<StatsScreen> {
     if (highRiskStudents.isEmpty && vio.suratPanggilan.isNotEmpty) {
       highRiskStudents = vio.suratPanggilan;
     }
+
+    const categoryColors = [
+      AppTheme.primary,
+      Color(0xFFD97706),
+      Color(0xFF475569),
+      Color(0xFFE11D48),
+      Color(0xFF0D9488),
+      Color(0xFF6366F1),
+    ];
 
     return Container(
       color: AppTheme.background,
@@ -129,14 +236,16 @@ class _StatsScreenState extends State<StatsScreen> {
                           Container(
                             width: 6,
                             height: 6,
-                            decoration: const BoxDecoration(
-                              color: Color(0xFF059669),
+                            decoration: BoxDecoration(
+                              color: totalStudents > 0 ? const Color(0xFF059669) : AppTheme.textMuted,
                               shape: BoxShape.circle,
                             ),
                           ),
                           const SizedBox(width: 5),
                           Text(
-                            'Data Master Sekolah • $totalStudents Siswa',
+                            totalStudents > 0
+                                ? 'Data Presensi Siswa • $totalStudents Siswa'
+                                : 'Data Presensi Siswa • Belum Ada Data',
                             style: const TextStyle(
                               fontFamily: AppTheme.fontFamily,
                               fontSize: 11,
@@ -158,7 +267,7 @@ class _StatsScreenState extends State<StatsScreen> {
               ),
               const SizedBox(height: 14),
 
-              // KPI Grid 2x2 (Mengambil Keseluruhan 1.500 Siswa)
+              // KPI Grid 2x2
               GridView.count(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
@@ -195,12 +304,11 @@ class _StatsScreenState extends State<StatsScreen> {
               ),
               const SizedBox(height: 14),
 
-              // Grafik Kehadiran Master Admin (12 Bulan Perbandingan 2026 vs 2025)
+              // Grafik Kehadiran
               AttendanceTrendChart(
                 data: _monthlyTrend,
                 targetRate: targetRate,
-                avg2026: avg2026,
-                avg2025: avg2025,
+                totalStudents: totalStudents,
               ),
               const SizedBox(height: 14),
 
@@ -220,13 +328,35 @@ class _StatsScreenState extends State<StatsScreen> {
                       ),
                     ),
                     const SizedBox(height: 12),
-                    _buildProgressRow('Kedisiplinan', 0.65, '65%', AppTheme.primary),
-                    const SizedBox(height: 8),
-                    _buildProgressRow('Kerapian', 0.20, '20%', const Color(0xFFD97706)),
-                    const SizedBox(height: 8),
-                    _buildProgressRow('Ketertiban', 0.10, '10%', const Color(0xFF475569)),
-                    const SizedBox(height: 8),
-                    _buildProgressRow('Pelanggaran Khusus', 0.05, '5%', const Color(0xFFE11D48)),
+                    if (distribution.isEmpty)
+                      const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 12),
+                        child: Center(
+                          child: Text(
+                            'Belum ada catatan pelanggaran siswa.',
+                            style: TextStyle(
+                              fontFamily: AppTheme.fontFamily,
+                              fontSize: 12,
+                              color: AppTheme.textSecondary,
+                            ),
+                          ),
+                        ),
+                      )
+                    else
+                      ...distribution.asMap().entries.map((entry) {
+                        final idx = entry.key;
+                        final item = entry.value;
+                        final color = categoryColors[idx % categoryColors.length];
+                        return Padding(
+                          padding: EdgeInsets.only(bottom: idx == distribution.length - 1 ? 0 : 8),
+                          child: _buildProgressRow(
+                            item.name,
+                            item.ratio,
+                            '${item.percentage.toStringAsFixed(0)}% (${item.count})',
+                            color,
+                          ),
+                        );
+                      }),
                   ],
                 ),
               ),
@@ -386,7 +516,7 @@ class _StatsScreenState extends State<StatsScreen> {
         ClipRRect(
           borderRadius: BorderRadius.circular(4),
           child: LinearProgressIndicator(
-            value: value,
+            value: value.clamp(0.0, 1.0),
             minHeight: 5,
             backgroundColor: AppTheme.surfaceMuted,
             color: color,

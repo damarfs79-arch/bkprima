@@ -15,6 +15,9 @@ Route::post('/absensi/bulk', [ApiController::class, 'bulkAttendance']);
 Route::get('/pelanggaran', [ApiController::class, 'getViolations']);
 Route::post('/pelanggaran', [ApiController::class, 'storeViolation']);
 
+Route::get('/aturan', [ApiController::class, 'getRules']);
+Route::post('/aturan', [ApiController::class, 'storeRule']);
+
 Route::get('/statistik', [ApiController::class, 'getStats']);
 Route::get('/stats', [ApiController::class, 'getStats']);
 Route::get('/statistik-kehadiran', [ApiController::class, 'getAttendanceStatsFromAdmin']);

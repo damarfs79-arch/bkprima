@@ -108,3 +108,26 @@ class ViolationStats {
     );
   }
 }
+
+class CategoryDistribution {
+  final String name;
+  final int count;
+  final double percentage;
+  final double ratio;
+
+  CategoryDistribution({
+    required this.name,
+    required this.count,
+    required this.percentage,
+    required this.ratio,
+  });
+
+  factory CategoryDistribution.fromJson(Map<String, dynamic> json) {
+    return CategoryDistribution(
+      name: json['name']?.toString() ?? 'Lainnya',
+      count: (json['count'] as num?)?.toInt() ?? 0,
+      percentage: (json['percentage'] as num?)?.toDouble() ?? 0.0,
+      ratio: (json['ratio'] as num?)?.toDouble() ?? 0.0,
+    );
+  }
+}

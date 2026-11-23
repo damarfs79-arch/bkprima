@@ -8,8 +8,11 @@ import '../core/widgets/app_text_field.dart';
 import '../core/widgets/compact_photo_picker.dart';
 import '../core/widgets/searchable_bottom_sheet.dart';
 import '../core/widgets/selectable_chip_wrap.dart';
+import '../models/violation_type_model.dart';
 import '../providers/attendance_provider.dart';
 import '../providers/violation_provider.dart';
+import '../services/violation_type_service.dart';
+import '../widgets/add_violation_type_sheet.dart';
 import '../widgets/rule_lookup_sheet.dart';
 
 class InputViolationScreen extends StatefulWidget {
@@ -36,21 +39,13 @@ class _InputViolationScreenState extends State<InputViolationScreen> {
   File? _selectedPhoto;
   int _selectedPointPreset = 5;
 
-  static const List<String> _categories = [
+  List<ViolationTypeItem> _allViolationTypes = [];
+
+  static const List<String> _categoryTabs = [
     'Kedisiplinan',
     'Kerapian',
-    'Kepribadian & Berat',
+    'Ketertiban & Berat',
     'Lainnya',
-  ];
-
-  static const List<ChipItem<String>> _violationChips = [
-    ChipItem(label: 'Terlambat Masuk', value: 'Terlambat Masuk (Jam ke-1)'),
-    ChipItem(label: 'Atribut Tidak Lengkap', value: 'Atribut Seragam Tidak Lengkap'),
-    ChipItem(label: 'Keluar Tanpa Izin', value: 'Keluar Lingkungan Sekolah Tanpa Izin'),
-    ChipItem(label: 'Merokok / Vape', value: 'Merokok / Membawa Rokok di Sekolah'),
-    ChipItem(label: 'HP Saat KBM', value: 'Memainkan HP Saat Jam Pelajaran'),
-    ChipItem(label: 'Rambut Tidak Rapi', value: 'Rambut Tidak Sesuai Ketentuan Tatib'),
-    ChipItem(label: 'Bolos Jam Pelajaran', value: 'Meninggalkan Kelas / Membolos'),
   ];
 
   static const List<ChipItem<int>> _pointPresets = [
@@ -75,6 +70,7 @@ class _InputViolationScreenState extends State<InputViolationScreen> {
   @override
   void initState() {
     super.initState();
+    _loadViolationTypes();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final att = context.read<AttendanceProvider>();
       if (att.students.isEmpty) {
@@ -92,26 +88,53 @@ class _InputViolationScreenState extends State<InputViolationScreen> {
     super.dispose();
   }
 
-  void _onSelectViolationPreset(String value) {
-    _violationNameController.text = value;
-    if (value.contains('Terlambat') || value.contains('Atribut')) {
-      _category = 'Kedisiplinan';
-      _setPoints(5);
-      _penaltyAction = 'Piket Kebersihan Lingkungan Sekolah';
-    } else if (value.contains('Merokok')) {
-      _category = 'Kepribadian & Berat';
-      _setPoints(50);
-      _penaltyAction = 'Pemanggilan Orang Tua (SP-1)';
-    } else if (value.contains('Keluar') || value.contains('HP') || value.contains('Bolos')) {
-      _category = 'Kedisiplinan';
-      _setPoints(10);
-      _penaltyAction = 'Teguran Tertulis & Surat Perjanjian';
-    } else {
-      _category = 'Kerapian';
-      _setPoints(10);
-      _penaltyAction = 'Pembinaan Lisan & Pengarahan BK';
+  Future<void> _loadViolationTypes() async {
+    final types = await ViolationTypeService.getAllTypes();
+    if (mounted) {
+      setState(() {
+        _allViolationTypes = types;
+      });
     }
-    setState(() {});
+  }
+
+  Future<void> _openAddCustomViolationType() async {
+    final newType = await AddViolationTypeSheet.show(
+      context,
+      initialCategory: _category,
+    );
+
+    if (newType != null && mounted) {
+      setState(() {
+        _allViolationTypes.removeWhere(
+          (t) => t.id == newType.id || t.name.toLowerCase().trim() == newType.name.toLowerCase().trim(),
+        );
+        _allViolationTypes.insert(0, newType);
+        _category = newType.category;
+        _violationNameController.text = newType.name;
+        _setPoints(newType.defaultPoints);
+        _penaltyAction = newType.defaultPenalty;
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Jenis pelanggaran baru "${newType.name}" berhasil ditambahkan.'),
+          backgroundColor: AppTheme.success,
+        ),
+      );
+    }
+  }
+
+  void _onSelectViolationType(ViolationTypeItem type) {
+    setState(() {
+      _violationNameController.text = type.name;
+      _category = type.category;
+      _setPoints(type.defaultPoints);
+      _penaltyAction = type.defaultPenalty;
+    });
+  }
+
+  List<ViolationTypeItem> get _filteredViolationTypes {
+    return _allViolationTypes.where((t) => t.category == _category).toList();
   }
 
   void _setPoints(int points) {
@@ -250,7 +273,7 @@ class _InputViolationScreenState extends State<InputViolationScreen> {
             Expanded(
               child: SingleChildScrollView(
                 physics: const AlwaysScrollableScrollPhysics(),
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                 child: Form(
                   key: _formKey,
                   child: Column(
@@ -273,12 +296,12 @@ class _InputViolationScreenState extends State<InputViolationScreen> {
                                   letterSpacing: -0.3,
                                 ),
                               ),
-                              SizedBox(height: 2),
+                              SizedBox(height: 4),
                               Text(
                                 'Pencatatan kasus tata tertib & skor kedisiplinan',
                                 style: TextStyle(
                                   fontFamily: AppTheme.fontFamily,
-                                  fontSize: 11,
+                                  fontSize: 12,
                                   color: AppTheme.textSecondary,
                                 ),
                               ),
@@ -288,7 +311,7 @@ class _InputViolationScreenState extends State<InputViolationScreen> {
                             onTap: _openRuleLookup,
                             borderRadius: BorderRadius.circular(8),
                             child: Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                               decoration: BoxDecoration(
                                 color: AppTheme.primaryLight,
                                 borderRadius: BorderRadius.circular(8),
@@ -297,13 +320,13 @@ class _InputViolationScreenState extends State<InputViolationScreen> {
                               child: const Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  Icon(Icons.menu_book_outlined, size: 14, color: AppTheme.primary),
-                                  SizedBox(width: 5),
+                                  Icon(Icons.menu_book_outlined, size: 16, color: AppTheme.primary),
+                                  SizedBox(width: 4),
                                   Text(
                                     'Buku Tatib',
                                     style: TextStyle(
                                       fontFamily: AppTheme.fontFamily,
-                                      fontSize: 11,
+                                      fontSize: 12,
                                       fontWeight: FontWeight.w600,
                                       color: AppTheme.primary,
                                     ),
@@ -314,11 +337,11 @@ class _InputViolationScreenState extends State<InputViolationScreen> {
                           ),
                         ],
                       ),
-                      const SizedBox(height: 14),
+                      const SizedBox(height: 16),
 
                       // Card 1: Identitas Siswa
                       AppSurface(
-                        padding: const EdgeInsets.all(14),
+                        padding: const EdgeInsets.all(16),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -329,7 +352,7 @@ class _InputViolationScreenState extends State<InputViolationScreen> {
                                   'Identitas Siswa',
                                   style: TextStyle(
                                     fontFamily: AppTheme.fontFamily,
-                                    fontSize: 13,
+                                    fontSize: 14,
                                     fontWeight: FontWeight.w700,
                                     color: AppTheme.textPrimary,
                                   ),
@@ -345,7 +368,7 @@ class _InputViolationScreenState extends State<InputViolationScreen> {
                                     _isManualInput ? 'Pilih dari Database' : 'Input Manual',
                                     style: const TextStyle(
                                       fontFamily: AppTheme.fontFamily,
-                                      fontSize: 11,
+                                      fontSize: 12,
                                       fontWeight: FontWeight.w600,
                                       color: AppTheme.primary,
                                     ),
@@ -358,13 +381,13 @@ class _InputViolationScreenState extends State<InputViolationScreen> {
                             if (!_isManualInput) ...[
                               InkWell(
                                 onTap: _openStudentPicker,
-                                borderRadius: BorderRadius.circular(10),
+                                borderRadius: BorderRadius.circular(8),
                                 child: Container(
                                   width: double.infinity,
-                                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                                   decoration: BoxDecoration(
-                                    color: const Color(0xFFF8FAFC),
-                                    borderRadius: BorderRadius.circular(10),
+                                    color: AppTheme.background,
+                                    borderRadius: BorderRadius.circular(8),
                                     border: Border.all(
                                       color: _selectedStudentId != null ? AppTheme.primary : AppTheme.border,
                                       width: _selectedStudentId != null ? 1.5 : 1.0,
@@ -386,18 +409,18 @@ class _InputViolationScreenState extends State<InputViolationScreen> {
                                               _studentName.isNotEmpty ? _studentName : 'Pilih Nama Siswa...',
                                               style: TextStyle(
                                                 fontFamily: AppTheme.fontFamily,
-                                                fontSize: 13,
+                                                fontSize: 14,
                                                 fontWeight: _studentName.isNotEmpty ? FontWeight.w700 : FontWeight.w400,
                                                 color: _studentName.isNotEmpty ? AppTheme.textPrimary : AppTheme.textMuted,
                                               ),
                                             ),
                                             if (_studentClass.isNotEmpty && _studentName.isNotEmpty) ...[
-                                              const SizedBox(height: 2),
+                                              const SizedBox(height: 4),
                                               Text(
                                                 'Kelas: $_studentClass',
                                                 style: const TextStyle(
                                                   fontFamily: AppTheme.fontFamily,
-                                                  fontSize: 11,
+                                                  fontSize: 12,
                                                   color: AppTheme.textSecondary,
                                                 ),
                                               ),
@@ -418,7 +441,7 @@ class _InputViolationScreenState extends State<InputViolationScreen> {
                                 onChanged: (val) => _studentName = val,
                                 validator: (val) => val == null || val.trim().isEmpty ? 'Nama siswa wajib diisi' : null,
                               ),
-                              const SizedBox(height: 10),
+                              const SizedBox(height: 12),
                               AppTextField(
                                 label: 'Kelas / Rombel Siswa',
                                 hintText: 'Contoh: X TKKR 1, XI RPL 1',
@@ -434,29 +457,72 @@ class _InputViolationScreenState extends State<InputViolationScreen> {
 
                       // Card 2: Pelanggaran & Kategori
                       AppSurface(
-                        padding: const EdgeInsets.all(14),
+                        padding: const EdgeInsets.all(16),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
-                              'Jenis Pelanggaran',
-                              style: TextStyle(
-                                fontFamily: AppTheme.fontFamily,
-                                fontSize: 13,
-                                fontWeight: FontWeight.w700,
-                                color: AppTheme.textPrimary,
-                              ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                const Text(
+                                  'Jenis Pelanggaran',
+                                  style: TextStyle(
+                                    fontFamily: AppTheme.fontFamily,
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w700,
+                                    color: AppTheme.textPrimary,
+                                  ),
+                                ),
+                                InkWell(
+                                  onTap: _openAddCustomViolationType,
+                                  borderRadius: BorderRadius.circular(8),
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                    decoration: BoxDecoration(
+                                      color: AppTheme.primaryLight,
+                                      borderRadius: BorderRadius.circular(8),
+                                      border: Border.all(color: AppTheme.primaryBorder, width: 1),
+                                    ),
+                                    child: const Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Icon(Icons.add_rounded, size: 15, color: AppTheme.primary),
+                                        SizedBox(width: 4),
+                                        Text(
+                                          'Tambah Template',
+                                          style: TextStyle(
+                                            fontFamily: AppTheme.fontFamily,
+                                            fontSize: 11,
+                                            fontWeight: FontWeight.w600,
+                                            color: AppTheme.primary,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
-                            const SizedBox(height: 10),
+                            const SizedBox(height: 12),
 
                             // Kategori Selector
+                            const Text(
+                              'Kategori Pelanggaran:',
+                              style: TextStyle(
+                                fontFamily: AppTheme.fontFamily,
+                                fontSize: 12,
+                                fontWeight: FontWeight.w500,
+                                color: AppTheme.textSecondary,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
                             SingleChildScrollView(
                               scrollDirection: Axis.horizontal,
                               child: Row(
-                                children: _categories.map((cat) {
+                                children: _categoryTabs.map((cat) {
                                   final isSelected = _category == cat;
                                   return Padding(
-                                    padding: const EdgeInsets.only(right: 6),
+                                    padding: const EdgeInsets.only(right: 8),
                                     child: InkWell(
                                       onTap: () {
                                         HapticFeedback.selectionClick();
@@ -466,12 +532,12 @@ class _InputViolationScreenState extends State<InputViolationScreen> {
                                       },
                                       borderRadius: BorderRadius.circular(8),
                                       child: Container(
-                                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                                         decoration: BoxDecoration(
-                                          color: isSelected ? const Color(0xFF0F172A) : const Color(0xFFF1F5F9),
+                                          color: isSelected ? AppTheme.textPrimary : AppTheme.surfaceMuted,
                                           borderRadius: BorderRadius.circular(8),
                                           border: Border.all(
-                                            color: isSelected ? const Color(0xFF0F172A) : AppTheme.border,
+                                            color: isSelected ? AppTheme.textPrimary : AppTheme.border,
                                             width: 1,
                                           ),
                                         ),
@@ -479,7 +545,7 @@ class _InputViolationScreenState extends State<InputViolationScreen> {
                                           cat,
                                           style: TextStyle(
                                             fontFamily: AppTheme.fontFamily,
-                                            fontSize: 11,
+                                            fontSize: 12,
                                             fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
                                             color: isSelected ? Colors.white : AppTheme.textSecondary,
                                           ),
@@ -492,31 +558,80 @@ class _InputViolationScreenState extends State<InputViolationScreen> {
                             ),
                             const SizedBox(height: 12),
 
-                            // Pilihan Cepat Chips
-                            const Text(
-                              'Pilihan Kasus Cepat:',
-                              style: TextStyle(
-                                fontFamily: AppTheme.fontFamily,
-                                fontSize: 11,
-                                fontWeight: FontWeight.w500,
-                                color: AppTheme.textSecondary,
+                            // Jika guru sudah pernah membuat template jenis kustom sendiri
+                            if (_filteredViolationTypes.isNotEmpty) ...[
+                              const Text(
+                                'Template Tersimpan Guru:',
+                                style: TextStyle(
+                                  fontFamily: AppTheme.fontFamily,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w500,
+                                  color: AppTheme.textSecondary,
+                                ),
                               ),
-                            ),
-                            const SizedBox(height: 6),
-                            SelectableChipWrap<String>(
-                              items: _violationChips,
-                              selectedValue: _violationNameController.text,
-                              onSelected: _onSelectViolationPreset,
-                            ),
-                            const SizedBox(height: 12),
+                              const SizedBox(height: 8),
+                              Wrap(
+                                spacing: 8,
+                                runSpacing: 8,
+                                children: _filteredViolationTypes.map((type) {
+                                  final isSelected = _violationNameController.text == type.name;
+                                  return GestureDetector(
+                                    onTap: () {
+                                      HapticFeedback.selectionClick();
+                                      _onSelectViolationType(type);
+                                    },
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                      decoration: BoxDecoration(
+                                        color: isSelected ? AppTheme.primaryLight : AppTheme.surface,
+                                        borderRadius: BorderRadius.circular(8),
+                                        border: Border.all(
+                                          color: isSelected ? AppTheme.primaryFocus : AppTheme.border,
+                                          width: isSelected ? 1.5 : 1.0,
+                                        ),
+                                      ),
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Text(
+                                            type.name,
+                                            style: TextStyle(
+                                              fontFamily: AppTheme.fontFamily,
+                                              fontSize: 12,
+                                              fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                                              color: isSelected ? AppTheme.primary : AppTheme.textSecondary,
+                                            ),
+                                          ),
+                                          const SizedBox(width: 6),
+                                          GestureDetector(
+                                            onTap: () async {
+                                              HapticFeedback.mediumImpact();
+                                              await ViolationTypeService.deleteCustomType(type.id);
+                                              _loadViolationTypes();
+                                            },
+                                            child: const Icon(
+                                              Icons.close_rounded,
+                                              size: 14,
+                                              color: AppTheme.textMuted,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  );
+                                }).toList(),
+                              ),
+                              const SizedBox(height: 12),
+                            ],
 
+                            // Input Manual
                             AppTextField(
                               controller: _violationNameController,
-                              label: 'Deskripsi Kasus / Pelanggaran',
-                              hintText: 'Contoh: Terlambat masuk jam ke-1',
-                              validator: (val) => val == null || val.trim().isEmpty ? 'Jenis pelanggaran wajib diisi' : null,
+                              label: 'Nama Kasus / Pelanggaran (Input Manual)',
+                              hintText: 'Ketik nama pelanggaran oleh siswa...',
+                              validator: (val) => val == null || val.trim().isEmpty ? 'Nama jenis pelanggaran wajib diisi' : null,
                             ),
-                            const SizedBox(height: 10),
+                            const SizedBox(height: 12),
 
                             AppTextField(
                               controller: _notesController,
@@ -531,7 +646,7 @@ class _InputViolationScreenState extends State<InputViolationScreen> {
 
                       // Card 3: Poin & Tindak Lanjut Sanksi
                       AppSurface(
-                        padding: const EdgeInsets.all(14),
+                        padding: const EdgeInsets.all(16),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -539,12 +654,12 @@ class _InputViolationScreenState extends State<InputViolationScreen> {
                               'Poin & Tindakan Pembinaan',
                               style: TextStyle(
                                 fontFamily: AppTheme.fontFamily,
-                                fontSize: 13,
+                                fontSize: 14,
                                 fontWeight: FontWeight.w700,
                                 color: AppTheme.textPrimary,
                               ),
                             ),
-                            const SizedBox(height: 10),
+                            const SizedBox(height: 12),
 
                             // Preset Poin
                             SelectableChipWrap<int>(
@@ -556,7 +671,7 @@ class _InputViolationScreenState extends State<InputViolationScreen> {
                                 });
                               },
                             ),
-                            const SizedBox(height: 10),
+                            const SizedBox(height: 12),
 
                             Row(
                               children: [
@@ -574,16 +689,16 @@ class _InputViolationScreenState extends State<InputViolationScreen> {
                                     },
                                   ),
                                 ),
-                                const SizedBox(width: 10),
+                                const SizedBox(width: 12),
                                 Expanded(
                                   child: Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
+                                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
                                     margin: const EdgeInsets.only(top: 20),
                                     decoration: BoxDecoration(
-                                      color: _selectedPointPreset > 0 ? const Color(0xFFFEF2F2) : const Color(0xFFF0FDF4),
-                                      borderRadius: BorderRadius.circular(10),
+                                      color: _selectedPointPreset > 0 ? AppTheme.dangerLight : AppTheme.successLight,
+                                      borderRadius: BorderRadius.circular(8),
                                       border: Border.all(
-                                        color: _selectedPointPreset > 0 ? const Color(0xFFFECACA) : const Color(0xFFBBF7D0),
+                                        color: _selectedPointPreset > 0 ? AppTheme.dangerBorder : AppTheme.successBorder,
                                         width: 1,
                                       ),
                                     ),
@@ -594,9 +709,9 @@ class _InputViolationScreenState extends State<InputViolationScreen> {
                                           : 'Tanpa Poin (Pembinaan)',
                                       style: TextStyle(
                                         fontFamily: AppTheme.fontFamily,
-                                        fontSize: 11,
+                                        fontSize: 12,
                                         fontWeight: FontWeight.w700,
-                                        color: _selectedPointPreset > 0 ? const Color(0xFFE11D48) : const Color(0xFF059669),
+                                        color: _selectedPointPreset > 0 ? AppTheme.danger : AppTheme.success,
                                       ),
                                     ),
                                   ),
@@ -610,17 +725,17 @@ class _InputViolationScreenState extends State<InputViolationScreen> {
                               'Tindakan Sanksi / Pembinaan:',
                               style: TextStyle(
                                 fontFamily: AppTheme.fontFamily,
-                                fontSize: 11,
+                                fontSize: 12,
                                 fontWeight: FontWeight.w500,
                                 color: AppTheme.textSecondary,
                               ),
                             ),
-                            const SizedBox(height: 6),
+                            const SizedBox(height: 8),
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 12),
                               decoration: BoxDecoration(
-                                color: const Color(0xFFF8FAFC),
-                                borderRadius: BorderRadius.circular(10),
+                                color: AppTheme.background,
+                                borderRadius: BorderRadius.circular(8),
                                 border: Border.all(color: AppTheme.border, width: 1),
                               ),
                               child: DropdownButtonHideUnderline(
@@ -650,7 +765,7 @@ class _InputViolationScreenState extends State<InputViolationScreen> {
                                 ),
                               ),
                             ),
-                            const SizedBox(height: 14),
+                            const SizedBox(height: 16),
 
                             // Photo Picker
                             CompactPhotoPicker(
@@ -677,7 +792,7 @@ class _InputViolationScreenState extends State<InputViolationScreen> {
                 left: 16,
                 right: 16,
                 top: 8,
-                bottom: bottomInset > 0 ? bottomInset + 8 : 10,
+                bottom: bottomInset > 0 ? bottomInset + 8 : 12,
               ),
               decoration: const BoxDecoration(
                 color: AppTheme.surface,
@@ -692,16 +807,16 @@ class _InputViolationScreenState extends State<InputViolationScreen> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppTheme.primary,
                     disabledBackgroundColor: AppTheme.primary.withValues(alpha: 0.6),
-                    padding: const EdgeInsets.symmetric(vertical: 13),
+                    padding: const EdgeInsets.symmetric(vertical: 12),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
+                      borderRadius: BorderRadius.circular(8),
                     ),
                     elevation: 0,
                   ),
                   child: violationProvider.isSubmitting
                       ? const SizedBox(
-                          height: 18,
-                          width: 18,
+                          height: 16,
+                          width: 16,
                           child: CircularProgressIndicator(
                             strokeWidth: 2,
                             color: Colors.white,
@@ -711,7 +826,7 @@ class _InputViolationScreenState extends State<InputViolationScreen> {
                           'Simpan Catatan Pelanggaran',
                           style: TextStyle(
                             fontFamily: AppTheme.fontFamily,
-                            fontSize: 13,
+                            fontSize: 14,
                             fontWeight: FontWeight.w700,
                             color: Colors.white,
                           ),

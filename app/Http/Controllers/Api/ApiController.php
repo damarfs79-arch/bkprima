@@ -10,6 +10,7 @@ use App\Models\User;
 use App\Models\Student;
 use App\Models\Attendance;
 use App\Models\Violation;
+use App\Models\Rule;
 
 class ApiController extends Controller
 {
@@ -481,6 +482,88 @@ class ApiController extends Controller
     }
 
     /**
+     * GET /api/aturan
+     */
+    public function getRules(Request $request)
+    {
+        $category = $request->query('category');
+        $query = Rule::query();
+        if ($category && $category !== 'Semua') {
+            $query->where('category', $category);
+        }
+        $rules = $query->orderBy('category')->orderBy('points')->get()->map(function ($r) {
+            return [
+                'id' => (string) $r->id,
+                'name' => $r->name ?: $r->description,
+                'category' => $r->category,
+                'code' => $r->code,
+                'points' => $r->points,
+                'sanction' => $r->sanction,
+                'defaultPoints' => $r->points,
+                'defaultPenalty' => $r->sanction ?? 'Pembinaan Lisan & Pengarahan BK',
+            ];
+        });
+
+        return response()->json([
+            'success' => true,
+            'rules' => $rules,
+        ]);
+    }
+
+    /**
+     * POST /api/aturan
+     */
+    public function storeRule(Request $request)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'category' => 'required|string|max:100',
+            'points' => 'nullable|integer|min:0',
+            'sanction' => 'nullable|string|max:255',
+            'code' => 'nullable|string|max:50',
+            'type' => 'nullable|string|in:pelanggaran,apresiasi',
+        ]);
+
+        $code = $validated['code'] ?? null;
+        if (!$code) {
+            $prefix = match ($validated['category']) {
+                'Kedisiplinan', 'Kedisiplinan & Waktu' => 'DIS',
+                'Kerapian', 'Kerapian & Atribut' => 'ATR',
+                'Ketertiban & Berat', 'Pelanggaran Khusus / Berat' => 'BRT',
+                default => 'CST',
+            };
+            $code = $prefix . '-' . str_pad((string) (Rule::count() + 1), 2, '0', STR_PAD_LEFT);
+        }
+
+        $rule = Rule::create([
+            'type' => $validated['type'] ?? 'pelanggaran',
+            'category' => $validated['category'],
+            'code' => $code,
+            'name' => $validated['name'],
+            'points' => $validated['points'] ?? 5,
+            'sanction' => $validated['sanction'] ?? 'Pembinaan Lisan & Pengarahan BK',
+            'description' => $validated['name'],
+            'is_active' => true,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Jenis aturan berhasil ditambahkan.',
+            'rule' => [
+                'id' => (string) $rule->id,
+                'name' => $rule->name,
+                'category' => $rule->category,
+                'code' => $rule->code,
+                'points' => $rule->points,
+                'sanction' => $rule->sanction,
+                'defaultPoints' => $rule->points,
+                'defaultPenalty' => $rule->sanction,
+                'isCustom' => true,
+            ],
+        ], 201);
+    }
+
+    /**
      * GET /api/profil or /api/profile
      */
     public function getProfile(Request $request)
@@ -926,7 +1009,7 @@ class ApiController extends Controller
         $izinSakitCount = Attendance::whereIn('status', ['Izin', 'Sakit'])->count();
 
         $totalRecorded = $hadirCount + $terlambatCount + $alpaCount + $izinSakitCount;
-        $hadirRate = $totalRecorded > 0 ? round(($hadirCount / $totalRecorded) * 100, 1) : ($totalStudents > 0 ? 100.0 : 0.0);
+        $hadirRate = $totalRecorded > 0 ? round(($hadirCount / $totalRecorded) * 100, 1) : 0.0;
         $terlambatRate = $totalRecorded > 0 ? round(($terlambatCount / $totalRecorded) * 100, 1) : 0.0;
         $alpaRate = $totalRecorded > 0 ? round(($alpaCount / $totalRecorded) * 100, 1) : 0.0;
         $izinSakitRate = $totalRecorded > 0 ? round(($izinSakitCount / $totalRecorded) * 100, 1) : 0.0;
@@ -946,25 +1029,65 @@ class ApiController extends Controller
             ];
         });
 
-        // Dataset 12 Bulan (Januari - Desember) sesuai Master Admin (DimensionComparisonLineChart.vue)
-        $monthlyTrend = [
-            ['month' => 1, 'short_name' => 'Jan', 'month_name' => 'Januari', 'val_2025' => 86.5, 'val_2026' => 88.2, 'note' => 'Awal Masuk Semester Genap'],
-            ['month' => 2, 'short_name' => 'Feb', 'month_name' => 'Februari', 'val_2025' => 82.0, 'val_2026' => 85.4, 'note' => 'Kegiatan Pembelajaran Efektif'],
-            ['month' => 3, 'short_name' => 'Mar', 'month_name' => 'Maret', 'val_2025' => 89.1, 'val_2026' => 92.0, 'note' => 'Ujian Tengah Semester (UTS)'],
-            ['month' => 4, 'short_name' => 'Apr', 'month_name' => 'April', 'val_2025' => 84.5, 'val_2026' => 87.8, 'note' => 'Pesantren Kilat & Libur Idul Fitri'],
-            ['month' => 5, 'short_name' => 'Mei', 'month_name' => 'Mei', 'val_2025' => 93.0, 'val_2026' => 94.6, 'note' => 'Praktik Kerja Industri & Uji Sertifikasi'],
-            ['month' => 6, 'short_name' => 'Jun', 'month_name' => 'Juni', 'val_2025' => 78.4, 'val_2026' => 83.1, 'note' => 'Penilaian Akhir Tahun (PAT) & Libur'],
-            ['month' => 7, 'short_name' => 'Jul', 'month_name' => 'Juli', 'val_2025' => 94.2, 'val_2026' => 91.5, 'note' => 'MPLS & Awal Tahun Ajaran Baru'],
-            ['month' => 8, 'short_name' => 'Agu', 'month_name' => 'Agustus', 'val_2025' => 81.3, 'val_2026' => 89.0, 'note' => 'Lomba HUT RI & Ekstrakurikuler'],
-            ['month' => 9, 'short_name' => 'Sep', 'month_name' => 'September', 'val_2025' => 90.5, 'val_2026' => 96.8, 'note' => 'PTS Ganjil & Penegakan Disiplin BK'],
-            ['month' => 10, 'short_name' => 'Okt', 'month_name' => 'Oktober', 'val_2025' => 87.2, 'val_2026' => 90.4, 'note' => 'Bulan Bahasa & Pembinaan Karakter'],
-            ['month' => 11, 'short_name' => 'Nov', 'month_name' => 'November', 'val_2025' => 95.8, 'val_2026' => 97.4, 'note' => 'Pemantapan Jelang Ujian Akhir'],
-            ['month' => 12, 'short_name' => 'Des', 'month_name' => 'Desember', 'val_2025' => 85.0, 'val_2026' => 91.0, 'note' => 'PAS Ganjil, Classmeeting & Rapor'],
+        // Hitung tren kehadiran bulanan murni dari data Attendance nyata
+        $monthNames = [
+            1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
+            5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
+            9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember'
         ];
+        $shortMonthNames = [
+            1 => 'Jan', 2 => 'Feb', 3 => 'Mar', 4 => 'Apr',
+            5 => 'Mei', 6 => 'Jun', 7 => 'Jul', 8 => 'Agu',
+            9 => 'Sep', 10 => 'Okt', 11 => 'Nov', 12 => 'Des'
+        ];
+
+        $monthlyTrend = [];
+        $monthlyRecords = Attendance::select(
+            \Illuminate\Support\Facades\DB::raw('MONTH(date) as month_num'),
+            \Illuminate\Support\Facades\DB::raw('COUNT(*) as total_attendance'),
+            \Illuminate\Support\Facades\DB::raw("SUM(CASE WHEN status = 'Hadir' THEN 1 ELSE 0 END) as hadir_count")
+        )
+        ->groupBy(\Illuminate\Support\Facades\DB::raw('MONTH(date)'))
+        ->orderBy('month_num')
+        ->get();
+
+        foreach ($monthlyRecords as $rec) {
+            $mNum = (int)$rec->month_num;
+            $mTotal = (int)$rec->total_attendance;
+            $mHadir = (int)$rec->hadir_count;
+            $rate = $mTotal > 0 ? round(($mHadir / $mTotal) * 100, 1) : 0.0;
+            $monthlyTrend[] = [
+                'month' => $mNum,
+                'short_name' => $shortMonthNames[$mNum] ?? "Bln $mNum",
+                'month_name' => $monthNames[$mNum] ?? "Bulan $mNum",
+                'val_2026' => $rate,
+                'val_2025' => $rate,
+                'rate' => $rate,
+                'total_recorded' => $mTotal,
+                'hadir_count' => $mHadir,
+                'note' => "$mHadir dari $mTotal siswa tercatat Hadir",
+            ];
+        }
+
+        // Distribusi kategori pelanggaran murni dari tabel violations
+        $categoryDistribution = [];
+        if ($violationsCount > 0) {
+            $catRecords = Violation::select('category', \Illuminate\Support\Facades\DB::raw('COUNT(*) as total'))
+                ->groupBy('category')
+                ->get();
+            foreach ($catRecords as $cat) {
+                $categoryDistribution[] = [
+                    'name' => $cat->category ?: 'Lainnya',
+                    'count' => (int)$cat->total,
+                    'percentage' => round(($cat->total / $violationsCount) * 100, 1),
+                    'ratio' => round($cat->total / $violationsCount, 2),
+                ];
+            }
+        }
 
         return response()->json([
             'success' => true,
-            'source' => 'master_admin',
+            'source' => 'real_database',
             'summary' => [
                 'total_students' => $totalStudents,
                 'hadir_rate' => $hadirRate,
@@ -975,23 +1098,16 @@ class ApiController extends Controller
                 'alpa_count' => $alpaCount,
                 'izin_sakit_rate' => $izinSakitRate,
                 'izin_sakit_count' => $izinSakitCount,
+                'total_recorded' => $totalRecorded,
                 'total_violations' => $violationsCount,
                 'sp_cases' => $spStudents->count(),
             ],
             'benchmark' => [
                 'target_rate' => 90.0,
-                'avg_2026' => 91.3,
-                'avg_2025' => 88.2,
-                'highest_month' => 'November (97.4%)',
-                'lowest_month' => 'Juni (83.1%)',
+                'avg_attendance' => $hadirRate,
             ],
             'monthly_trend' => $monthlyTrend,
-            'category_distribution' => [
-                ['name' => 'Kedisiplinan', 'percentage' => 65, 'ratio' => 0.65],
-                ['name' => 'Kerapian', 'percentage' => 20, 'ratio' => 0.20],
-                ['name' => 'Ketertiban', 'percentage' => 10, 'ratio' => 0.10],
-                ['name' => 'Pelanggaran Khusus', 'percentage' => 5, 'ratio' => 0.05],
-            ],
+            'category_distribution' => $categoryDistribution,
             'surat_panggilan' => $spStudents,
         ]);
     }

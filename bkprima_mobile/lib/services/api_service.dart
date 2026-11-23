@@ -231,7 +231,7 @@ class ApiService {
     }
   }
 
-  /// 3c. Statistik Keseluruhan Sekolah Master Admin (1.500 Siswa & Tren 12 Bulan)
+  /// 3c. Statistik Keseluruhan Sekolah Master Admin (Data Real Database)
   static Future<Map<String, dynamic>> getOverallStats() async {
     try {
       final url = await getBaseUrl();
@@ -478,6 +478,65 @@ class ApiService {
       }
     } catch (e) {
       return {'success': false, 'message': 'Kesalahan jaringan: $e'};
+    }
+  }
+
+  /// 9. Ambil Daftar Aturan / Jenis Pelanggaran dari Backend
+  static Future<Map<String, dynamic>> getRules({String? category}) async {
+    try {
+      final url = await getBaseUrl();
+      final uri = Uri.parse('$url/aturan').replace(
+        queryParameters: category != null && category != 'Semua' ? {'category': category} : null,
+      );
+      final response = await http.get(uri, headers: await _headers()).timeout(const Duration(seconds: 10));
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return {
+          'success': true,
+          'rules': data['rules'] ?? [],
+        };
+      }
+      return {'success': false, 'rules': []};
+    } catch (e) {
+      return {'success': false, 'rules': [], 'message': '$e'};
+    }
+  }
+
+  /// 10. Tambah Aturan / Jenis Pelanggaran Baru ke Backend
+  static Future<Map<String, dynamic>> storeRule({
+    required String name,
+    required String category,
+    int points = 5,
+    String? sanction,
+  }) async {
+    try {
+      final url = await getBaseUrl();
+      final response = await http.post(
+        Uri.parse('$url/aturan'),
+        headers: await _headers(),
+        body: jsonEncode({
+          'name': name.trim(),
+          'category': category.trim(),
+          'points': points,
+          'sanction': sanction?.trim() ?? 'Pembinaan Lisan & Pengarahan BK',
+        }),
+      ).timeout(const Duration(seconds: 10));
+
+      final data = jsonDecode(response.body);
+      if (response.statusCode == 201 && data['success'] == true) {
+        return {
+          'success': true,
+          'message': data['message'] ?? 'Jenis pelanggaran berhasil ditambahkan.',
+          'rule': data['rule'],
+        };
+      }
+      return {
+        'success': false,
+        'message': data['message'] ?? 'Gagal menambahkan jenis pelanggaran.',
+      };
+    } catch (e) {
+      return {'success': false, 'message': 'Kesalahan koneksi server: $e'};
     }
   }
 }

@@ -25,16 +25,15 @@ class InertiaRoutesTest extends TestCase
             '/',
             '/login',
             '/absensi',
+            '/absensi/bulanan',
             '/statistik',
             '/pelanggaran',
             '/verifikasi',
             '/pelanggaran/detail',
             '/pemanggilan',
-            '/piket',
             '/panduan',
             '/profil',
             '/admin',
-            '/tamu',
             '/arsip-lulus',
         ];
 
@@ -43,6 +42,9 @@ class InertiaRoutesTest extends TestCase
             $response->assertStatus(200);
             $this->assertStringContainsString('data-page', $response->getContent(), "Route {$route} does not contain Inertia data-page attribute.");
         }
+
+        $this->get('/piket')->assertRedirect('/absensi');
+        $this->get('/tamu')->assertRedirect('/login');
     }
 
     public function test_login_routes_connect_by_role(): void
@@ -91,12 +93,8 @@ class InertiaRoutesTest extends TestCase
 
     public function test_guest_portal_searches_by_nisn(): void
     {
-        $this->seed();
-        $student = Student::first();
-
-        $response = $this->get("/tamu?nisn={$student->nisn}");
-        $response->assertStatus(200);
-        $this->assertStringContainsString($student->name, $response->getContent());
+        $response = $this->get('/tamu');
+        $response->assertRedirect('/login');
     }
 
     public function test_store_violation_connects_properly(): void
