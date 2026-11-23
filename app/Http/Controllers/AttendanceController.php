@@ -14,21 +14,36 @@ class AttendanceController extends Controller
 {
     private function getAuthorizedClasses(): array
     {
+        $allDbClasses = Classroom::orderBy('name')->pluck('name')->toArray();
+        if (empty($allDbClasses)) {
+            $allDbClasses = Student::select('class_name')->distinct()->orderBy('class_name')->pluck('class_name')->toArray();
+        }
+        $allDbClasses = array_values(array_unique(array_filter($allDbClasses)));
+
         $user = Auth::user();
         if ($user && $user->role === 'guru') {
+            $userRombel = (string)($user->rombel ?? '');
+            // Jika guru ditugaskan untuk "Semua Rombel" atau kosong, beri akses ke seluruh kelas
+            if (empty($userRombel) || str_contains(strtolower($userRombel), 'semua')) {
+                return $allDbClasses;
+            }
+
             $fromClassrooms = Classroom::where('guru_bk_id', $user->id)
                 ->orWhere('guru_bk_name', $user->name)
                 ->pluck('name')->toArray();
             
             $fromUserRombel = [];
-            if (!empty($user->rombel)) {
-                $decoded = json_decode($user->rombel, true);
-                if (is_array($decoded)) {
-                    $fromUserRombel = $decoded;
-                } else {
-                    $fromUserRombel = array_map('trim', explode(',', $user->rombel));
-                }
+            $decoded = json_decode($userRombel, true);
+            if (is_array($decoded)) {
+                $fromUserRombel = $decoded;
+            } else {
+                $fromUserRombel = array_map('trim', explode(',', $userRombel));
             }
+
+            // Bersihkan string non-kelas seperti "Semua Rombel"
+            $fromUserRombel = array_filter($fromUserRombel, function ($r) {
+                return !empty($r) && !str_contains(strtolower($r), 'semua');
+            });
 
             $guruRombels = array_values(array_unique(array_filter(array_merge($fromClassrooms, $fromUserRombel))));
             if (!empty($guruRombels)) {
@@ -36,12 +51,7 @@ class AttendanceController extends Controller
             }
         }
 
-        // Admin atau fallback semua kelas yang ada di database
-        $dbClasses = Classroom::orderBy('name')->pluck('name')->toArray();
-        if (empty($dbClasses)) {
-            $dbClasses = Student::select('class_name')->distinct()->orderBy('class_name')->pluck('class_name')->toArray();
-        }
-        return array_values(array_unique($dbClasses));
+        return $allDbClasses;
     }
 
     public function index(Request $request)
@@ -254,7 +264,10 @@ class AttendanceController extends Controller
             'nis' => 'nullable|string|max:50',
             'nisn' => 'nullable|string|max:50',
             'name' => 'required|string|max:255',
-            'class_name' => 'required|string|max:50',
+            'class_name' => 'nullable|string|max:50',
+            'level' => 'nullable|string|max:20',
+            'major' => 'nullable|string|max:50',
+            'rombel' => 'nullable|string|max:20',
             'gender' => 'required|in:L,P',
             'parent_name' => 'nullable|string|max:255',
             'parent_phone' => 'nullable|string|max:20',
@@ -268,28 +281,55 @@ class AttendanceController extends Controller
             return redirect()->back()->withErrors(['nis' => 'NIS sudah terdaftar. Silakan gunakan NIS lain.']);
         }
 
-        $parts = explode(' ', trim($validated['class_name']));
-        $level = '10';
-        if (!empty($parts[0])) {
-            $upper = strtoupper($parts[0]);
-            if ($upper === 'X') $level = '10';
-            elseif ($upper === 'XI') $level = '11';
-            elseif ($upper === 'XII') $level = '12';
-            elseif (is_numeric($parts[0])) $level = $parts[0];
-        }
-        $major = $parts[1] ?? 'Umum';
+        // Resolusi Tingkat (Level), Jurusan (Major), dan Rombel
+        $rawLevel = trim((string)($request->input('level') ?? ''));
+        $rawMajor = trim((string)($request->input('major') ?? ''));
+        $rawRombel = trim((string)($request->input('rombel') ?? ''));
+        $className = trim((string)($request->input('class_name') ?? ''));
 
+        $parts = !empty($className) ? preg_split('/\s+/', $className) : [];
+        $prefix = $parts[0] ?? '';
+
+        // Tentukan Level standar ('10', '11', '12')
+        $level = '10';
+        if (!empty($rawLevel)) {
+            $upperLvl = strtoupper($rawLevel);
+            if ($upperLvl === 'X' || $rawLevel === '10' || str_contains($rawLevel, '10')) $level = '10';
+            elseif ($upperLvl === 'XI' || $rawLevel === '11' || str_contains($rawLevel, '11')) $level = '11';
+            elseif ($upperLvl === 'XII' || $rawLevel === '12' || str_contains($rawLevel, '12')) $level = '12';
+            else $level = $rawLevel;
+        } elseif (!empty($prefix)) {
+            $upper = strtoupper($prefix);
+            if ($upper === 'X' || $upper === '10') $level = '10';
+            elseif ($upper === 'XI' || $upper === '11') $level = '11';
+            elseif ($upper === 'XII' || $upper === '12') $level = '12';
+            elseif (is_numeric($prefix)) $level = $prefix;
+        }
+
+        $romanPrefix = $level === '10' ? 'X' : ($level === '11' ? 'XI' : ($level === '12' ? 'XII' : $level));
+        $major = !empty($rawMajor) ? strtoupper($rawMajor) : (isset($parts[1]) ? strtoupper($parts[1]) : 'RPL');
+        $rombel = !empty($rawRombel) ? $rawRombel : (isset($parts[2]) ? $parts[2] : (count($parts) > 2 ? end($parts) : '1'));
+
+        if (empty($className)) {
+            $className = "{$romanPrefix} {$major} {$rombel}";
+        }
+
+        // Pastikan Jurusan terdaftar
         Major::firstOrCreate(
             ['code' => $major],
             ['name' => $major, 'description' => 'Program Keahlian ' . $major]
         );
 
+        // Pastikan Classroom terdaftar dengan level standar ('10', '11', '12')
+        $user = Auth::user();
         $classroom = Classroom::firstOrCreate(
-            ['name' => $validated['class_name']],
+            ['name' => $className],
             [
-                'level' => "Kelas {$level} ({$parts[0]})",
+                'level' => $level,
                 'major' => $major,
-                'wali_kelas' => 'Wali Kelas ' . $validated['class_name'],
+                'wali_kelas' => 'Wali Kelas ' . $className,
+                'guru_bk_id' => $user?->id,
+                'guru_bk_name' => $user?->name ?? 'Damar',
             ]
         );
 
@@ -297,14 +337,14 @@ class AttendanceController extends Controller
             'classroom_id' => $classroom->id,
             'nis' => $nis,
             'name' => $validated['name'],
-            'class_name' => $validated['class_name'],
+            'class_name' => $className,
             'level' => $level,
             'major' => $major,
+            'rombel' => $rombel,
             'gender' => $validated['gender'],
             'parent_name' => $validated['parent_name'] ?? 'Bpk/Ibu ' . $validated['name'],
             'parent_phone' => $validated['parent_phone'] ?? '081234567890',
             'total_violation_points' => 0,
-            'rombel' => end($parts),
             'status' => 'aktif',
         ]);
 
@@ -328,7 +368,10 @@ class AttendanceController extends Controller
             'nis' => 'nullable|string|max:50',
             'nisn' => 'nullable|string|max:50',
             'name' => 'required|string|max:255',
-            'class_name' => 'required|string|max:50',
+            'class_name' => 'nullable|string|max:50',
+            'level' => 'nullable|string|max:20',
+            'major' => 'nullable|string|max:50',
+            'rombel' => 'nullable|string|max:20',
             'gender' => 'required|in:L,P',
             'parent_name' => 'nullable|string|max:255',
             'parent_phone' => 'nullable|string|max:20',
@@ -339,28 +382,51 @@ class AttendanceController extends Controller
             return redirect()->back()->withErrors(['nis' => 'NIS sudah digunakan oleh siswa lain.']);
         }
 
-        $parts = explode(' ', trim($validated['class_name']));
-        $level = $student->level;
-        if (!empty($parts[0])) {
-            $upper = strtoupper($parts[0]);
-            if ($upper === 'X') $level = '10';
-            elseif ($upper === 'XI') $level = '11';
-            elseif ($upper === 'XII') $level = '12';
-            elseif (is_numeric($parts[0])) $level = $parts[0];
+        $rawLevel = trim((string)($request->input('level') ?? ''));
+        $rawMajor = trim((string)($request->input('major') ?? ''));
+        $rawRombel = trim((string)($request->input('rombel') ?? ''));
+        $className = trim((string)($request->input('class_name') ?? ''));
+
+        $parts = !empty($className) ? preg_split('/\s+/', $className) : [];
+        $prefix = $parts[0] ?? '';
+
+        $level = $student->level ?: '10';
+        if (!empty($rawLevel)) {
+            $upperLvl = strtoupper($rawLevel);
+            if ($upperLvl === 'X' || $rawLevel === '10' || str_contains($rawLevel, '10')) $level = '10';
+            elseif ($upperLvl === 'XI' || $rawLevel === '11' || str_contains($rawLevel, '11')) $level = '11';
+            elseif ($upperLvl === 'XII' || $rawLevel === '12' || str_contains($rawLevel, '12')) $level = '12';
+            else $level = $rawLevel;
+        } elseif (!empty($prefix)) {
+            $upper = strtoupper($prefix);
+            if ($upper === 'X' || $upper === '10') $level = '10';
+            elseif ($upper === 'XI' || $upper === '11') $level = '11';
+            elseif ($upper === 'XII' || $upper === '12') $level = '12';
+            elseif (is_numeric($prefix)) $level = $prefix;
         }
-        $major = $parts[1] ?? $student->major;
+
+        $romanPrefix = $level === '10' ? 'X' : ($level === '11' ? 'XI' : ($level === '12' ? 'XII' : $level));
+        $major = !empty($rawMajor) ? strtoupper($rawMajor) : (isset($parts[1]) ? strtoupper($parts[1]) : ($student->major ?: 'RPL'));
+        $rombel = !empty($rawRombel) ? $rawRombel : (isset($parts[2]) ? $parts[2] : ($student->rombel ?: '1'));
+
+        if (empty($className)) {
+            $className = "{$romanPrefix} {$major} {$rombel}";
+        }
 
         Major::firstOrCreate(
             ['code' => $major],
             ['name' => $major, 'description' => 'Program Keahlian ' . $major]
         );
 
+        $user = Auth::user();
         $classroom = Classroom::firstOrCreate(
-            ['name' => $validated['class_name']],
+            ['name' => $className],
             [
-                'level' => "Kelas {$level} ({$parts[0]})",
+                'level' => $level,
                 'major' => $major,
-                'wali_kelas' => 'Wali Kelas ' . $validated['class_name'],
+                'wali_kelas' => 'Wali Kelas ' . $className,
+                'guru_bk_id' => $user?->id,
+                'guru_bk_name' => $user?->name ?? 'Damar',
             ]
         );
 
@@ -368,9 +434,10 @@ class AttendanceController extends Controller
             'classroom_id' => $classroom->id,
             'nis' => $nis,
             'name' => $validated['name'],
-            'class_name' => $validated['class_name'],
+            'class_name' => $className,
             'level' => $level,
             'major' => $major,
+            'rombel' => $rombel,
             'gender' => $validated['gender'],
             'parent_name' => $validated['parent_name'] ?? $student->parent_name,
             'parent_phone' => $validated['parent_phone'] ?? $student->parent_phone,
@@ -388,19 +455,17 @@ class AttendanceController extends Controller
         return redirect()->back()->with('success', 'Siswa "' . $name . '" berhasil dihapus dari sistem!');
     }
 
-    public function clearClassStudents(Request $request)
+    public function deleteClassroom(Request $request)
     {
         $validated = $request->validate([
-            'class_name' => 'required|string|max:50',
+            'class_name' => 'required|string|max:100',
         ]);
 
         $className = trim($validated['class_name']);
+
+        // 1. Hapus seluruh siswa di kelas tersebut beserta data terkait
         $students = Student::where('class_name', $className)->get();
         $count = $students->count();
-
-        if ($count === 0) {
-            return redirect()->back()->with('error', "Tidak ada siswa yang terdaftar di kelas {$className}.");
-        }
 
         foreach ($students as $student) {
             $student->attendances()->delete();
@@ -408,7 +473,19 @@ class AttendanceController extends Controller
             $student->delete();
         }
 
-        return redirect()->back()->with('success', "Berhasil menghapus seluruh ({$count}) siswa di kelas {$className}!");
+        // 2. Hapus master kelas dari tabel classrooms
+        Classroom::where('name', $className)->delete();
+
+        $msg = $count > 0 
+            ? "Kelas {$className} beserta {$count} siswa di dalamnya berhasil dihapus langsung!" 
+            : "Kelas {$className} berhasil dihapus dari sistem!";
+
+        return redirect('/absensi')->with('success', $msg);
+    }
+
+    public function clearClassStudents(Request $request)
+    {
+        return $this->deleteClassroom($request);
     }
 
     public function stats(Request $request)

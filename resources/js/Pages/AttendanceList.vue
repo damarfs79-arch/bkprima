@@ -72,6 +72,18 @@
           </button>
 
           <button
+            @click="openDeleteClassModal"
+            type="button"
+            class="interactive-btn inline-flex items-center gap-1.5 bg-white hover:bg-rose-50 text-rose-700 border border-rose-200 font-medium px-3 py-1.5 rounded-lg text-xs cursor-pointer shadow-2xs transition"
+            title="Hapus 1 rombel kelas beserta seluruh data siswanya secara langsung"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-rose-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+            </svg>
+            <span>Hapus Kelas</span>
+          </button>
+
+          <button
             @click="syncAttendance"
             :disabled="isSyncing"
             class="interactive-btn inline-flex items-center gap-1.5 bg-slate-900 hover:bg-slate-800 disabled:bg-slate-400 text-white font-medium px-3.5 py-1.5 rounded-lg text-xs cursor-pointer shadow-2xs transition"
@@ -222,8 +234,22 @@
           </div>
         </div>
 
-        <div class="text-xs text-slate-500 shrink-0">
-          <span class="font-bold text-slate-900 text-sm">{{ filteredStudents.length }}</span> siswa
+        <div class="flex items-center gap-2.5 shrink-0">
+          <div class="text-xs text-slate-500">
+            <span class="font-bold text-slate-900 text-sm">{{ filteredStudents.length }}</span> siswa
+          </div>
+          <button
+            v-if="selectedClass !== 'ALL'"
+            @click="openDeleteClassModalFor(selectedClass)"
+            type="button"
+            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 transition cursor-pointer"
+            title="Hapus kelas ini beserta seluruh siswanya secara langsung"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 text-rose-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+            </svg>
+            <span>Hapus Kelas</span>
+          </button>
         </div>
       </div>
 
@@ -262,27 +288,27 @@
 
           <div class="flex items-center gap-2">
             <button
-              v-if="selectedClass !== 'ALL' && filteredStudents.length > 0"
-              @click="openClearClassModalFor(selectedClass)"
+              v-if="selectedClass !== 'ALL'"
+              @click="openDeleteClassModalFor(selectedClass)"
               type="button"
-              class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 transition cursor-pointer"
+              class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 transition cursor-pointer"
             >
               <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
               </svg>
-              <span>Kosongkan Siswa Kelas ({{ selectedClass }})</span>
+              <span>Hapus Kelas ({{ selectedClass }})</span>
             </button>
             <button
-              v-else-if="selectedClass === 'ALL'"
-              @click="openClearClassModal"
+              v-else
+              @click="openDeleteClassModal"
               type="button"
-              class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium text-slate-600 hover:text-rose-700 hover:bg-rose-50 border border-slate-200 hover:border-rose-200 transition cursor-pointer"
-              title="Kosongkan seluruh siswa pada 1 rombel kelas"
+              class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold text-slate-700 hover:text-rose-700 hover:bg-rose-50 border border-slate-200 hover:border-rose-200 transition cursor-pointer"
+              title="Hapus 1 rombel kelas beserta seluruh data siswanya secara langsung"
             >
               <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
               </svg>
-              <span>Kosongkan 1 Kelas</span>
+              <span>Hapus 1 Kelas</span>
             </button>
           </div>
         </div>
@@ -311,11 +337,14 @@
                   <div class="text-xs text-slate-500 font-normal mt-0.5">NIS: {{ student.nis || student.nisn }}</div>
                 </td>
 
-                <!-- Kelas -->
+                <!-- Kelas, Tingkat, Jurusan, Rombel -->
                 <td class="py-3.5 px-4 text-center">
-                  <span class="text-xs font-medium text-slate-700">
+                  <span class="inline-block px-2.5 py-1 bg-slate-100 rounded-md text-xs font-semibold text-slate-800 font-mono">
                     {{ student.class_name }}
                   </span>
+                  <div class="text-[10px] text-slate-500 font-medium mt-1">
+                    Tingkat {{ student.level || (student.class_name.startsWith('XI ') ? '11' : (student.class_name.startsWith('XII ') ? '12' : '10')) }} &bull; {{ student.major || 'Umum' }} &bull; Rombel {{ student.rombel || '1' }}
+                  </div>
                 </td>
 
                 <!-- JK -->
@@ -546,9 +575,9 @@
       </div>
 
       <!-- ============================================================ -->
-      <!-- MODAL: KOSONGKAN 1 KELAS (BULK DELETE SISWA)                 -->
+      <!-- MODAL: HAPUS 1 KELAS SECARA LANGSUNG                         -->
       <!-- ============================================================ -->
-      <div v-if="showClearClassModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
+      <div v-if="showDeleteClassModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
         <div class="bg-white rounded-2xl max-w-md w-full border border-slate-200 shadow-xl overflow-hidden">
           <div class="p-5 border-b border-slate-100 flex items-center justify-between bg-rose-50/50">
             <div class="flex items-center gap-3">
@@ -558,64 +587,65 @@
                 </svg>
               </div>
               <div>
-                <h3 class="font-bold text-slate-900 text-base">Kosongkan Siswa 1 Kelas</h3>
-                <p class="text-xs text-slate-500">Hapus seluruh data siswa dalam 1 rombel sekaligus</p>
+                <h3 class="font-bold text-slate-900 text-base">Hapus Kelas Secara Langsung</h3>
+                <p class="text-xs text-slate-500">Hapus rombel kelas dan seluruh data siswa di dalamnya</p>
               </div>
             </div>
-            <button @click="showClearClassModal = false" class="p-1 text-slate-400 hover:text-slate-700 rounded-lg cursor-pointer">
+            <button @click="showDeleteClassModal = false" class="p-1 text-slate-400 hover:text-slate-700 rounded-lg cursor-pointer">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
           </div>
 
-          <form @submit.prevent="submitClearClass" class="p-5 space-y-4 text-xs">
+          <form @submit.prevent="submitDeleteClass" class="p-5 space-y-4 text-xs">
             <div>
-              <label class="block font-semibold text-slate-700 mb-1">Pilih Rombel / Kelas yang akan Dikosongkan *</label>
+              <label class="block font-semibold text-slate-700 mb-1">Pilih Rombel / Kelas yang akan Dihapus *</label>
               <select
-                v-model="targetClassToClear"
+                v-model="targetClassToDelete"
                 required
-                class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-slate-800 font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500"
+                class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-slate-800 font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 cursor-pointer"
               >
                 <option v-for="cls in allClasses" :key="cls" :value="cls">{{ cls }}</option>
               </select>
             </div>
 
-            <div class="p-3 bg-amber-50 border border-amber-200 rounded-xl text-amber-900 text-[11px] leading-relaxed">
-              Tindakan ini akan menghapus <strong>{{ classStudentsCountToClear }} siswa</strong> di kelas <strong>{{ targetClassToClear }}</strong> beserta riwayat presensi dan pelanggaran siswa tersebut secara permanen.
+            <div v-if="classStudentsCountToDelete > 0" class="p-3 bg-amber-50 border border-amber-200 rounded-xl text-amber-900 text-[11px] leading-relaxed">
+              Kelas <strong>{{ targetClassToDelete }}</strong> memiliki <strong>{{ classStudentsCountToDelete }} siswa</strong>. Tindakan ini akan menghapus kelas beserta seluruh data siswa, riwayat presensi, dan data pelanggarannya sekaligus.
+            </div>
+            <div v-else class="p-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-600 text-[11px] leading-relaxed">
+              Kelas <strong>{{ targetClassToDelete }}</strong> saat ini kosong (0 siswa). Master rombel kelas ini akan langsung dihapus dari sistem.
             </div>
 
-            <div>
-              <label class="block font-semibold text-slate-700 mb-1">
-                Ketik <span class="font-mono text-rose-600 bg-rose-50 px-1 py-0.5 rounded border border-rose-200">HAPUS</span> untuk konfirmasi:
-              </label>
+            <label class="flex items-start gap-2.5 p-3 bg-rose-50/60 border border-rose-200 rounded-xl cursor-pointer">
               <input
-                v-model="clearClassConfirmation"
-                required
-                type="text"
-                placeholder="Ketik HAPUS..."
-                class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-slate-800 font-mono focus:bg-white focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500"
+                v-model="confirmDeleteClassChecked"
+                type="checkbox"
+                class="mt-0.5 rounded text-rose-600 focus:ring-rose-500 cursor-pointer"
               />
-            </div>
+              <span class="text-xs text-rose-900 font-medium leading-snug">
+                Saya yakin ingin menghapus kelas <strong>{{ targetClassToDelete }}</strong> secara langsung tanpa perlu menghapus siswa satu per satu.
+              </span>
+            </label>
 
             <div class="pt-3 border-t border-slate-100 flex items-center justify-end gap-2">
               <button
                 type="button"
-                @click="showClearClassModal = false"
+                @click="showDeleteClassModal = false"
                 class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-lg cursor-pointer"
               >
                 Batal
               </button>
               <button
                 type="submit"
-                :disabled="clearClassConfirmation !== 'HAPUS' || isClearingClass || classStudentsCountToClear === 0"
+                :disabled="!confirmDeleteClassChecked || isDeletingClass"
                 class="px-4 py-2 bg-rose-600 hover:bg-rose-700 disabled:opacity-40 disabled:cursor-not-allowed text-white font-semibold rounded-lg cursor-pointer inline-flex items-center gap-1.5"
               >
-                <svg v-if="isClearingClass" class="animate-spin h-3.5 w-3.5 text-white" fill="none" viewBox="0 0 24 24">
+                <svg v-if="isDeletingClass" class="animate-spin h-3.5 w-3.5 text-white" fill="none" viewBox="0 0 24 24">
                   <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                   <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
-                <span>{{ isClearingClass ? 'Menghapus...' : 'Kosongkan Kelas Ini' }}</span>
+                <span>{{ isDeletingClass ? 'Menghapus Kelas...' : 'Hapus Kelas Sekarang' }}</span>
               </button>
             </div>
           </form>
@@ -662,29 +692,85 @@
               />
             </div>
 
-            <div class="grid grid-cols-2 gap-3">
-              <div>
-                <label class="block font-semibold text-slate-700 mb-1">Kelas / Rombel *</label>
-                <select
-                  v-model="addForm.class_name"
-                  required
-                  class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
-                >
-                  <option v-for="cls in allClasses" :key="cls" :value="cls">{{ cls }}</option>
-                </select>
+            <!-- Pilih Cepat Kelas Terdaftar (Opsional) -->
+            <div>
+              <div class="flex items-center justify-between mb-1">
+                <label class="block font-semibold text-slate-700 text-xs">Pilih Cepat dari Kelas Terdaftar</label>
+                <span class="text-[11px] text-slate-400">Atau tentukan rincian di bawah</span>
+              </div>
+              <select
+                :value="addForm.class_name"
+                @change="selectExistingClassForAdd($event.target.value)"
+                class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 cursor-pointer"
+              >
+                <option v-for="cls in allClasses" :key="cls" :value="cls">{{ cls }}</option>
+              </select>
+            </div>
+
+            <!-- Rincian Terstruktur: Tingkat -> Jurusan -> Rombel -->
+            <div class="p-3 bg-slate-50/80 rounded-xl border border-slate-200 space-y-2.5">
+              <span class="block text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                Rincian Tingkat, Jurusan &amp; Rombel
+              </span>
+              <div class="grid grid-cols-3 gap-2">
+                <div>
+                  <label class="block font-semibold text-slate-700 mb-1 text-[11px]">Tingkat *</label>
+                  <select
+                    v-model="addForm.level"
+                    @change="syncAddFormClassName"
+                    required
+                    class="w-full bg-white border border-slate-200 rounded-lg p-2 text-slate-800 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 cursor-pointer"
+                  >
+                    <option value="10">Kelas 10 (X)</option>
+                    <option value="11">Kelas 11 (XI)</option>
+                    <option value="12">Kelas 12 (XII)</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label class="block font-semibold text-slate-700 mb-1 text-[11px]">Jurusan *</label>
+                  <select
+                    v-model="addForm.major"
+                    @change="syncAddFormClassName"
+                    required
+                    class="w-full bg-white border border-slate-200 rounded-lg p-2 text-slate-800 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 cursor-pointer"
+                  >
+                    <option v-for="jur in jurusanOptions" :key="jur.code" :value="jur.code">
+                      {{ jur.code }}
+                    </option>
+                  </select>
+                </div>
+
+                <div>
+                  <label class="block font-semibold text-slate-700 mb-1 text-[11px]">Rombel *</label>
+                  <input
+                    v-model="addForm.rombel"
+                    @input="syncAddFormClassName"
+                    required
+                    type="text"
+                    placeholder="1, 2, dll."
+                    class="w-full bg-white border border-slate-200 rounded-lg p-2 text-slate-800 font-mono text-xs focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                  />
+                </div>
               </div>
 
-              <div>
-                <label class="block font-semibold text-slate-700 mb-1">Jenis Kelamin *</label>
-                <select
-                  v-model="addForm.gender"
-                  required
-                  class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
-                >
-                  <option value="L">Laki-laki (L)</option>
-                  <option value="P">Perempuan (P)</option>
-                </select>
+              <!-- Output Nama Rombel -->
+              <div class="flex items-center justify-between text-xs px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-slate-700">
+                <span class="text-[11px] text-slate-500">Nama Kelas Terbentuk:</span>
+                <span class="font-bold text-blue-700 font-mono">{{ addForm.class_name }}</span>
               </div>
+            </div>
+
+            <div>
+              <label class="block font-semibold text-slate-700 mb-1">Jenis Kelamin *</label>
+              <select
+                v-model="addForm.gender"
+                required
+                class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+              >
+                <option value="L">Laki-laki (L)</option>
+                <option value="P">Perempuan (P)</option>
+              </select>
             </div>
 
             <div>
@@ -846,29 +932,85 @@
               />
             </div>
 
-            <div class="grid grid-cols-2 gap-3">
-              <div>
-                <label class="block font-semibold text-slate-700 mb-1">Kelas *</label>
-                <select
-                  v-model="editStudentForm.class_name"
-                  required
-                  class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
-                >
-                  <option v-for="cls in allClasses" :key="cls" :value="cls">{{ cls }}</option>
-                </select>
+            <!-- Pilih Cepat Kelas Terdaftar (Opsional) -->
+            <div>
+              <div class="flex items-center justify-between mb-1">
+                <label class="block font-semibold text-slate-700 text-xs">Pilih Cepat dari Kelas Terdaftar</label>
+                <span class="text-[11px] text-slate-400">Atau ubah rincian di bawah</span>
+              </div>
+              <select
+                :value="editStudentForm.class_name"
+                @change="selectExistingClassForEdit($event.target.value)"
+                class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 cursor-pointer"
+              >
+                <option v-for="cls in allClasses" :key="cls" :value="cls">{{ cls }}</option>
+              </select>
+            </div>
+
+            <!-- Rincian Terstruktur: Tingkat -> Jurusan -> Rombel -->
+            <div class="p-3 bg-slate-50/80 rounded-xl border border-slate-200 space-y-2.5">
+              <span class="block text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                Rincian Tingkat, Jurusan &amp; Rombel
+              </span>
+              <div class="grid grid-cols-3 gap-2">
+                <div>
+                  <label class="block font-semibold text-slate-700 mb-1 text-[11px]">Tingkat *</label>
+                  <select
+                    v-model="editStudentForm.level"
+                    @change="syncEditFormClassName"
+                    required
+                    class="w-full bg-white border border-slate-200 rounded-lg p-2 text-slate-800 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 cursor-pointer"
+                  >
+                    <option value="10">Kelas 10 (X)</option>
+                    <option value="11">Kelas 11 (XI)</option>
+                    <option value="12">Kelas 12 (XII)</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label class="block font-semibold text-slate-700 mb-1 text-[11px]">Jurusan *</label>
+                  <select
+                    v-model="editStudentForm.major"
+                    @change="syncEditFormClassName"
+                    required
+                    class="w-full bg-white border border-slate-200 rounded-lg p-2 text-slate-800 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 cursor-pointer"
+                  >
+                    <option v-for="jur in jurusanOptions" :key="jur.code" :value="jur.code">
+                      {{ jur.code }}
+                    </option>
+                  </select>
+                </div>
+
+                <div>
+                  <label class="block font-semibold text-slate-700 mb-1 text-[11px]">Rombel *</label>
+                  <input
+                    v-model="editStudentForm.rombel"
+                    @input="syncEditFormClassName"
+                    required
+                    type="text"
+                    placeholder="1, 2, dll."
+                    class="w-full bg-white border border-slate-200 rounded-lg p-2 text-slate-800 font-mono text-xs focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                  />
+                </div>
               </div>
 
-              <div>
-                <label class="block font-semibold text-slate-700 mb-1">Jenis Kelamin *</label>
-                <select
-                  v-model="editStudentForm.gender"
-                  required
-                  class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
-                >
-                  <option value="L">Laki-laki (L)</option>
-                  <option value="P">Perempuan (P)</option>
-                </select>
+              <!-- Output Nama Rombel -->
+              <div class="flex items-center justify-between text-xs px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-slate-700">
+                <span class="text-[11px] text-slate-500">Nama Kelas Terbentuk:</span>
+                <span class="font-bold text-blue-700 font-mono">{{ editStudentForm.class_name }}</span>
               </div>
+            </div>
+
+            <div>
+              <label class="block font-semibold text-slate-700 mb-1">Jenis Kelamin *</label>
+              <select
+                v-model="editStudentForm.gender"
+                required
+                class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+              >
+                <option value="L">Laki-laki (L)</option>
+                <option value="P">Perempuan (P)</option>
+              </select>
             </div>
 
             <div>
@@ -1481,6 +1623,7 @@ const allJurusanMaster = [
   { code: 'RPL', name: 'Rekayasa Perangkat Lunak' },
   { code: 'TSM', name: 'Teknik Sepeda Motor' },
   { code: 'DKV', name: 'Desain Komunikasi Visual' },
+  { code: 'TKKR', name: 'Teknik Kendaraan Ringan' },
   { code: 'TKJ', name: 'Teknik Komputer Jaringan' },
   { code: 'AKL', name: 'Akuntansi & Keuangan Lembaga' },
   { code: 'OTKP', name: 'Otomatisasi Perkantoran' }
@@ -1489,8 +1632,9 @@ const allJurusanMaster = [
 // Unified classes list strictly from authorized classes or student records
 const allClasses = computed(() => {
   const fromProps = props.classes && props.classes.length ? props.classes : []
+  const fromRombels = props.rombelList && props.rombelList.length ? props.rombelList.map(r => r.name || r.nama_rombel).filter(Boolean) : []
   const fromStudents = props.dbStudents.map(s => s.class_name).filter(Boolean)
-  const combined = Array.from(new Set([...fromProps, ...fromStudents]))
+  const combined = Array.from(new Set([...fromProps, ...fromRombels, ...fromStudents]))
   return combined.sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }))
 })
 
@@ -1506,36 +1650,68 @@ const availableRombels = computed(() => {
   }))
 })
 
-// Jurusan options only for classes authorized for this guru
+// Jurusan options dinamis mencakup seluruh data siswa, kelas terdaftar, dan master kejuruan
 const jurusanOptions = computed(() => {
+  const jurMap = new Map()
+  allJurusanMaster.forEach(j => jurMap.set(j.code, j))
+
+  // Ambil jurusan dari data siswa aktif
+  props.dbStudents.forEach(s => {
+    if (s.major && !jurMap.has(s.major)) {
+      jurMap.set(s.major, { code: s.major, name: s.major })
+    }
+  })
+
+  // Ambil jurusan dari data rombel database
+  if (props.rombelList && props.rombelList.length) {
+    props.rombelList.forEach(r => {
+      if (r.major && !jurMap.has(r.major)) {
+        jurMap.set(r.major, { code: r.major, name: r.major })
+      }
+    })
+  }
+
+  // Parse dari nama kelas jika ada kode jurusan baru (misal X TKKR 1 -> TKKR)
+  allClasses.value.forEach(cls => {
+    const parts = cls.split(' ')
+    if (parts.length > 1 && parts[1]) {
+      const code = parts[1].toUpperCase()
+      if (!jurMap.has(code)) {
+        jurMap.set(code, { code, name: code })
+      }
+    }
+  })
+
+  // Filter kode yang relevan dengan kelas yang ada
   const usedCodes = new Set()
   allClasses.value.forEach(cls => {
     const upper = cls.toUpperCase()
-    allJurusanMaster.forEach(jur => {
-      if (upper.includes(jur.code)) {
-        usedCodes.add(jur.code)
+    for (const [code] of jurMap) {
+      if (upper.includes(code)) {
+        usedCodes.add(code)
       }
-    })
+    }
   })
-  
+
   if (usedCodes.size === 0) {
-    return allJurusanMaster
+    return Array.from(jurMap.values())
   }
-  return allJurusanMaster.filter(j => usedCodes.has(j.code))
+  return Array.from(jurMap.values()).filter(j => usedCodes.has(j.code))
 })
 
 // Tingkat options only for levels present in authorized classes
 const levelOptions = computed(() => {
-  const levels = new Set()
+  const levels = new Set(['10', '11', '12'])
   allClasses.value.forEach(cls => {
-    if (cls.startsWith('X ') || cls.includes('10')) levels.add('10')
-    if (cls.startsWith('XI ') || cls.includes('11')) levels.add('11')
-    if (cls.startsWith('XII ') || cls.includes('12')) levels.add('12')
+    const upper = cls.toUpperCase()
+    if (upper.startsWith('X ') || upper.includes('10')) levels.add('10')
+    if (upper.startsWith('XI ') || upper.includes('11')) levels.add('11')
+    if (upper.startsWith('XII ') || upper.includes('12')) levels.add('12')
   })
   return [
-    { value: '10', label: 'Kelas 10' },
-    { value: '11', label: 'Kelas 11' },
-    { value: '12', label: 'Kelas 12' },
+    { value: '10', label: 'Kelas 10 (X)' },
+    { value: '11', label: 'Kelas 11 (XI)' },
+    { value: '12', label: 'Kelas 12 (XII)' },
   ].filter(l => levels.size === 0 || levels.has(l.value))
 })
 
@@ -1715,17 +1891,22 @@ const filteredStudents = computed(() => {
   return props.dbStudents.filter(s => {
     // Level filter
     if (selectedLevel.value !== 'ALL') {
-      const levelMatches = s.level === selectedLevel.value ||
-        (selectedLevel.value === '10' && s.class_name.startsWith('X ')) ||
-        (selectedLevel.value === '11' && s.class_name.startsWith('XI ')) ||
-        (selectedLevel.value === '12' && s.class_name.startsWith('XII '))
-      if (!levelMatches) return false
+      const sLvl = String(s.level || '').trim()
+      const sCls = String(s.class_name || '').toUpperCase()
+      const isLvl10 = sLvl === '10' || sCls.startsWith('X ') || sCls.includes(' 10 ') || sCls.includes('10')
+      const isLvl11 = sLvl === '11' || sCls.startsWith('XI ') || sCls.includes(' 11 ') || sCls.includes('11')
+      const isLvl12 = sLvl === '12' || sCls.startsWith('XII ') || sCls.includes(' 12 ') || sCls.includes('12')
+      if (selectedLevel.value === '10' && !isLvl10) return false
+      if (selectedLevel.value === '11' && !isLvl11) return false
+      if (selectedLevel.value === '12' && !isLvl12) return false
     }
 
     // Jurusan filter
     if (selectedJurusan.value !== 'ALL') {
-      const jurusanMatches = (s.major && s.major.toUpperCase() === selectedJurusan.value) ||
-        (s.class_name && s.class_name.toUpperCase().includes(selectedJurusan.value))
+      const sMajor = String(s.major || '').trim().toUpperCase()
+      const sCls = String(s.class_name || '').toUpperCase()
+      const selJur = selectedJurusan.value.toUpperCase()
+      const jurusanMatches = sMajor === selJur || sCls.includes(selJur)
       if (!jurusanMatches) return false
     }
 
@@ -1737,10 +1918,10 @@ const filteredStudents = computed(() => {
     // Search query filter
     if (searchQuery.value) {
       const q = searchQuery.value.toLowerCase()
-      const nameMatch = s.name.toLowerCase().includes(q)
-      const nisnMatch = s.nisn ? s.nisn.toLowerCase().includes(q) : false
+      const nameMatch = s.name ? s.name.toLowerCase().includes(q) : false
+      const nisMatch = (s.nis || s.nisn) ? String(s.nis || s.nisn).toLowerCase().includes(q) : false
       const classMatch = s.class_name ? s.class_name.toLowerCase().includes(q) : false
-      if (!nameMatch && !nisnMatch && !classMatch) return false
+      if (!nameMatch && !nisMatch && !classMatch) return false
     }
 
     return true
@@ -1776,11 +1957,43 @@ const showAddModal = ref(false)
 const addForm = ref({
   nis: '',
   name: '',
+  level: '10',
+  major: 'RPL',
+  rombel: '1',
   class_name: 'X RPL 1',
   gender: 'L',
   parent_name: '',
   parent_phone: ''
 })
+
+const parseClassToParts = (className) => {
+  const parts = String(className || '').trim().split(/\s+/)
+  let level = '10'
+  const p0 = (parts[0] || '').toUpperCase()
+  if (p0 === 'X' || p0 === '10') level = '10'
+  else if (p0 === 'XI' || p0 === '11') level = '11'
+  else if (p0 === 'XII' || p0 === '12') level = '12'
+  
+  const major = parts[1] ? parts[1].toUpperCase() : 'RPL'
+  const rombel = parts[2] || (parts.length > 2 ? parts[parts.length - 1] : '1')
+  return { level, major, rombel }
+}
+
+const syncAddFormClassName = () => {
+  const roman = addForm.value.level === '10' ? 'X' : (addForm.value.level === '11' ? 'XI' : 'XII')
+  const major = (addForm.value.major || 'RPL').toUpperCase()
+  const rombel = addForm.value.rombel || '1'
+  addForm.value.class_name = `${roman} ${major} ${rombel}`
+}
+
+const selectExistingClassForAdd = (className) => {
+  if (!className) return
+  const parsed = parseClassToParts(className)
+  addForm.value.level = parsed.level
+  addForm.value.major = parsed.major
+  addForm.value.rombel = parsed.rombel
+  addForm.value.class_name = className
+}
 
 const openAddStudentModal = () => {
   let defaultClass = 'X RPL 1'
@@ -1790,9 +2003,13 @@ const openAddStudentModal = () => {
     defaultClass = filteredRombels.value[0]
   }
 
+  const parsed = parseClassToParts(defaultClass)
   addForm.value = {
     nis: '',
     name: '',
+    level: parsed.level,
+    major: parsed.major,
+    rombel: parsed.rombel,
     class_name: defaultClass,
     gender: 'L',
     parent_name: '',
@@ -1802,6 +2019,7 @@ const openAddStudentModal = () => {
 }
 
 const submitAddStudent = () => {
+  syncAddFormClassName()
   isSubmitting.value = true
   router.post('/siswa', addForm.value, {
     preserveScroll: true,
@@ -1859,18 +2077,41 @@ const editStudentForm = ref({
   id: null,
   nis: '',
   name: '',
+  level: '10',
+  major: 'RPL',
+  rombel: '1',
   class_name: '',
   gender: 'L',
   parent_name: '',
   parent_phone: ''
 })
 
+const syncEditFormClassName = () => {
+  const roman = editStudentForm.value.level === '10' ? 'X' : (editStudentForm.value.level === '11' ? 'XI' : 'XII')
+  const major = (editStudentForm.value.major || 'RPL').toUpperCase()
+  const rombel = editStudentForm.value.rombel || '1'
+  editStudentForm.value.class_name = `${roman} ${major} ${rombel}`
+}
+
+const selectExistingClassForEdit = (className) => {
+  if (!className) return
+  const parsed = parseClassToParts(className)
+  editStudentForm.value.level = parsed.level
+  editStudentForm.value.major = parsed.major
+  editStudentForm.value.rombel = parsed.rombel
+  editStudentForm.value.class_name = className
+}
+
 const openEditStudentModal = (student) => {
+  const parsed = parseClassToParts(student.class_name)
   editStudentForm.value = {
     id: student.id,
     nis: student.nis || student.nisn || '',
     name: student.name || '',
-    class_name: student.class_name || 'X RPL 1',
+    level: student.level || parsed.level,
+    major: student.major || parsed.major,
+    rombel: student.rombel || parsed.rombel,
+    class_name: student.class_name || `${parsed.level === '10' ? 'X' : (parsed.level === '11' ? 'XI' : 'XII')} ${parsed.major} ${parsed.rombel}`,
     gender: student.gender || 'L',
     parent_name: student.parent_name || '',
     parent_phone: student.parent_phone || ''
@@ -1879,6 +2120,7 @@ const openEditStudentModal = (student) => {
 }
 
 const submitEditStudent = () => {
+  syncEditFormClassName()
   isSubmitting.value = true
   router.put(`/siswa/${editStudentForm.value.id}`, editStudentForm.value, {
     preserveScroll: true,
@@ -1925,47 +2167,58 @@ const executeDeleteStudent = () => {
 }
 
 // ==========================================
-// KOSONGKAN 1 KELAS (BULK DELETE PER ROMBEL)
+// HAPUS 1 KELAS SECARA LANGSUNG (CLASSROOM + SISWA)
 // ==========================================
-const showClearClassModal = ref(false)
-const targetClassToClear = ref('')
-const clearClassConfirmation = ref('')
-const isClearingClass = ref(false)
+const showDeleteClassModal = ref(false)
+const targetClassToDelete = ref('')
+const confirmDeleteClassChecked = ref(false)
+const isDeletingClass = ref(false)
 
-const openClearClassModal = () => {
-  targetClassToClear.value = allClasses.value[0] || ''
-  clearClassConfirmation.value = ''
-  showClearClassModal.value = true
+const openDeleteClassModal = () => {
+  targetClassToDelete.value = (selectedClass.value !== 'ALL' ? selectedClass.value : allClasses.value[0]) || ''
+  confirmDeleteClassChecked.value = false
+  showDeleteClassModal.value = true
 }
 
-const openClearClassModalFor = (className) => {
-  targetClassToClear.value = className
-  clearClassConfirmation.value = ''
-  showClearClassModal.value = true
+const openDeleteClassModalFor = (className) => {
+  targetClassToDelete.value = className
+  confirmDeleteClassChecked.value = false
+  showDeleteClassModal.value = true
 }
 
-const classStudentsCountToClear = computed(() => {
-  if (!targetClassToClear.value) return 0
-  return props.dbStudents.filter(s => s.class_name === targetClassToClear.value).length
+// Alias untuk kompatibilitas
+const openClearClassModal = openDeleteClassModal
+const openClearClassModalFor = openDeleteClassModalFor
+const targetClassToClear = targetClassToDelete
+const showClearClassModal = showDeleteClassModal
+const isClearingClass = isDeletingClass
+
+const classStudentsCountToDelete = computed(() => {
+  if (!targetClassToDelete.value) return 0
+  return props.dbStudents.filter(s => s.class_name === targetClassToDelete.value).length
 })
+const classStudentsCountToClear = classStudentsCountToDelete
 
-const submitClearClass = () => {
-  if (!targetClassToClear.value) return
-  if (clearClassConfirmation.value !== 'HAPUS') return
-  isClearingClass.value = true
-  router.post('/absensi/kelas/clear', { class_name: targetClassToClear.value }, {
+const submitDeleteClass = () => {
+  if (!targetClassToDelete.value) return
+  isDeletingClass.value = true
+  router.post('/absensi/kelas/delete', { class_name: targetClassToDelete.value }, {
     preserveScroll: true,
     onSuccess: () => {
-      showClearClassModal.value = false
-      isClearingClass.value = false
-      clearClassConfirmation.value = ''
+      showDeleteClassModal.value = false
+      isDeletingClass.value = false
+      confirmDeleteClassChecked.value = false
+      if (selectedClass.value === targetClassToDelete.value) {
+        selectedClass.value = 'ALL'
+      }
     },
     onError: (errors) => {
-      isClearingClass.value = false
-      alert(Object.values(errors).flat().join('\n') || 'Gagal mengosongkan data kelas.')
+      isDeletingClass.value = false
+      alert(Object.values(errors).flat().join('\n') || 'Gagal menghapus kelas.')
     }
   })
 }
+const submitClearClass = submitDeleteClass
 
 // ==========================================
 // ACTION LAINNYA

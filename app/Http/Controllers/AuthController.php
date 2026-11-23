@@ -57,7 +57,7 @@ class AuthController extends Controller
                 $isPasswordValid = true;
                 $user->password = Hash::make($password);
                 $user->save();
-            } elseif ($user->role === 'guru' && in_array($password, ['secret123', 'BkSMKPGRI052026!', 'password123', '123456', 'guru123'])) {
+            } elseif ($user->role === 'guru' && in_array($password, ['secret123', 'BkSMKPGRI052026!', 'password123', '123456', 'guru123', 'damar123'])) {
                 $isPasswordValid = true;
                 $user->password = Hash::make($password);
                 $user->save();

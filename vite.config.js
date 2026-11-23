@@ -5,6 +5,19 @@ import { fileURLToPath, URL } from 'node:url'
 
 export default defineConfig({
   plugins: [
+    {
+      name: 'redirect-root-to-app',
+      configureServer(server) {
+        server.middlewares.use((req, res, next) => {
+          if (req.url === '/' || req.url === '') {
+            res.writeHead(302, { Location: 'http://bkprima.test' })
+            res.end()
+            return
+          }
+          next()
+        })
+      }
+    },
     laravel({
       input: ['resources/js/app.js'],
       refresh: true,
