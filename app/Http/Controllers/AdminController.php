@@ -356,6 +356,9 @@ class AdminController extends Controller
             ]
         );
 
+        // Kaitkan siswa yang sudah memiliki nama rombel ini ke classroom_id baru
+        Student::where('class_name', $className)->update(['classroom_id' => $classroom->id]);
+
         // Update rombel pada User Guru BK agar tersinkronisasi
         if ($guruUser) {
             $currentRombels = !empty($guruUser->rombel) ? array_map('trim', explode(',', $guruUser->rombel)) : [];
@@ -446,8 +449,13 @@ class AdminController extends Controller
         if ($oldName !== $className) {
             Student::where('class_name', $oldName)->update([
                 'class_name' => $className,
+                'classroom_id' => $classroom->id,
                 'level' => $validated['level'],
                 'major' => $majorCode,
+            ]);
+        } else {
+            Student::where('class_name', $className)->whereNull('classroom_id')->update([
+                'classroom_id' => $classroom->id,
             ]);
         }
 
@@ -542,7 +550,7 @@ class AdminController extends Controller
             }
         }
 
-        Classroom::firstOrCreate(
+        $cls = Classroom::firstOrCreate(
             ['name' => $className],
             [
                 'level' => "Kelas {$level} ({$level})",
@@ -555,6 +563,7 @@ class AdminController extends Controller
         $rombel = end($rombelParts);
 
         $student = Student::create([
+            'classroom_id' => $cls->id,
             'nis' => $rawNis,
             'name' => trim($request->input('name')),
             'class_name' => $className,
@@ -615,7 +624,7 @@ class AdminController extends Controller
             }
         }
 
-        Classroom::firstOrCreate(
+        $cls = Classroom::firstOrCreate(
             ['name' => $className],
             [
                 'level' => "Kelas {$level} ({$level})",
@@ -628,6 +637,7 @@ class AdminController extends Controller
         $rombel = end($rombelParts);
 
         $student->update([
+            'classroom_id' => $cls->id,
             'nis' => $rawNis,
             'name' => trim($request->input('name')),
             'class_name' => $className,
@@ -740,7 +750,7 @@ class AdminController extends Controller
             }
 
             // Pastikan Classroom ada di database
-            Classroom::firstOrCreate(
+            $cls = Classroom::firstOrCreate(
                 ['name' => $className],
                 [
                     'level' => "Kelas {$level} ({$level})",
@@ -757,6 +767,7 @@ class AdminController extends Controller
             Student::updateOrCreate(
                 ['nis' => $nis],
                 [
+                    'classroom_id' => $cls->id,
                     'name' => trim($item['name']),
                     'class_name' => $className,
                     'level' => $level,

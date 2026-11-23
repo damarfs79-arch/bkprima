@@ -3020,64 +3020,45 @@ const formGuru = ref({
   rombelText: ''
 })
 
-const saveGuru = async () => {
+const isSubmittingGuru = ref(false)
+
+const saveGuru = () => {
   if (!formGuru.value.name || !formGuru.value.name.trim()) return
   if (!formGuru.value.email || !formGuru.value.email.trim()) return
 
   const cleanName = formGuru.value.name.trim()
   const cleanEmail = formGuru.value.email.trim().toLowerCase()
 
-  const rArray = (formGuru.value.rombelText && formGuru.value.rombelText.trim())
-    ? formGuru.value.rombelText.split(',').map(s => s.trim().toUpperCase()).filter(Boolean)
-    : []
-
-  const payload = {
+  isSubmittingGuru.value = true
+  router.post('/admin/guru', {
     name: cleanName,
     email: cleanEmail,
     password: formGuru.value.password || '123456',
     jabatan: formGuru.value.jabatan && formGuru.value.jabatan.trim() ? formGuru.value.jabatan.trim() : 'Guru BK',
     wa: formGuru.value.wa && formGuru.value.wa.trim() ? formGuru.value.wa.trim() : '-',
     rombelText: formGuru.value.rombelText && formGuru.value.rombelText.trim() ? formGuru.value.rombelText.trim() : '-'
-  }
-
-  try {
-    const res = await fetch('/admin/guru', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
-      },
-      body: JSON.stringify(payload)
-    })
-
-    if (res.ok) {
-      const data = await res.json()
-      if (data.guru) {
-        guruBkList.value.push(data.guru)
-      } else {
-        guruBkList.value.push({ id: Date.now(), ...payload, rombel: rArray })
+  }, {
+    preserveScroll: true,
+    preserveState: true,
+    onSuccess: () => {
+      isSubmittingGuru.value = false
+      showToast(`Akun Guru BK ${cleanName} (${cleanEmail}) berhasil dibuat!`)
+      closeModal()
+      formGuru.value = {
+        name: '',
+        email: '',
+        password: '',
+        jabatan: '',
+        wa: '',
+        rombelText: ''
       }
-    } else {
-      guruBkList.value.push({ id: Date.now(), ...payload, rombel: rArray })
+      showGuruPassword.value = false
+    },
+    onError: (errs) => {
+      isSubmittingGuru.value = false
+      alert(Object.values(errs)[0] || 'Gagal menyimpan data Guru BK.')
     }
-  } catch (e) {
-    guruBkList.value.push({ id: Date.now(), ...payload, rombel: rArray })
-  }
-
-  showToast(`Akun Guru BK ${cleanName} (${cleanEmail}) berhasil dibuat!`)
-  
-  // Reset form
-  formGuru.value = {
-    name: '',
-    email: '',
-    password: '',
-    jabatan: '',
-    wa: '',
-    rombelText: ''
-  }
-  showGuruPassword.value = false
-  closeModal()
+  })
 }
 
 const formEditGuru = ref({
@@ -3107,48 +3088,34 @@ const editGuru = (g) => {
   modalType.value = 'edit-guru'
 }
 
-const updateGuru = async () => {
+const isUpdatingGuru = ref(false)
+
+const updateGuru = () => {
   if (!editingGuru.value) return
-  const idx = guruBkList.value.findIndex(g => g.id === editingGuru.value.id)
-  if (idx !== -1) {
-    const rArray = formEditGuru.value.rombelText
-      ? formEditGuru.value.rombelText.split(',').map(s => s.trim().toUpperCase()).filter(Boolean)
-      : []
 
-    const cleanEmail = formEditGuru.value.email ? formEditGuru.value.email.trim().toLowerCase() : editingGuru.value.email
+  const cleanEmail = formEditGuru.value.email ? formEditGuru.value.email.trim().toLowerCase() : editingGuru.value.email
+  isUpdatingGuru.value = true
 
-    const payload = {
-      name: formEditGuru.value.name,
-      email: cleanEmail,
-      password: formEditGuru.value.password || undefined,
-      jabatan: formEditGuru.value.jabatan && formEditGuru.value.jabatan.trim() ? formEditGuru.value.jabatan.trim() : 'Guru BK',
-      wa: formEditGuru.value.wa && formEditGuru.value.wa.trim() ? formEditGuru.value.wa.trim() : '-',
-      rombelText: formEditGuru.value.rombelText && formEditGuru.value.rombelText.trim() ? formEditGuru.value.rombelText.trim() : '-'
+  router.put(`/admin/guru/${editingGuru.value.id}`, {
+    name: formEditGuru.value.name,
+    email: cleanEmail,
+    password: formEditGuru.value.password || undefined,
+    jabatan: formEditGuru.value.jabatan && formEditGuru.value.jabatan.trim() ? formEditGuru.value.jabatan.trim() : 'Guru BK',
+    wa: formEditGuru.value.wa && formEditGuru.value.wa.trim() ? formEditGuru.value.wa.trim() : '-',
+    rombelText: formEditGuru.value.rombelText && formEditGuru.value.rombelText.trim() ? formEditGuru.value.rombelText.trim() : '-'
+  }, {
+    preserveScroll: true,
+    preserveState: true,
+    onSuccess: () => {
+      isUpdatingGuru.value = false
+      showToast(`Data Guru BK ${formEditGuru.value.name} (${cleanEmail}) berhasil diperbarui.`)
+      closeModal()
+    },
+    onError: (errs) => {
+      isUpdatingGuru.value = false
+      alert(Object.values(errs)[0] || 'Gagal memperbarui data Guru BK.')
     }
-
-    try {
-      await fetch(`/admin/guru/${editingGuru.value.id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-          'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
-        },
-        body: JSON.stringify(payload)
-      })
-    } catch (e) {}
-
-    guruBkList.value[idx] = {
-      ...guruBkList.value[idx],
-      name: formEditGuru.value.name,
-      email: cleanEmail,
-      jabatan: formEditGuru.value.jabatan,
-      wa: formEditGuru.value.wa,
-      rombel: rArray
-    }
-    showToast(`Data Guru BK ${formEditGuru.value.name} (${cleanEmail}) berhasil diperbarui.`)
-  }
-  closeModal()
+  })
 }
 
 const confirmDeleteGuru = (g) => {
@@ -3164,22 +3131,17 @@ const confirmDeleteGuru = (g) => {
     },
     confirmText: 'Ya, Hapus Akun',
     cancelText: 'Batal',
-    onConfirm: async () => {
-      try {
-        await fetch(`/admin/guru/${g.id}`, {
-          method: 'DELETE',
-          headers: {
-            'Accept': 'application/json',
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
-          }
-        })
-      } catch (e) {}
-
-      const idx = guruBkList.value.findIndex(item => item.id === g.id)
-      if (idx !== -1) {
-        guruBkList.value.splice(idx, 1)
-        showToast(`Akun Guru BK ${g.name} berhasil dihapus.`)
-      }
+    onConfirm: () => {
+      router.delete(`/admin/guru/${g.id}`, {
+        preserveScroll: true,
+        preserveState: true,
+        onSuccess: () => {
+          showToast(`Akun Guru BK ${g.name} berhasil dihapus.`)
+        },
+        onError: () => {
+          showToast('Gagal menghapus akun Guru BK.')
+        }
+      })
     }
   }
 }
@@ -3194,14 +3156,7 @@ const deleteGuru = (idx) => {
 // ==========================================
 // 2.5. DATA JURUSAN / BIDANG KEAHLIAN
 // ==========================================
-const jurusanList = ref(props.initialJurusanList && props.initialJurusanList.length > 0 ? [...props.initialJurusanList] : [
-  { id: 1, code: 'RPL', name: 'Rekayasa Perangkat Lunak / PPLG', description: 'Pengembangan software & web' },
-  { id: 2, code: 'TSM', name: 'Teknik Sepeda Motor', description: 'Teknik otomotif kendaraan roda dua' },
-  { id: 3, code: 'DKV', name: 'Desain Komunikasi Visual', description: 'Kreatif grafis & multimedia' },
-  { id: 4, code: 'TKJ', name: 'Teknik Komputer & Jaringan', description: 'Infrastruktur & jaringan' },
-  { id: 5, code: 'AKL', name: 'Akuntansi & Keuangan Lembaga', description: 'Keuangan & perpajakan' },
-  { id: 6, code: 'OTKP', name: 'Otomatisasi & Tata Kelola Perkantoran', description: 'Administrasi perkantoran' }
-])
+const jurusanList = ref(props.initialJurusanList ? [...props.initialJurusanList] : [])
 
 watch(() => props.initialJurusanList, (newVal) => {
   if (newVal && newVal.length > 0) {
@@ -3404,7 +3359,7 @@ const formEditKelas = ref({
   name: '',
   waliKelas: '',
   guruBkId: '',
-  studentCount: 36
+  studentCount: 0
 })
 
 const editingKelas = ref(null)
@@ -3432,7 +3387,7 @@ const editKelas = (k) => {
     name: k.name,
     waliKelas: k.waliKelas,
     guruBkId: k.guruBkId || '',
-    studentCount: k.studentCount || 36
+    studentCount: k.studentCount ?? 0
   }
   modalType.value = 'edit-kelas'
 }

@@ -17,24 +17,6 @@
         </router-link>
       </div>
 
-      <!-- Admin Profile in Sidebar (Natural Integrated Section) -->
-      <div class="px-5 py-4 border-b border-slate-800 flex items-center gap-3 bg-slate-900">
-        <div class="relative shrink-0">
-          <div class="w-9 h-9 rounded-lg bg-blue-600 text-white flex items-center justify-center font-bold">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4.5 w-4.5" viewBox="0 0 20 20" fill="currentColor">
-              <path fill-rule="evenodd" d="M10 1.944A11.954 11.954 0 012.166 5C2.056 5.649 2 6.319 2 7c0 5.225 3.34 9.67 8 11.317C14.66 16.67 18 12.225 18 7c0-.682-.057-1.35-.166-2.001A11.954 11.954 0 0110 1.944zM11 14a1 1 0 11-2 0 1 1 0 012 0zm0-7a1 1 0 10-2 0v3a1 1 0 102 0V7z" clip-rule="evenodd" />
-            </svg>
-          </div>
-        </div>
-        <div class="flex-1 min-w-0">
-          <h4 class="text-xs font-bold text-white truncate leading-tight">Admin IT Sekolah</h4>
-          <p class="text-[10px] text-slate-400 truncate mt-0.5">Super Administrator</p>
-        </div>
-        <span class="text-[11px] text-slate-400 font-mono">
-          root
-        </span>
-      </div>
-
       <!-- Admin Navigation Menu -->
       <nav class="flex-1 px-3 py-3 space-y-1 overflow-y-auto">
         <p class="px-3 text-xs font-semibold text-slate-400 mb-2">Panel Kontrol</p>
