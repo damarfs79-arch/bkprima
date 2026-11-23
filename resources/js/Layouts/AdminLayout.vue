@@ -208,7 +208,7 @@
         <!-- Session Info Card -->
         <div class="mt-4 p-3 bg-slate-50 rounded-lg border border-slate-200 text-left text-xs">
           <div class="flex items-center justify-between">
-            <span class="font-bold text-slate-800">Admin IT Sekolah</span>
+            <span class="font-bold text-slate-800">Admin BK</span>
             <span class="text-xs font-medium text-slate-500">Super Administrator</span>
           </div>
           <p class="text-[11px] text-slate-400 mt-0.5">SMK PGRI 05 Jember &bull; Sesi Manajemen Penuh</p>

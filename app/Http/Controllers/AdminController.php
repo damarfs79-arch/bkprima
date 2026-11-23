@@ -49,7 +49,7 @@ class AdminController extends Controller
             $guruName = '-';
             if ($c->guruBk && $c->guruBk->role === 'guru') {
                 $guruName = $c->guruBk->name;
-            } elseif (!empty($c->guru_bk_name) && $c->guru_bk_name !== 'Admin IT Sekolah') {
+            } elseif (!empty($c->guru_bk_name) && !in_array($c->guru_bk_name, ['Admin IT Sekolah', 'Admin BK'])) {
                 $guruName = $c->guru_bk_name;
             }
 

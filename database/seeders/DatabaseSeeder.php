@@ -22,7 +22,7 @@ class DatabaseSeeder extends Seeder
         User::updateOrCreate(
             ['email' => 'admin@bkprima.sch.id'],
             [
-                'name' => 'Admin IT Sekolah',
+                'name' => 'Admin BK',
                 'username' => 'admin_bkprima',
                 'role' => 'admin',
                 'password' => Hash::make('admin2026!'),

@@ -156,12 +156,12 @@
         </div>
         <h3 class="text-sm font-bold text-slate-900">Bantuan Lupa Kata Sandi</h3>
         <p class="text-xs text-slate-500 mt-1 leading-relaxed">
-          Pemulihan akun dapat dilakukan melalui Administrator IT Sekolah atau Koordinator BK.
+          Pemulihan akun dapat dilakukan melalui Admin BK atau Koordinator BK.
         </p>
 
         <div class="mt-4 p-3 bg-slate-50 rounded-lg border border-slate-200 text-xs space-y-1">
           <div class="font-medium text-slate-700">Prosedur Pemulihan:</div>
-          <p class="text-slate-500 text-[11px]">1. Hubungi Admin IT Sekolah dengan menyertakan alamat email resmi.</p>
+          <p class="text-slate-500 text-[11px]">1. Hubungi Admin BK dengan menyertakan alamat email resmi.</p>
           <p class="text-slate-500 text-[11px]">2. Petugas akan mereset kredensial masuk akun Anda.</p>
         </div>
 
