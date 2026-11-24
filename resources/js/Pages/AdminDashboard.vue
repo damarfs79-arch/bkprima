@@ -791,7 +791,6 @@
                   <th class="py-3 px-4 text-center w-12 text-[11px] font-semibold uppercase tracking-wider text-slate-500">No</th>
                   <th class="py-3 px-4 text-[11px] font-semibold uppercase tracking-wider text-slate-500">Nama Lengkap &amp; Email</th>
                   <th class="py-3 px-4 text-[11px] font-semibold uppercase tracking-wider text-slate-500">Jabatan</th>
-                  <th class="py-3 px-4 text-[11px] font-semibold uppercase tracking-wider text-slate-500">Rombel Binaan</th>
                   <th class="py-3 px-4 text-[11px] font-semibold uppercase tracking-wider text-slate-500">No. WhatsApp</th>
                   <th class="py-3 px-4 text-center text-[11px] font-semibold uppercase tracking-wider text-slate-500">Status Akun</th>
                   <th class="py-3 px-4 text-center text-[11px] font-semibold uppercase tracking-wider text-slate-500">Aksi</th>
@@ -805,9 +804,6 @@
                     <div class="text-xs text-slate-500 font-normal mt-0.5">{{ g.email }}</div>
                   </td>
                   <td class="py-3.5 px-4 font-semibold text-slate-800">{{ g.jabatan }}</td>
-                  <td class="py-3.5 px-4">
-                    <span class="text-xs text-slate-600 font-medium">{{ Array.isArray(g.rombel) ? g.rombel.join(', ') : (g.rombel || '-') }}</span>
-                  </td>
                   <td class="py-3.5 px-4 font-mono text-slate-600">{{ g.wa || '-' }}</td>
                   <td class="py-3.5 px-4 text-center">
                     <span class="text-xs font-medium text-emerald-700">
@@ -1327,15 +1323,6 @@
               </div>
             </div>
 
-            <div>
-              <label class="block font-semibold text-slate-700 mb-1">Rombel Binaan</label>
-              <input
-                v-model="formGuru.rombelText"
-                placeholder="Pisahkan dengan koma, contoh: X RPL 1, X RPL 2"
-                class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-400"
-              />
-            </div>
-
             <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-200">
               <button type="button" @click="closeModal" class="px-4 py-2 rounded-lg border border-slate-200 font-semibold text-slate-600 hover:bg-slate-50 transition cursor-pointer">
                 Batal
@@ -1799,15 +1786,6 @@
                   class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-400"
                 />
               </div>
-            </div>
-
-            <div>
-              <label class="block font-semibold text-slate-700 mb-1">Rombel Binaan</label>
-              <input
-                v-model="formEditGuru.rombelText"
-                placeholder="Pisahkan dengan koma, contoh: X RPL 1, X RPL 2"
-                class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-400"
-              />
             </div>
 
             <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-200">
@@ -3584,27 +3562,80 @@ const loadSampleDapodikData = () => {
 const parseCsvText = (text) => {
   const lines = text.split(/\r?\n/).map(l => l.trim()).filter(Boolean)
   if (lines.length <= 1) return []
-  
-  const results = []
-  for (let i = 1; i < lines.length; i++) {
-    const line = lines[i]
-    const cols = line.includes(';') ? line.split(';') : line.split(',')
-    if (cols.length >= 2) {
-      const nisn = cols[0]?.trim().replace(/['"]/g, '') || `00829${100 + i}`
-      const name = cols[1]?.trim().replace(/['"]/g, '') || 'Siswa Baru'
-      const className = cols[2]?.trim().replace(/['"]/g, '').toUpperCase() || 'X RPL 1'
-      const gender = (cols[3]?.trim().replace(/['"]/g, '').toUpperCase() === 'P') ? 'P' : 'L'
-      const parentWa = cols[4]?.trim().replace(/['"]/g, '') || `+62 812-${1000 + i}-${2000 + i}`
-      
-      results.push({
-        nisn,
-        name,
-        className,
-        gender,
-        parentWa
-      })
+
+  // Deteksi delimiter
+  const firstLine = lines[0]
+  let delimiter = ','
+  const semicolons = (firstLine.match(/;/g) || []).length
+  const commas = (firstLine.match(/,/g) || []).length
+  const tabs = (firstLine.match(/\t/g) || []).length
+  if (semicolons > commas && semicolons > tabs) delimiter = ';'
+  else if (tabs > commas && tabs > semicolons) delimiter = '\t'
+
+  const splitRow = (rowStr) => {
+    const regex = new RegExp(`(?:^|${delimiter})(?:"([^"]*)"|([^${delimiter}]*))`, 'g')
+    const matches = []
+    let match
+    while ((match = regex.exec(rowStr)) !== null) {
+      const val = match[1] !== undefined ? match[1] : match[2]
+      matches.push((val || '').trim())
+      if (regex.lastIndex === rowStr.length && rowStr.endsWith(delimiter)) {
+        matches.push('')
+        break
+      }
     }
+    return matches.length > 0 ? matches : rowStr.split(delimiter).map(c => c.trim().replace(/^["']|["']$/g, ''))
   }
+
+  const headerRow = splitRow(lines[0])
+  const colMap = { nisn: -1, name: -1, className: -1, gender: -1, parentWa: -1 }
+
+  headerRow.forEach((col, idx) => {
+    const c = col.toLowerCase().replace(/[^a-z0-9]/g, '')
+    if (['nisn', 'nis', 'noinduk'].includes(c)) colMap.nisn = idx
+    else if (['nama', 'namasiswa', 'namalengkap', 'namapesertadidik', 'studentname'].includes(c)) colMap.name = idx
+    else if (['kelas', 'rombel', 'namarombel', 'tingkat', 'classname'].includes(c)) colMap.className = idx
+    else if (['jk', 'jeniskelamin', 'lp', 'gender', 'sex'].includes(c)) colMap.gender = idx
+    else if (['nowa', 'nohp', 'nowawali', 'telepon', 'whatsapp', 'kontak', 'parentwa'].includes(c)) colMap.parentWa = idx
+  })
+
+  const hasRecognizedHeader = colMap.name !== -1 || colMap.nisn !== -1
+  const startIndex = hasRecognizedHeader ? 1 : 0
+
+  if (!hasRecognizedHeader) {
+    colMap.nisn = 0
+    colMap.name = 1
+    colMap.className = 2
+    colMap.gender = 3
+    colMap.parentWa = 4
+  }
+
+  const results = []
+  for (let i = startIndex; i < lines.length; i++) {
+    const cols = splitRow(lines[i])
+    if (cols.length < 2) continue
+
+    const name = (colMap.name !== -1 && cols[colMap.name]) ? cols[colMap.name] : (cols[1] || '')
+    if (!name || /^(mengetahui|kepala|wali|total|jumlah)/i.test(name)) continue
+
+    const rawNisn = (colMap.nisn !== -1 && cols[colMap.nisn]) ? cols[colMap.nisn] : (cols[0] || '')
+    const nisn = rawNisn.replace(/[^a-zA-Z0-9]/g, '') || `00829${1000 + i}`
+    const rawClass = (colMap.className !== -1 && cols[colMap.className]) ? cols[colMap.className] : (cols[2] || '')
+    const className = rawClass.trim().toUpperCase() || (selectedFilterKelas.value !== 'Semua' ? selectedFilterKelas.value : 'X RPL 1')
+    const rawGender = (colMap.gender !== -1 && cols[colMap.gender]) ? cols[colMap.gender].toUpperCase() : (cols[3]?.toUpperCase() || 'L')
+    const gender = (rawGender.startsWith('P') || rawGender.includes('WANITA') || rawGender.includes('PEREMPUAN')) ? 'P' : 'L'
+    const parentWa = (colMap.parentWa !== -1 && cols[colMap.parentWa]) ? cols[colMap.parentWa] : (cols[4] || '')
+
+    results.push({
+      nis: nisn,
+      nisn,
+      name,
+      className,
+      gender,
+      parentWa: parentWa || '+62 812-3344-5566'
+    })
+  }
+
   return results
 }
 
@@ -3626,6 +3657,40 @@ const processFile = async (file) => {
   uploadError.value = ''
   isUploadingFile.value = true
 
+  const ext = file.name.split('.').pop().toLowerCase()
+
+  // Untuk file CSV atau TXT, baca langsung melalui browser secara instan
+  if (['csv', 'txt'].includes(ext)) {
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      try {
+        const text = e.target.result
+        const parsed = parseCsvText(text)
+        if (parsed.length > 0) {
+          importedStudents.value = parsed
+          if (importTargetClass.value === 'AUTO' && parsed[0]?.className) {
+            importTargetClass.value = parsed[0].className
+          }
+          showToast(`Berhasil membaca ${parsed.length} data siswa dari file ${file.name}.`)
+        } else {
+          uploadError.value = 'Tidak ada baris data siswa yang terbaca dari file CSV/TXT ini.'
+        }
+      } catch (err) {
+        console.error(err)
+        uploadError.value = 'Gagal memproses struktur file CSV.'
+      } finally {
+        isUploadingFile.value = false
+      }
+    }
+    reader.onerror = () => {
+      uploadError.value = 'Gagal membaca file dari penyimpanan lokal.'
+      isUploadingFile.value = false
+    }
+    reader.readAsText(file)
+    return
+  }
+
+  // Untuk Excel (.xlsx, .xls), proses melalui server preview
   try {
     const formData = new FormData()
     formData.append('file', file)
