@@ -195,26 +195,6 @@
         </div>
 
         <div class="flex items-center gap-3">
-          <!-- Notification Bell Button for Consultation Messages -->
-          <button
-            @click="$emit('select-tab', 'konsultasi')"
-            class="relative px-3 py-1.5 rounded-lg bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 transition cursor-pointer flex items-center gap-2"
-            title="Lihat Pesan Konsultasi Wali Murid"
-          >
-            <div>
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-              </svg>
-            </div>
-            <span class="text-xs font-medium text-slate-700">Pesan Masuk</span>
-            <span
-              v-if="unreadCount > 0"
-              class="text-xs font-semibold text-rose-600"
-            >
-              ({{ unreadCount }})
-            </span>
-          </button>
-
           <div class="px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-md text-xs text-slate-600 font-medium">
             <span>SIM-Pegawai &bull; Mode Kelola Penuh</span>
           </div>
@@ -329,14 +309,6 @@ const adminMenuItems = computed(() => [
     label: 'Dashboard & Tren 30 Hari',
     icon: () => h('svg', { xmlns: 'http://www.w3.org/2000/svg', class: 'h-4 w-4', fill: 'none', viewBox: '0 0 24 24', stroke: 'currentColor', 'stroke-width': '1.75' }, [
       h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', d: 'M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z' })
-    ])
-  },
-  {
-    key: 'konsultasi',
-    label: 'Pesan Konsultasi',
-    badge: props.unreadCount > 0 ? `${props.unreadCount} Baru` : null,
-    icon: () => h('svg', { xmlns: 'http://www.w3.org/2000/svg', class: 'h-4 w-4', fill: 'none', viewBox: '0 0 24 24', stroke: 'currentColor', 'stroke-width': '2' }, [
-      h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', d: 'M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z' })
     ])
   },
   {
