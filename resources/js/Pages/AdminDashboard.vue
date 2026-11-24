@@ -901,7 +901,54 @@
         </div>
 
         <!-- Table Kelas -->
-        <div class="bg-white rounded-lg border border-slate-200 overflow-hidden p-5 sm:p-6">
+        <div class="bg-white rounded-lg border border-slate-200 overflow-hidden p-5 sm:p-6 space-y-4">
+          <!-- Filter Bar Kelas: Search + Dropdown Kelas 10, 11, 12 -->
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div class="relative flex-1 max-w-sm">
+              <input
+                v-model="searchKelas"
+                type="text"
+                placeholder="Cari rombel, wali kelas, guru BK..."
+                class="w-full bg-slate-50 border border-slate-200 rounded-lg pl-9 pr-4 py-2 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+              />
+              <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              </span>
+            </div>
+
+            <div class="flex items-center gap-2 flex-wrap">
+              <div class="flex items-center gap-1.5">
+                <label class="text-xs font-medium text-slate-500">Tingkat:</label>
+                <select
+                  v-model="selectedFilterLevelKelas"
+                  class="bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
+                >
+                  <option value="Semua">Semua Tingkat</option>
+                  <option value="10">Kelas 10 (X)</option>
+                  <option value="11">Kelas 11 (XI)</option>
+                  <option value="12">Kelas 12 (XII)</option>
+                </select>
+              </div>
+
+              <div v-if="jurusanList.length > 0" class="flex items-center gap-1.5">
+                <label class="text-xs font-medium text-slate-500">Jurusan:</label>
+                <select
+                  v-model="selectedFilterJurusanKelas"
+                  class="bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
+                >
+                  <option value="Semua">Semua Jurusan</option>
+                  <option v-for="jur in jurusanList" :key="jur.id" :value="jur.code">{{ jur.code }}</option>
+                </select>
+              </div>
+
+              <div class="text-xs text-slate-500 pl-1 font-medium">
+                <span>({{ filteredKelasList.length }} rombel)</span>
+              </div>
+            </div>
+          </div>
+
           <div class="overflow-x-auto border border-slate-200 rounded-lg">
             <table class="w-full text-left text-xs whitespace-nowrap">
               <thead class="bg-slate-50/50 border-b border-slate-200">
@@ -916,7 +963,12 @@
                 </tr>
               </thead>
               <tbody class="divide-y divide-slate-100 bg-white">
-                <tr v-for="(k, idx) in kelasList" :key="k.id" class="hover:bg-slate-50 transition">
+                <tr v-if="filteredKelasList.length === 0">
+                  <td colspan="7" class="py-8 text-center text-slate-400">
+                    Tidak ada rombel kelas yang sesuai dengan filter tingkat atau pencarian.
+                  </td>
+                </tr>
+                <tr v-for="(k, idx) in filteredKelasList" :key="k.id" class="hover:bg-slate-50 transition">
                   <td class="py-3.5 px-4 text-center font-medium text-slate-400">{{ idx + 1 }}</td>
                   <td class="py-3.5 px-4">
                     <span class="font-bold text-slate-900 text-xs sm:text-sm">{{ k.name }}</span>
@@ -2423,6 +2475,9 @@ watch(activeTab, (val) => {
 const modalType = ref(null)
 const searchSiswa = ref('')
 const selectedFilterKelas = ref('Semua')
+const searchKelas = ref('')
+const selectedFilterLevelKelas = ref('Semua')
+const selectedFilterJurusanKelas = ref('Semua')
 
 // Notifikasi Toast
 const toastMessage = ref('')
@@ -3336,6 +3391,58 @@ watch(() => props.initialKelasList, (newVal) => {
     kelasList.value = [...newVal]
   }
 }, { deep: true })
+
+const getClassGradeNumber = (k) => {
+  if (!k) return ''
+  const name = (k.name || '').trim().toUpperCase()
+  const level = (k.level || '').trim().toUpperCase()
+  const combined = `${name} ${level}`
+
+  if (name.startsWith('XII ') || combined.includes('12') || combined.includes('(XII)')) {
+    return '12'
+  }
+  if (name.startsWith('XI ') || combined.includes('11') || combined.includes('(XI)')) {
+    return '11'
+  }
+  if (name.startsWith('X ') || combined.includes('10') || combined.includes('(X)')) {
+    return '10'
+  }
+  return ''
+}
+
+const filteredKelasList = computed(() => {
+  return kelasList.value.filter(k => {
+    // 1. Filter Tingkat Kelas (10, 11, 12)
+    if (selectedFilterLevelKelas.value !== 'Semua') {
+      const grade = getClassGradeNumber(k)
+      if (grade !== selectedFilterLevelKelas.value) {
+        return false
+      }
+    }
+
+    // 2. Filter Jurusan
+    if (selectedFilterJurusanKelas.value !== 'Semua') {
+      const jur = (k.jurusan || '').toUpperCase()
+      if (jur !== selectedFilterJurusanKelas.value.toUpperCase()) {
+        return false
+      }
+    }
+
+    // 3. Pencarian nama rombel, wali kelas, atau guru BK
+    if (searchKelas.value && searchKelas.value.trim() !== '') {
+      const q = searchKelas.value.toLowerCase().trim()
+      const matchName = (k.name || '').toLowerCase().includes(q)
+      const matchWali = (k.waliKelas || '').toLowerCase().includes(q)
+      const matchBk = (k.guruBK || '').toLowerCase().includes(q)
+      const matchJur = (k.jurusan || '').toLowerCase().includes(q)
+      if (!matchName && !matchWali && !matchBk && !matchJur) {
+        return false
+      }
+    }
+
+    return true
+  })
+})
 
 const formKelas = ref({
   level: 'Kelas 10 (X)',
