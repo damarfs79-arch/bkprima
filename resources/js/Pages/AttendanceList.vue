@@ -238,18 +238,6 @@
           <div class="text-xs text-slate-500">
             <span class="font-bold text-slate-900 text-sm">{{ filteredStudents.length }}</span> siswa
           </div>
-          <button
-            v-if="selectedClass !== 'ALL'"
-            @click="openDeleteClassModalFor(selectedClass)"
-            type="button"
-            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 transition cursor-pointer"
-            title="Hapus kelas ini beserta seluruh siswanya secara langsung"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 text-rose-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-            </svg>
-            <span>Hapus Kelas</span>
-          </button>
         </div>
       </div>
 
@@ -284,32 +272,6 @@
           <div class="text-xs font-semibold text-slate-800 flex items-center gap-2">
             <span>Daftar Siswa {{ selectedClass !== 'ALL' ? selectedClass : (selectedJurusan !== 'ALL' ? 'Jurusan ' + selectedJurusan : 'Seluruh Kelas') }}</span>
             <span class="text-slate-400 font-normal">({{ filteredStudents.length }} siswa)</span>
-          </div>
-
-          <div class="flex items-center gap-2">
-            <button
-              v-if="selectedClass !== 'ALL'"
-              @click="openDeleteClassModalFor(selectedClass)"
-              type="button"
-              class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 transition cursor-pointer"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-              </svg>
-              <span>Hapus Kelas ({{ selectedClass }})</span>
-            </button>
-            <button
-              v-else
-              @click="openDeleteClassModal"
-              type="button"
-              class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold text-slate-700 hover:text-rose-700 hover:bg-rose-50 border border-slate-200 hover:border-rose-200 transition cursor-pointer"
-              title="Hapus 1 rombel kelas beserta seluruh data siswanya secara langsung"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-              </svg>
-              <span>Hapus 1 Kelas</span>
-            </button>
           </div>
         </div>
 
