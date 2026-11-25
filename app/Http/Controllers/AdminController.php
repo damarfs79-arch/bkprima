@@ -14,8 +14,15 @@ use Illuminate\Support\Facades\Hash;
 
 class AdminController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
+        $selectedMonth = (string) $request->query('month', '');
+        $hasValidMonth = preg_match('/^\d{4}-\d{2}$/', $selectedMonth) === 1;
+        $selectedAngkatan = (string) $request->query('angkatan', 'all');
+        if (!in_array($selectedAngkatan, ['all', 'x', 'xi', 'xii'])) {
+            $selectedAngkatan = 'all';
+        }
+
         $stats = [
             'totalStudents' => Student::count(),
             'totalViolations' => Violation::count(),
@@ -84,14 +91,44 @@ class AdminController extends Controller
 
         $jurusanList = Major::orderBy('code')->get();
 
-        // 4. Hitung statistik presensi aktual dari database
-        $totalAttendances = \App\Models\Attendance::count();
-        $hadirCount = \App\Models\Attendance::where('status', 'Hadir')->count();
-        $sakitCount = \App\Models\Attendance::where('status', 'Sakit')->count();
-        $izinCount = \App\Models\Attendance::where('status', 'Izin')->count();
-        $alphaCount = \App\Models\Attendance::where('status', 'Alpa')->count();
+        // 4. Hitung statistik presensi aktual dari database (dinamis berdasarkan bulan & angkatan)
+        $applyAngkatanToStudent = function ($q) use ($selectedAngkatan) {
+            if ($selectedAngkatan === 'x') {
+                $q->where(function ($sub) {
+                    $sub->whereIn('level', ['10', 'X', 'Kelas 10 (X)'])
+                        ->orWhere('class_name', 'like', 'X %');
+                });
+            } elseif ($selectedAngkatan === 'xi') {
+                $q->where(function ($sub) {
+                    $sub->whereIn('level', ['11', 'XI', 'Kelas 11 (XI)'])
+                        ->orWhere('class_name', 'like', 'XI %');
+                });
+            } elseif ($selectedAngkatan === 'xii') {
+                $q->where(function ($sub) {
+                    $sub->whereIn('level', ['12', 'XII', 'Kelas 12 (XII)'])
+                        ->orWhere('class_name', 'like', 'XII %');
+                });
+            }
+        };
+
+        $baseAttQuery = \App\Models\Attendance::query();
+        if ($selectedAngkatan !== 'all') {
+            $baseAttQuery->whereHas('student', $applyAngkatanToStudent);
+        }
+        if ($hasValidMonth) {
+            [$y, $m] = explode('-', $selectedMonth);
+            $baseAttQuery->whereYear('date', (int) $y)->whereMonth('date', (int) $m);
+        }
+
+        $totalAttendances = (clone $baseAttQuery)->count();
+        $hadirCount = (clone $baseAttQuery)->where('status', 'Hadir')->count();
+        $terlambatCount = (clone $baseAttQuery)->where('status', 'Terlambat')->count();
+        $sakitCount = (clone $baseAttQuery)->where('status', 'Sakit')->count();
+        $izinCount = (clone $baseAttQuery)->where('status', 'Izin')->count();
+        $alphaCount = (clone $baseAttQuery)->where('status', 'Alpa')->count();
 
         $hadirRate = $totalAttendances > 0 ? round(($hadirCount / $totalAttendances) * 100, 1) : 0;
+        $terlambatRate = $totalAttendances > 0 ? round(($terlambatCount / $totalAttendances) * 100, 1) : 0;
         $sakitRate = $totalAttendances > 0 ? round(($sakitCount / $totalAttendances) * 100, 1) : 0;
         $izinRate = $totalAttendances > 0 ? round(($izinCount / $totalAttendances) * 100, 1) : 0;
         $alphaRate = $totalAttendances > 0 ? round(($alphaCount / $totalAttendances) * 100, 1) : 0;
@@ -99,18 +136,130 @@ class AdminController extends Controller
         $attendanceStats = [
             'totalPresensi' => $totalAttendances,
             'hadirCount' => $hadirCount,
+            'terlambatCount' => $terlambatCount,
             'sakitCount' => $sakitCount,
             'izinCount' => $izinCount,
             'alphaCount' => $alphaCount,
             'hadirRate' => $hadirRate,
+            'terlambatRate' => $terlambatRate,
             'sakitRate' => $sakitRate,
             'izinRate' => $izinRate,
             'alphaRate' => $alphaRate,
         ];
 
+        // 5. Rincian Kehadiran Per Bulan (6 bulan terakhir)
+        $indonesianMonths = [
+            1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
+            5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
+            9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember',
+        ];
+        $shortMonths = [
+            1 => 'Jan', 2 => 'Feb', 3 => 'Mar', 4 => 'Apr',
+            5 => 'Mei', 6 => 'Jun', 7 => 'Jul', 8 => 'Agu',
+            9 => 'Sep', 10 => 'Okt', 11 => 'Nov', 12 => 'Des',
+        ];
+
+        $monthlyBreakdown = [];
+        $prevRate = null;
+
+        for ($i = 5; $i >= 0; $i--) {
+            $monthDate = now()->subMonths($i);
+            $year = $monthDate->year;
+            $month = $monthDate->month;
+            $monthKey = $monthDate->format('Y-m');
+            $monthNameId = ($indonesianMonths[$month] ?? $monthDate->format('F')) . ' ' . $year;
+            $shortNameId = ($shortMonths[$month] ?? $monthDate->format('M')) . ' ' . $year;
+
+            $mQuery = \App\Models\Attendance::whereYear('date', $year)->whereMonth('date', $month);
+            if ($selectedAngkatan !== 'all') {
+                $mQuery->whereHas('student', $applyAngkatanToStudent);
+            }
+
+            $mTotal = (clone $mQuery)->count();
+            $mHadir = (clone $mQuery)->where('status', 'Hadir')->count();
+            $mLate = (clone $mQuery)->where('status', 'Terlambat')->count();
+            $mSakit = (clone $mQuery)->where('status', 'Sakit')->count();
+            $mIzin = (clone $mQuery)->where('status', 'Izin')->count();
+            $mAlpa = (clone $mQuery)->where('status', 'Alpa')->count();
+
+            $mHadirRate = $mTotal > 0 ? round(($mHadir / $mTotal) * 100, 1) : 0;
+            $mLateRate = $mTotal > 0 ? round(($mLate / $mTotal) * 100, 1) : 0;
+            $mAttRate = $mTotal > 0 ? round((($mHadir + $mLate) / $mTotal) * 100, 1) : 0;
+
+            $diff = $prevRate !== null ? round($mAttRate - $prevRate, 1) : 0;
+            $trend = $diff >= 0 ? 'naik' : 'turun';
+            $delta = ($diff >= 0 ? '+' : '') . $diff . '%';
+            $prevRate = $mAttRate;
+
+            $monthlyBreakdown[] = [
+                'id' => $monthKey,
+                'month_key' => $monthKey,
+                'label' => $monthNameId,
+                'shortName' => $shortNameId,
+                'total' => $mTotal,
+                'hadir' => $mHadir,
+                'terlambat' => $mLate,
+                'sakit' => $mSakit,
+                'izin' => $mIzin,
+                'alpha' => $mAlpa,
+                'hadirRate' => $mHadirRate,
+                'hadir_rate' => $mHadirRate,
+                'terlambat_rate' => $mLateRate,
+                'sakit_rate' => $mTotal > 0 ? round(($mSakit / $mTotal) * 100, 1) : 0,
+                'izin_rate' => $mTotal > 0 ? round(($mIzin / $mTotal) * 100, 1) : 0,
+                'alpha_rate' => $mTotal > 0 ? round(($mAlpa / $mTotal) * 100, 1) : 0,
+                'attendance_rate' => $mAttRate,
+                'trend' => $trend,
+                'delta' => $delta,
+            ];
+        }
+
+        // Urutkan terbaru terlebih dahulu untuk tabel rincian bulanan
+        $monthlyBreakdown = array_reverse($monthlyBreakdown);
+
+        // 6. Rincian Kehadiran Per Siswa sesuai Bulan & Angkatan Terpilih
+        $studentDetailQuery = Student::active()->orderBy('class_name')->orderBy('name');
+        if ($selectedAngkatan !== 'all') {
+            $applyAngkatanToStudent($studentDetailQuery);
+        }
+
+        $studentMonthlyDetails = $studentDetailQuery->with(['attendances' => function ($q) use ($hasValidMonth, $selectedMonth) {
+            if ($hasValidMonth) {
+                [$y, $m] = explode('-', $selectedMonth);
+                $q->whereYear('date', (int) $y)->whereMonth('date', (int) $m);
+            }
+        }])->get()->map(function ($s) {
+            $atts = $s->attendances;
+            $hadir = $atts->where('status', 'Hadir')->count();
+            $terlambat = $atts->where('status', 'Terlambat')->count();
+            $sakit = $atts->where('status', 'Sakit')->count();
+            $izin = $atts->where('status', 'Izin')->count();
+            $alpa = $atts->where('status', 'Alpa')->count();
+            $total = $atts->count();
+            $rate = $total > 0 ? round((($hadir + $terlambat) / $total) * 100, 1) : 0;
+
+            return [
+                'id' => $s->id,
+                'nis' => $s->nis,
+                'name' => $s->name,
+                'class_name' => $s->class_name,
+                'hadir' => $hadir,
+                'terlambat' => $terlambat,
+                'sakit' => $sakit,
+                'izin' => $izin,
+                'alpha' => $alpa,
+                'total' => $total,
+                'rate' => $rate,
+            ];
+        })->values();
+
         return Inertia::render('AdminDashboard', [
             'stats' => $stats,
             'attendanceStats' => $attendanceStats,
+            'monthlyBreakdown' => $monthlyBreakdown,
+            'studentMonthlyDetails' => $studentMonthlyDetails,
+            'activeMonth' => $hasValidMonth ? $selectedMonth : '',
+            'activeAngkatan' => $selectedAngkatan,
             'consultations' => $consultationRequests,
             'unreadConsultationsCount' => $unreadConsultationsCount,
             'initialGuruBkList' => $guruBkList,
