@@ -1,12 +1,9 @@
 <template>
-  <AdminLayout :active-tab="activeTab" :unread-count="unreadConsultationCount" @select-tab="activeTab = $event">
+  <AdminLayout :active-tab="activeTab" @select-tab="activeTab = $event">
     <div class="max-w-6xl mx-auto space-y-6">
 
       <!-- ============================================================ -->
-      <!-- HEADER CARD & ROLE BADGE                                     -->
-      <!-- ============================================================ -->
-      <!-- ============================================================ -->
-      <!-- HEADER CARD & ROLE BADGE                                     -->
+      <!-- HEADER CARD                                                  -->
       <!-- ============================================================ -->
       <div class="bg-white rounded-lg p-5 sm:p-6 border border-slate-200">
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -15,37 +12,6 @@
             <p class="text-xs sm:text-sm text-slate-500 mt-1">Kelola data Guru BK, Rombel Kelas, Siswa, dan pantau tren fluktuasi kehadiran 1 bulan.</p>
           </div>
         </div>
-      </div>
-
-      <!-- Notification Banner: Pesan Konsultasi Baru dari Halaman Tamu -->
-      <div
-        v-if="unreadConsultationCount > 0 && activeTab !== 'konsultasi'"
-        class="p-4 sm:p-5 rounded-lg bg-amber-50 border border-amber-200 text-amber-900 flex flex-col sm:flex-row sm:items-center justify-between gap-3 animate-in fade-in"
-      >
-        <div class="flex items-center gap-3">
-          <div class="w-9 h-9 rounded-lg bg-amber-100 text-amber-800 flex items-center justify-center shrink-0">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-            </svg>
-          </div>
-          <div>
-            <p class="text-xs sm:text-sm font-bold text-slate-900">
-              Terdapat {{ unreadConsultationCount }} Pesan Konsultasi Baru Masuk dari Halaman Tamu
-            </p>
-            <p class="text-[11px] text-slate-600 mt-0.5">
-              Wali murid mengirimkan permohonan bimbingan/konsultasi siswa yang membutuhkan tindak lanjut Guru BK.
-            </p>
-          </div>
-        </div>
-        <button
-          @click="activeTab = 'konsultasi'"
-          class="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs rounded-lg transition cursor-pointer self-start sm:self-auto shrink-0 flex items-center gap-1.5"
-        >
-          <span>Tindak Lanjuti Pesan</span>
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
-          </svg>
-        </button>
       </div>
 
       <!-- ============================================================ -->
@@ -825,7 +791,6 @@
                   <th class="py-3 px-4 text-center w-12 text-[11px] font-semibold uppercase tracking-wider text-slate-500">No</th>
                   <th class="py-3 px-4 text-[11px] font-semibold uppercase tracking-wider text-slate-500">Nama Lengkap &amp; Email</th>
                   <th class="py-3 px-4 text-[11px] font-semibold uppercase tracking-wider text-slate-500">Jabatan</th>
-                  <th class="py-3 px-4 text-[11px] font-semibold uppercase tracking-wider text-slate-500">Rombel Binaan</th>
                   <th class="py-3 px-4 text-[11px] font-semibold uppercase tracking-wider text-slate-500">No. WhatsApp</th>
                   <th class="py-3 px-4 text-center text-[11px] font-semibold uppercase tracking-wider text-slate-500">Status Akun</th>
                   <th class="py-3 px-4 text-center text-[11px] font-semibold uppercase tracking-wider text-slate-500">Aksi</th>
@@ -839,9 +804,6 @@
                     <div class="text-xs text-slate-500 font-normal mt-0.5">{{ g.email }}</div>
                   </td>
                   <td class="py-3.5 px-4 font-semibold text-slate-800">{{ g.jabatan }}</td>
-                  <td class="py-3.5 px-4">
-                    <span class="text-xs text-slate-600 font-medium">{{ Array.isArray(g.rombel) ? g.rombel.join(', ') : (g.rombel || '-') }}</span>
-                  </td>
                   <td class="py-3.5 px-4 font-mono text-slate-600">{{ g.wa || '-' }}</td>
                   <td class="py-3.5 px-4 text-center">
                     <span class="text-xs font-medium text-emerald-700">
@@ -901,7 +863,54 @@
         </div>
 
         <!-- Table Kelas -->
-        <div class="bg-white rounded-lg border border-slate-200 overflow-hidden p-5 sm:p-6">
+        <div class="bg-white rounded-lg border border-slate-200 overflow-hidden p-5 sm:p-6 space-y-4">
+          <!-- Filter Bar Kelas: Search + Dropdown Kelas 10, 11, 12 -->
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div class="relative flex-1 max-w-sm">
+              <input
+                v-model="searchKelas"
+                type="text"
+                placeholder="Cari rombel, wali kelas, guru BK..."
+                class="w-full bg-slate-50 border border-slate-200 rounded-lg pl-9 pr-4 py-2 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+              />
+              <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              </span>
+            </div>
+
+            <div class="flex items-center gap-2 flex-wrap">
+              <div class="flex items-center gap-1.5">
+                <label class="text-xs font-medium text-slate-500">Tingkat:</label>
+                <select
+                  v-model="selectedFilterLevelKelas"
+                  class="bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
+                >
+                  <option value="Semua">Semua Tingkat</option>
+                  <option value="10">Kelas 10 (X)</option>
+                  <option value="11">Kelas 11 (XI)</option>
+                  <option value="12">Kelas 12 (XII)</option>
+                </select>
+              </div>
+
+              <div v-if="jurusanList.length > 0" class="flex items-center gap-1.5">
+                <label class="text-xs font-medium text-slate-500">Jurusan:</label>
+                <select
+                  v-model="selectedFilterJurusanKelas"
+                  class="bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
+                >
+                  <option value="Semua">Semua Jurusan</option>
+                  <option v-for="jur in jurusanList" :key="jur.id" :value="jur.code">{{ jur.code }}</option>
+                </select>
+              </div>
+
+              <div class="text-xs text-slate-500 pl-1 font-medium">
+                <span>({{ filteredKelasList.length }} rombel)</span>
+              </div>
+            </div>
+          </div>
+
           <div class="overflow-x-auto border border-slate-200 rounded-lg">
             <table class="w-full text-left text-xs whitespace-nowrap">
               <thead class="bg-slate-50/50 border-b border-slate-200">
@@ -916,7 +925,12 @@
                 </tr>
               </thead>
               <tbody class="divide-y divide-slate-100 bg-white">
-                <tr v-for="(k, idx) in kelasList" :key="k.id" class="hover:bg-slate-50 transition">
+                <tr v-if="filteredKelasList.length === 0">
+                  <td colspan="7" class="py-8 text-center text-slate-400">
+                    Tidak ada rombel kelas yang sesuai dengan filter tingkat atau pencarian.
+                  </td>
+                </tr>
+                <tr v-for="(k, idx) in filteredKelasList" :key="k.id" class="hover:bg-slate-50 transition">
                   <td class="py-3.5 px-4 text-center font-medium text-slate-400">{{ idx + 1 }}</td>
                   <td class="py-3.5 px-4">
                     <span class="font-bold text-slate-900 text-xs sm:text-sm">{{ k.name }}</span>
@@ -1110,181 +1124,10 @@
         </div>
       </div>
 
-      <!-- ============================================================ -->
-      <!-- TAB 5: PESAN KONSULTASI WALI MURID & TAMU                     -->
-      <!-- ============================================================ -->
-      <div v-if="activeTab === 'konsultasi'" class="space-y-6 animate-in fade-in duration-150">
-        
-        <!-- Header Strip Pesan Konsultasi -->
-        <div class="bg-white rounded-lg border border-slate-200 p-5 sm:p-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div>
-            <div class="flex items-center gap-2 mb-1">
-              <span class="text-xs font-semibold text-blue-700">Inbox Layanan Konseling</span>
-              <span v-if="unreadConsultationCount > 0" class="text-xs font-medium text-rose-600">
-                &bull; {{ unreadConsultationCount }} Perlu Tindak Lanjut
-              </span>
-            </div>
-            <h2 class="text-lg sm:text-xl font-bold text-slate-900 tracking-tight">Pesan Konsultasi Wali Murid</h2>
-            <p class="text-xs text-slate-500 mt-0.5">Daftar pesan dan permohonan pendampingan yang dikirimkan oleh wali murid melalui Halaman Tamu.</p>
-          </div>
 
-          <!-- Quick Stats Pill -->
-          <div class="flex items-center gap-2 self-start md:self-auto text-xs">
-            <div class="px-3 py-1.5 rounded-lg bg-slate-50 border border-slate-200 text-slate-700 font-semibold">
-              Total: <strong class="text-slate-900">{{ consultationList.length }}</strong>
-            </div>
-            <div class="px-3 py-1.5 rounded-lg bg-amber-50 border border-amber-200 text-amber-800 font-semibold">
-              Belum Dihubungi: <strong>{{ unreadConsultationCount }}</strong>
-            </div>
-            <div class="px-3 py-1.5 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800 font-semibold">
-              Selesai: <strong>{{ contactedCount }}</strong>
-            </div>
-          </div>
-        </div>
-
-        <!-- Filter & Search List -->
-        <div class="bg-white rounded-lg border border-slate-200 overflow-hidden p-5 sm:p-6 space-y-4">
-          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <div class="relative flex-1 max-w-md">
-              <input
-                v-model="searchConsultation"
-                type="text"
-                placeholder="Cari nama wali, siswa, atau topik..."
-                class="w-full bg-slate-50 border border-slate-200 rounded-lg pl-9 pr-4 py-2 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
-              />
-              <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
-              </span>
-            </div>
-
-            <div class="flex items-center gap-2">
-              <select
-                v-model="filterConsultationStatus"
-                class="bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
-              >
-                <option value="Semua">Semua Status</option>
-                <option value="Belum Dihubungi">Belum Dihubungi</option>
-                <option value="Sudah Dihubungi">Sudah Dihubungi</option>
-              </select>
-            </div>
-          </div>
-
-          <!-- Table of Consultation Messages -->
-          <div class="overflow-x-auto border border-slate-200 rounded-lg">
-            <table class="w-full text-left text-xs">
-              <thead class="bg-slate-50/50 border-b border-slate-200">
-                <tr>
-                  <th class="py-3 px-4 text-center w-12 text-[11px] font-semibold uppercase tracking-wider text-slate-500">No</th>
-                  <th class="py-3 px-4 text-[11px] font-semibold uppercase tracking-wider text-slate-500">Nama Wali Murid</th>
-                  <th class="py-3 px-4 text-[11px] font-semibold uppercase tracking-wider text-slate-500">Siswa &amp; Kelas</th>
-                  <th class="py-3 px-4 min-w-[240px] text-[11px] font-semibold uppercase tracking-wider text-slate-500">Topik Konsultasi &amp; Pesan</th>
-                  <th class="py-3 px-4 text-[11px] font-semibold uppercase tracking-wider text-slate-500">Waktu Masuk</th>
-                  <th class="py-3 px-4 text-center text-[11px] font-semibold uppercase tracking-wider text-slate-500">Status</th>
-                  <th class="py-3 px-4 text-center text-[11px] font-semibold uppercase tracking-wider text-slate-500">Tindakan</th>
-                </tr>
-              </thead>
-              <tbody class="divide-y divide-slate-100 bg-white">
-                <tr
-                  v-for="(item, idx) in filteredConsultations"
-                  :key="item.id"
-                  class="hover:bg-slate-50 transition"
-                  :class="item.status === 'unread' ? 'bg-amber-50/30 font-medium' : ''"
-                >
-                  <td class="py-3.5 px-4 text-center font-medium text-slate-400">{{ idx + 1 }}</td>
-                  
-                  <!-- Nama Wali & No Telp -->
-                  <td class="py-3.5 px-4">
-                    <span class="font-bold text-slate-900 block leading-tight">{{ item.parent_name }}</span>
-                    <span v-if="item.phone" class="text-xs text-slate-500 font-normal block mt-0.5">{{ item.phone }}</span>
-                    <span v-else class="text-xs text-slate-400 font-normal block mt-0.5">Kontak via data siswa</span>
-                  </td>
-
-                  <!-- Siswa & Kelas -->
-                  <td class="py-3.5 px-4">
-                    <span class="font-bold text-slate-800 block">{{ item.student_name }}</span>
-                  </td>
-
-                  <!-- Topik Pesan -->
-                  <td class="py-3.5 px-4">
-                    <p class="text-xs text-slate-700 leading-relaxed max-w-md">{{ item.topic }}</p>
-                  </td>
-
-                  <!-- Waktu Masuk -->
-                  <td class="py-3.5 px-4 text-slate-500 text-[11px] whitespace-nowrap">
-                    {{ formatConsultationTime(item.created_at) }}
-                  </td>
-
-                  <!-- Status -->
-                  <td class="py-3.5 px-4 text-center whitespace-nowrap">
-                    <span
-                      class="text-xs font-medium"
-                      :class="item.status === 'unread' ? 'text-amber-700' : 'text-emerald-700'"
-                    >
-                      {{ item.status === 'unread' ? 'Perlu Dihubungi' : 'Sudah Dihubungi' }}
-                    </span>
-                  </td>
-
-                  <!-- Tindakan -->
-                  <td class="py-3.5 px-4 text-center whitespace-nowrap">
-                    <div class="flex items-center justify-center gap-1.5">
-                      <!-- WhatsApp Hubungi -->
-                      <button
-                        @click="openWhatsAppToParent(item)"
-                        class="px-2.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[11px] flex items-center gap-1 transition cursor-pointer"
-                        title="Hubungi langsung via WhatsApp"
-                      >
-                        <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">
-                          <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.77-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.299.045-.677.063-1.092-.069-.252-.08-.575-.187-.988-.365-1.739-.751-2.874-2.502-2.961-2.617-.087-.116-.708-.94-.708-1.793s.448-1.273.607-1.446c.159-.173.346-.217.462-.217l.332.006c.106.005.249-.04.39.299.144.347.491 1.2.534 1.288.043.087.072.188.014.304-.058.116-.087.188-.173.289l-.26.304c-.087.086-.177.18-.076.354.101.174.449.741.964 1.2.662.589 1.22.771 1.394.858.173.086.275.072.376-.044.101-.116.433-.506.549-.68.116-.173.231-.145.39-.087s1.011.477 1.184.564.289.13.332.202c.043.073.043.419-.101.824z"/>
-                        </svg>
-                        <span>WhatsApp</span>
-                      </button>
-
-                      <!-- Toggle Selesai / Belum -->
-                      <button
-                        v-if="item.status === 'unread'"
-                        @click="confirmApproveConsultation(item)"
-                        class="px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-[11px] border border-slate-200 transition cursor-pointer"
-                        title="Tandai sudah dihubungi oleh Guru BK"
-                      >
-                        Tandai Selesai
-                      </button>
-
-                      <!-- Hapus -->
-                      <button
-                        @click="confirmDeleteConsultation(item)"
-                        class="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-md transition cursor-pointer"
-                        title="Hapus riwayat pesan"
-                      >
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                        </svg>
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-
-                <tr v-if="filteredConsultations.length === 0">
-                  <td colspan="7" class="py-12 text-center">
-                    <div class="flex flex-col items-center justify-center text-slate-400">
-                      <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-slate-300 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
-                      </svg>
-                      <p class="text-xs font-bold text-slate-600">Tidak ada pesan konsultasi</p>
-                      <p class="text-[11px] text-slate-400 mt-0.5">Pesan yang dikirimkan oleh wali murid di Halaman Tamu akan muncul di sini secara otomatis.</p>
-                    </div>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-      </div>
 
       <!-- ============================================================ -->
-      <!-- TAB 6: PENGATURAN SEKOLAH, KEPALA SEKOLAH & SEMESTER          -->
+      <!-- TAB 5: PENGATURAN SEKOLAH, KEPALA SEKOLAH & SEMESTER          -->
       <!-- ============================================================ -->
       <div v-if="activeTab === 'pengaturan'" class="space-y-6 animate-in fade-in duration-150">
         
@@ -1478,15 +1321,6 @@
                   class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-400"
                 />
               </div>
-            </div>
-
-            <div>
-              <label class="block font-semibold text-slate-700 mb-1">Rombel Binaan</label>
-              <input
-                v-model="formGuru.rombelText"
-                placeholder="Pisahkan dengan koma, contoh: X RPL 1, X RPL 2"
-                class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-400"
-              />
             </div>
 
             <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-200">
@@ -1954,15 +1788,6 @@
               </div>
             </div>
 
-            <div>
-              <label class="block font-semibold text-slate-700 mb-1">Rombel Binaan</label>
-              <input
-                v-model="formEditGuru.rombelText"
-                placeholder="Pisahkan dengan koma, contoh: X RPL 1, X RPL 2"
-                class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-400"
-              />
-            </div>
-
             <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-200">
               <button type="button" @click="closeModal" class="px-4 py-2 rounded-lg border border-slate-200 font-semibold text-slate-600 hover:bg-slate-50 transition cursor-pointer">
                 Batal
@@ -2402,11 +2227,11 @@ const getSavedTab = () => {
   if (typeof window !== 'undefined') {
     const params = new URLSearchParams(window.location.search)
     const tabParam = params.get('tab')
-    if (tabParam && ['dashboard', 'guru', 'kelas', 'siswa', 'konsultasi', 'pengaturan'].includes(tabParam)) {
+    if (tabParam && ['dashboard', 'guru', 'kelas', 'siswa', 'pengaturan'].includes(tabParam)) {
       return tabParam
     }
     const saved = localStorage.getItem('bkprima_admin_active_tab')
-    if (saved && ['dashboard', 'guru', 'kelas', 'siswa', 'konsultasi', 'pengaturan'].includes(saved)) {
+    if (saved && ['dashboard', 'guru', 'kelas', 'siswa', 'pengaturan'].includes(saved)) {
       return saved
     }
   }
@@ -2423,6 +2248,9 @@ watch(activeTab, (val) => {
 const modalType = ref(null)
 const searchSiswa = ref('')
 const selectedFilterKelas = ref('Semua')
+const searchKelas = ref('')
+const selectedFilterLevelKelas = ref('Semua')
+const selectedFilterJurusanKelas = ref('Semua')
 
 // Notifikasi Toast
 const toastMessage = ref('')
@@ -2467,14 +2295,6 @@ const tabs = computed(() => [
     icon: () => h('svg', { xmlns: 'http://www.w3.org/2000/svg', class: 'h-4 w-4', fill: 'none', viewBox: '0 0 24 24', stroke: 'currentColor', 'stroke-width': '2' }, [
       h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', d: 'M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z' }),
       h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', d: 'M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z' })
-    ])
-  },
-  {
-    id: 'konsultasi',
-    label: 'Pesan Konsultasi',
-    count: unreadConsultationCount.value > 0 ? unreadConsultationCount.value : undefined,
-    icon: () => h('svg', { xmlns: 'http://www.w3.org/2000/svg', class: 'h-4 w-4', fill: 'none', viewBox: '0 0 24 24', stroke: 'currentColor', 'stroke-width': '2' }, [
-      h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', d: 'M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z' })
     ])
   },
   {
@@ -3255,6 +3075,58 @@ watch(() => props.initialKelasList, (newVal) => {
   }
 }, { deep: true })
 
+const getClassGradeNumber = (k) => {
+  if (!k) return ''
+  const name = (k.name || '').trim().toUpperCase()
+  const level = (k.level || '').trim().toUpperCase()
+  const combined = `${name} ${level}`
+
+  if (name.startsWith('XII ') || combined.includes('12') || combined.includes('(XII)')) {
+    return '12'
+  }
+  if (name.startsWith('XI ') || combined.includes('11') || combined.includes('(XI)')) {
+    return '11'
+  }
+  if (name.startsWith('X ') || combined.includes('10') || combined.includes('(X)')) {
+    return '10'
+  }
+  return ''
+}
+
+const filteredKelasList = computed(() => {
+  return kelasList.value.filter(k => {
+    // 1. Filter Tingkat Kelas (10, 11, 12)
+    if (selectedFilterLevelKelas.value !== 'Semua') {
+      const grade = getClassGradeNumber(k)
+      if (grade !== selectedFilterLevelKelas.value) {
+        return false
+      }
+    }
+
+    // 2. Filter Jurusan
+    if (selectedFilterJurusanKelas.value !== 'Semua') {
+      const jur = (k.jurusan || '').toUpperCase()
+      if (jur !== selectedFilterJurusanKelas.value.toUpperCase()) {
+        return false
+      }
+    }
+
+    // 3. Pencarian nama rombel, wali kelas, atau guru BK
+    if (searchKelas.value && searchKelas.value.trim() !== '') {
+      const q = searchKelas.value.toLowerCase().trim()
+      const matchName = (k.name || '').toLowerCase().includes(q)
+      const matchWali = (k.waliKelas || '').toLowerCase().includes(q)
+      const matchBk = (k.guruBK || '').toLowerCase().includes(q)
+      const matchJur = (k.jurusan || '').toLowerCase().includes(q)
+      if (!matchName && !matchWali && !matchBk && !matchJur) {
+        return false
+      }
+    }
+
+    return true
+  })
+})
+
 const formKelas = ref({
   level: 'Kelas 10 (X)',
   jurusan_id: '',
@@ -3615,27 +3487,80 @@ const loadSampleDapodikData = () => {
 const parseCsvText = (text) => {
   const lines = text.split(/\r?\n/).map(l => l.trim()).filter(Boolean)
   if (lines.length <= 1) return []
-  
-  const results = []
-  for (let i = 1; i < lines.length; i++) {
-    const line = lines[i]
-    const cols = line.includes(';') ? line.split(';') : line.split(',')
-    if (cols.length >= 2) {
-      const nisn = cols[0]?.trim().replace(/['"]/g, '') || `00829${100 + i}`
-      const name = cols[1]?.trim().replace(/['"]/g, '') || 'Siswa Baru'
-      const className = cols[2]?.trim().replace(/['"]/g, '').toUpperCase() || 'X RPL 1'
-      const gender = (cols[3]?.trim().replace(/['"]/g, '').toUpperCase() === 'P') ? 'P' : 'L'
-      const parentWa = cols[4]?.trim().replace(/['"]/g, '') || `+62 812-${1000 + i}-${2000 + i}`
-      
-      results.push({
-        nisn,
-        name,
-        className,
-        gender,
-        parentWa
-      })
+
+  // Deteksi delimiter
+  const firstLine = lines[0]
+  let delimiter = ','
+  const semicolons = (firstLine.match(/;/g) || []).length
+  const commas = (firstLine.match(/,/g) || []).length
+  const tabs = (firstLine.match(/\t/g) || []).length
+  if (semicolons > commas && semicolons > tabs) delimiter = ';'
+  else if (tabs > commas && tabs > semicolons) delimiter = '\t'
+
+  const splitRow = (rowStr) => {
+    const regex = new RegExp(`(?:^|${delimiter})(?:"([^"]*)"|([^${delimiter}]*))`, 'g')
+    const matches = []
+    let match
+    while ((match = regex.exec(rowStr)) !== null) {
+      const val = match[1] !== undefined ? match[1] : match[2]
+      matches.push((val || '').trim())
+      if (regex.lastIndex === rowStr.length && rowStr.endsWith(delimiter)) {
+        matches.push('')
+        break
+      }
     }
+    return matches.length > 0 ? matches : rowStr.split(delimiter).map(c => c.trim().replace(/^["']|["']$/g, ''))
   }
+
+  const headerRow = splitRow(lines[0])
+  const colMap = { nisn: -1, name: -1, className: -1, gender: -1, parentWa: -1 }
+
+  headerRow.forEach((col, idx) => {
+    const c = col.toLowerCase().replace(/[^a-z0-9]/g, '')
+    if (['nisn', 'nis', 'noinduk'].includes(c)) colMap.nisn = idx
+    else if (['nama', 'namasiswa', 'namalengkap', 'namapesertadidik', 'studentname'].includes(c)) colMap.name = idx
+    else if (['kelas', 'rombel', 'namarombel', 'tingkat', 'classname'].includes(c)) colMap.className = idx
+    else if (['jk', 'jeniskelamin', 'lp', 'gender', 'sex'].includes(c)) colMap.gender = idx
+    else if (['nowa', 'nohp', 'nowawali', 'telepon', 'whatsapp', 'kontak', 'parentwa'].includes(c)) colMap.parentWa = idx
+  })
+
+  const hasRecognizedHeader = colMap.name !== -1 || colMap.nisn !== -1
+  const startIndex = hasRecognizedHeader ? 1 : 0
+
+  if (!hasRecognizedHeader) {
+    colMap.nisn = 0
+    colMap.name = 1
+    colMap.className = 2
+    colMap.gender = 3
+    colMap.parentWa = 4
+  }
+
+  const results = []
+  for (let i = startIndex; i < lines.length; i++) {
+    const cols = splitRow(lines[i])
+    if (cols.length < 2) continue
+
+    const name = (colMap.name !== -1 && cols[colMap.name]) ? cols[colMap.name] : (cols[1] || '')
+    if (!name || /^(mengetahui|kepala|wali|total|jumlah)/i.test(name)) continue
+
+    const rawNisn = (colMap.nisn !== -1 && cols[colMap.nisn]) ? cols[colMap.nisn] : (cols[0] || '')
+    const nisn = rawNisn.replace(/[^a-zA-Z0-9]/g, '') || `00829${1000 + i}`
+    const rawClass = (colMap.className !== -1 && cols[colMap.className]) ? cols[colMap.className] : (cols[2] || '')
+    const className = rawClass.trim().toUpperCase() || (selectedFilterKelas.value !== 'Semua' ? selectedFilterKelas.value : 'X RPL 1')
+    const rawGender = (colMap.gender !== -1 && cols[colMap.gender]) ? cols[colMap.gender].toUpperCase() : (cols[3]?.toUpperCase() || 'L')
+    const gender = (rawGender.startsWith('P') || rawGender.includes('WANITA') || rawGender.includes('PEREMPUAN')) ? 'P' : 'L'
+    const parentWa = (colMap.parentWa !== -1 && cols[colMap.parentWa]) ? cols[colMap.parentWa] : (cols[4] || '')
+
+    results.push({
+      nis: nisn,
+      nisn,
+      name,
+      className,
+      gender,
+      parentWa: parentWa || '+62 812-3344-5566'
+    })
+  }
+
   return results
 }
 
@@ -3657,6 +3582,40 @@ const processFile = async (file) => {
   uploadError.value = ''
   isUploadingFile.value = true
 
+  const ext = file.name.split('.').pop().toLowerCase()
+
+  // Untuk file CSV atau TXT, baca langsung melalui browser secara instan
+  if (['csv', 'txt'].includes(ext)) {
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      try {
+        const text = e.target.result
+        const parsed = parseCsvText(text)
+        if (parsed.length > 0) {
+          importedStudents.value = parsed
+          if (importTargetClass.value === 'AUTO' && parsed[0]?.className) {
+            importTargetClass.value = parsed[0].className
+          }
+          showToast(`Berhasil membaca ${parsed.length} data siswa dari file ${file.name}.`)
+        } else {
+          uploadError.value = 'Tidak ada baris data siswa yang terbaca dari file CSV/TXT ini.'
+        }
+      } catch (err) {
+        console.error(err)
+        uploadError.value = 'Gagal memproses struktur file CSV.'
+      } finally {
+        isUploadingFile.value = false
+      }
+    }
+    reader.onerror = () => {
+      uploadError.value = 'Gagal membaca file dari penyimpanan lokal.'
+      isUploadingFile.value = false
+    }
+    reader.readAsText(file)
+    return
+  }
+
+  // Untuk Excel (.xlsx, .xls), proses melalui server preview
   try {
     const formData = new FormData()
     formData.append('file', file)
@@ -3789,161 +3748,4 @@ const closeModal = () => {
   errorMessageJurusan.value = ''
   formJurusan.value = { code: '', name: '', description: '' }
 }
-
-// ==========================================
-// 6. PESAN KONSULTASI TAMU & NOTIFIKASI
-// ==========================================
-const consultationList = ref([])
-const searchConsultation = ref('')
-const filterConsultationStatus = ref('Semua')
-
-const syncConsultations = () => {
-  if (Array.isArray(props.consultations)) {
-    consultationList.value = [...props.consultations]
-  } else {
-    consultationList.value = []
-  }
-}
-
-const unreadConsultationCount = computed(() => {
-  return consultationList.value.filter(c => c.status === 'unread').length
-})
-
-const contactedCount = computed(() => {
-  return consultationList.value.filter(c => c.status === 'contacted').length
-})
-
-const filteredConsultations = computed(() => {
-  return consultationList.value.filter(c => {
-    const q = searchConsultation.value.toLowerCase().trim()
-    const matchQuery = !q || 
-      (c.parent_name && c.parent_name.toLowerCase().includes(q)) || 
-      (c.student_name && c.student_name.toLowerCase().includes(q)) ||
-      (c.topic && c.topic.toLowerCase().includes(q))
-    
-    const matchStatus = filterConsultationStatus.value === 'Semua' || 
-      (filterConsultationStatus.value === 'Belum Dihubungi' && c.status === 'unread') ||
-      (filterConsultationStatus.value === 'Sudah Dihubungi' && c.status === 'contacted')
-
-    return matchQuery && matchStatus
-  })
-})
-
-const formatConsultationTime = (isoString) => {
-  if (!isoString) return '-'
-  try {
-    const d = new Date(isoString)
-    return d.toLocaleString('id-ID', {
-      day: 'numeric',
-      month: 'short',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    }) + ' WIB'
-  } catch (e) {
-    return isoString
-  }
-}
-
-const markConsultationContacted = async (item) => {
-  item.status = 'contacted'
-  item.contacted_at = new Date().toISOString()
-  
-  try {
-    localStorage.setItem('bk_prima_consultations', JSON.stringify(consultationList.value))
-  } catch (e) {}
-
-  try {
-    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
-    await fetch(`/admin/konsultasi/${item.id}`, {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'X-Requested-With': 'XMLHttpRequest',
-        ...(csrfToken ? { 'X-CSRF-TOKEN': csrfToken } : {})
-      },
-      body: JSON.stringify({ status: 'contacted' })
-    })
-  } catch (e) {}
-}
-
-const confirmApproveConsultation = (item) => {
-  confirmModal.value = {
-    show: true,
-    type: 'approve',
-    title: 'Setujui & Tandai Pesan Selesai',
-    message: 'Konfirmasi bahwa permohonan bimbingan dan konsultasi dari wali murid ini telah ditindaklanjuti dan disetujui?',
-    targetInfo: {
-      name: `Wali: ${item.parent_name}`,
-      tag: 'Disetujui',
-      sub: `Siswa: ${item.student_name} • Kontak: ${item.phone || '-'}`
-    },
-    confirmText: 'Setujui & Tandai Selesai',
-    cancelText: 'Batal',
-    onConfirm: async () => {
-      await markConsultationContacted(item)
-      showToast(`Permohonan konsultasi dari ${item.parent_name} berhasil disetujui.`)
-    }
-  }
-}
-
-const confirmDeleteConsultation = (item) => {
-  confirmModal.value = {
-    show: true,
-    type: 'delete',
-    title: 'Hapus Riwayat Konsultasi',
-    message: 'Apakah Anda yakin ingin menghapus riwayat pesan permohonan konsultasi ini dari database?',
-    targetInfo: {
-      name: `Wali: ${item.parent_name}`,
-      tag: item.status === 'contacted' ? 'Sudah Dihubungi' : 'Belum Dihubungi',
-      sub: `Siswa: ${item.student_name}`
-    },
-    confirmText: 'Ya, Hapus Pesan',
-    cancelText: 'Batal',
-    onConfirm: async () => {
-      const idx = consultationList.value.findIndex(c => c.id === item.id)
-      if (idx !== -1) {
-        consultationList.value.splice(idx, 1)
-      }
-      try {
-        localStorage.setItem('bk_prima_consultations', JSON.stringify(consultationList.value))
-      } catch (e) {}
-
-      try {
-        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
-        await fetch(`/admin/konsultasi/${item.id}`, {
-          method: 'DELETE',
-          headers: {
-            'Accept': 'application/json',
-            'X-Requested-With': 'XMLHttpRequest',
-            ...(csrfToken ? { 'X-CSRF-TOKEN': csrfToken } : {})
-          }
-        })
-      } catch (e) {}
-      showToast(`Pesan permohonan dari ${item.parent_name} berhasil dihapus.`)
-    }
-  }
-}
-
-const deleteConsultationItem = (idx, item) => {
-  confirmDeleteConsultation(item)
-}
-
-const openWhatsAppToParent = (item) => {
-  const phone = item.phone ? item.phone.replace(/[^0-9]/g, '') : ''
-  const targetPhone = phone.startsWith('0') ? '62' + phone.slice(1) : (phone || '6281234567890')
-  const message = encodeURIComponent(`Halo Bapak/Ibu ${item.parent_name}, kami dari Ruang Bimbingan Konseling (BK) SMK PGRI 05 Jember menindaklanjuti pesan konsultasi Anda mengenai ananda ${item.student_name}. Kami siap berdiskusi untuk pendampingan ananda. Terima kasih.`)
-  window.open(`https://wa.me/${targetPhone}?text=${message}`, '_blank')
-  markConsultationContacted(item)
-}
-
-onMounted(() => {
-  syncConsultations()
-  window.addEventListener('storage', (e) => {
-    if (e.key === 'bk_prima_consultations') {
-      syncConsultations()
-    }
-  })
-})
 </script>

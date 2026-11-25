@@ -678,8 +678,12 @@ class AdminController extends Controller
         $ext = strtolower($file->getClientOriginalExtension());
         $rows = [];
 
-        if (in_array($ext, ['xlsx'])) {
-            $rows = $this->parseXlsxFile($file->getRealPath());
+        if (in_array($ext, ['xlsx', 'xls'])) {
+            if (class_exists('\ZipArchive')) {
+                $rows = $this->parseXlsxFile($file->getRealPath());
+            } else {
+                $rows = $this->parseCsvFile($file->getRealPath());
+            }
         } else {
             $rows = $this->parseCsvFile($file->getRealPath());
         }
@@ -732,13 +736,17 @@ class AdminController extends Controller
                 : (!empty($item['className']) ? strtoupper(trim($item['className'])) : 'X RPL 1');
             
             // Ekstrak level & jurusan dari nama kelas
-            $level = 'X';
-            if (str_starts_with($className, 'XII')) {
-                $level = 'XII';
-            } elseif (str_starts_with($className, 'XI')) {
-                $level = 'XI';
-            } elseif (str_starts_with($className, 'X')) {
-                $level = 'X';
+            $levelNum = '10';
+            $roman = 'X';
+            if (str_starts_with($className, 'XII') || str_contains($className, ' 12 ') || str_contains($className, '12')) {
+                $levelNum = '12';
+                $roman = 'XII';
+            } elseif (str_starts_with($className, 'XI') || str_contains($className, ' 11 ') || str_contains($className, '11')) {
+                $levelNum = '11';
+                $roman = 'XI';
+            } elseif (str_starts_with($className, 'X') || str_contains($className, ' 10 ') || str_contains($className, '10')) {
+                $levelNum = '10';
+                $roman = 'X';
             }
 
             $major = 'RPL';
@@ -753,24 +761,25 @@ class AdminController extends Controller
             $cls = Classroom::firstOrCreate(
                 ['name' => $className],
                 [
-                    'level' => "Kelas {$level} ({$level})",
+                    'level' => "Kelas {$levelNum} ({$roman})",
                     'major' => $major,
                     'wali_kelas' => 'Wali Kelas ' . $className,
                 ]
             );
 
-            $parentPhone = !empty($item['parentWa']) && $item['parentWa'] !== '-' ? $item['parentWa'] : ($item['parent_phone'] ?? null);
+            $parentPhone = !empty($item['parentWa']) && $item['parentWa'] !== '-' ? $item['parentWa'] : (!empty($item['parent_phone']) ? $item['parent_phone'] : null);
 
             $rombelParts = explode(' ', trim($className));
             $rombel = end($rombelParts);
 
-            Student::updateOrCreate(
+            $student = Student::updateOrCreate(
                 ['nis' => $nis],
                 [
                     'classroom_id' => $cls->id,
                     'name' => trim($item['name']),
                     'class_name' => $className,
-                    'level' => $level,
+                    'classroom_id' => $classroom->id,
+                    'level' => $levelNum,
                     'major' => $major,
                     'gender' => in_array(strtoupper($item['gender'] ?? 'L'), ['L', 'P']) ? strtoupper($item['gender']) : 'L',
                     'parent_phone' => $parentPhone,
@@ -780,10 +789,15 @@ class AdminController extends Controller
                 ]
             );
 
+            \App\Models\Attendance::firstOrCreate(
+                ['student_id' => $student->id, 'date' => now()->toDateString()],
+                ['status' => 'Hadir', 'check_in_time' => '07:00', 'class_snapshot' => $className, 'notes' => 'Tepat waktu']
+            );
+
             $importedCount++;
         }
 
-        if ($request->wantsJson()) {
+        if ($request->wantsJson() && !$request->header('X-Inertia')) {
             return response()->json([
                 'success' => true,
                 'count' => $importedCount,

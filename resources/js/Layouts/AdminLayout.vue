@@ -40,7 +40,7 @@
           </span>
         </button>
 
-        <div class="pt-4 mt-4 border-t border-slate-800">
+        <div class="pt-4 mt-4 border-t border-slate-800 space-y-1">
           <p class="px-3 text-xs font-semibold text-slate-400 mb-2">Akses Cepat</p>
           <router-link
             to="/absensi"
@@ -49,7 +49,17 @@
             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-slate-400 group-hover:text-slate-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
             </svg>
-            <span>Pratinjau Portal Guru BK</span>
+            <span>Portal Guru BK</span>
+          </router-link>
+          <router-link
+            to="/arsip-lulus"
+            class="flex items-center gap-3 px-3 py-2 rounded-lg text-xs font-medium text-slate-400 hover:bg-slate-800/60 hover:text-slate-200 transition group"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-slate-400 group-hover:text-slate-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M12 14l9-5-9-5-9 5 9 5z" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
+            </svg>
+            <span>Arsip Siswa Lulus</span>
           </router-link>
         </div>
       </nav>
@@ -118,6 +128,30 @@
             <component :is="item.icon" class="w-4 h-4" />
             <span>{{ item.label }}</span>
           </button>
+
+          <div class="pt-3 border-t border-slate-800 space-y-1">
+            <router-link
+              to="/absensi"
+              @click="mobileDrawerOpen = false"
+              class="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-xs font-medium text-slate-300 hover:bg-slate-800 transition"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+              </svg>
+              <span>Portal Guru BK</span>
+            </router-link>
+            <router-link
+              to="/arsip-lulus"
+              @click="mobileDrawerOpen = false"
+              class="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-xs font-medium text-slate-300 hover:bg-slate-800 transition"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M12 14l9-5-9-5-9 5 9 5z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
+              </svg>
+              <span>Arsip Siswa Lulus</span>
+            </router-link>
+          </div>
         </nav>
         <button
           type="button"
@@ -143,26 +177,6 @@
         </div>
 
         <div class="flex items-center gap-3">
-          <!-- Notification Bell Button for Consultation Messages -->
-          <button
-            @click="$emit('select-tab', 'konsultasi')"
-            class="relative px-3 py-1.5 rounded-lg bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 transition cursor-pointer flex items-center gap-2"
-            title="Lihat Pesan Konsultasi Wali Murid"
-          >
-            <div>
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-              </svg>
-            </div>
-            <span class="text-xs font-medium text-slate-700">Pesan Masuk</span>
-            <span
-              v-if="unreadCount > 0"
-              class="text-xs font-semibold text-rose-600"
-            >
-              ({{ unreadCount }})
-            </span>
-          </button>
-
           <div class="px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-md text-xs text-slate-600 font-medium">
             <span>SIM-Pegawai &bull; Mode Kelola Penuh</span>
           </div>
@@ -277,14 +291,6 @@ const adminMenuItems = computed(() => [
     label: 'Dashboard & Tren 30 Hari',
     icon: () => h('svg', { xmlns: 'http://www.w3.org/2000/svg', class: 'h-4 w-4', fill: 'none', viewBox: '0 0 24 24', stroke: 'currentColor', 'stroke-width': '1.75' }, [
       h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', d: 'M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z' })
-    ])
-  },
-  {
-    key: 'konsultasi',
-    label: 'Pesan Konsultasi',
-    badge: props.unreadCount > 0 ? `${props.unreadCount} Baru` : null,
-    icon: () => h('svg', { xmlns: 'http://www.w3.org/2000/svg', class: 'h-4 w-4', fill: 'none', viewBox: '0 0 24 24', stroke: 'currentColor', 'stroke-width': '2' }, [
-      h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', d: 'M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z' })
     ])
   },
   {
