@@ -490,13 +490,36 @@ class AttendanceController extends Controller
 
     public function stats(Request $request)
     {
-        // 1. Hitung ringkasan presensi aktual dari database
-        $totalAttendances = Attendance::count();
-        $hadirCount = Attendance::where('status', 'Hadir')->count();
-        $terlambatCount = Attendance::where('status', 'Terlambat')->count();
-        $sakitCount = Attendance::where('status', 'Sakit')->count();
-        $izinCount = Attendance::where('status', 'Izin')->count();
-        $alphaCount = Attendance::where('status', 'Alpa')->count();
+        $period = $request->query('period', 'bulan');
+        if (!in_array($period, ['minggu', 'bulan', 'tahun'])) {
+            $period = 'bulan';
+        }
+        $selectedMonth = (string) $request->query('month', '');
+        $hasValidMonth = preg_match('/^\d{4}-\d{2}$/', $selectedMonth) === 1;
+
+        $applyDateFilter = function ($query) use ($period, $selectedMonth, $hasValidMonth) {
+            if ($hasValidMonth) {
+                [$y, $m] = explode('-', $selectedMonth);
+                $query->whereYear('date', (int) $y)->whereMonth('date', (int) $m);
+            } elseif ($period === 'minggu') {
+                $query->where('date', '>=', now()->subDays(7)->toDateString());
+            } elseif ($period === 'bulan') {
+                $query->whereYear('date', now()->year)->whereMonth('date', now()->month);
+            } else {
+                $query->where('date', '>=', now()->subMonths(11)->startOfMonth()->toDateString());
+            }
+        };
+
+        // 1. Hitung ringkasan presensi aktual dari database sesuai periode / bulan terpilih
+        $baseAttQuery = Attendance::query();
+        $applyDateFilter($baseAttQuery);
+
+        $totalAttendances = (clone $baseAttQuery)->count();
+        $hadirCount = (clone $baseAttQuery)->where('status', 'Hadir')->count();
+        $terlambatCount = (clone $baseAttQuery)->where('status', 'Terlambat')->count();
+        $sakitCount = (clone $baseAttQuery)->where('status', 'Sakit')->count();
+        $izinCount = (clone $baseAttQuery)->where('status', 'Izin')->count();
+        $alphaCount = (clone $baseAttQuery)->where('status', 'Alpa')->count();
 
         $hadirRate = $totalAttendances > 0 ? round(($hadirCount / $totalAttendances) * 100, 1) : 0;
         $terlambatRate = $totalAttendances > 0 ? round(($terlambatCount / $totalAttendances) * 100, 1) : 0;
@@ -518,24 +541,61 @@ class AttendanceController extends Controller
             'alphaRate' => $alphaRate,
         ];
 
-        // 2. Hitung tren 6 bulan terakhir dari database aktual
+        // 2. Hitung rincian & tren 6 bulan terakhir dari database aktual
+        $indonesianMonths = [
+            1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
+            5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
+            9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember',
+        ];
+
         $monthLabels = [];
         $presentRateSeries = [];
         $lateRateSeries = [];
+        $monthlyBreakdown = [];
 
         for ($i = 5; $i >= 0; $i--) {
             $monthDate = now()->subMonths($i);
-            $monthLabels[] = $monthDate->translatedFormat('F');
             $year = $monthDate->year;
             $month = $monthDate->month;
+            $monthKey = $monthDate->format('Y-m');
+            $monthNameId = ($indonesianMonths[$month] ?? $monthDate->format('F')) . ' ' . $year;
+            $monthLabels[] = $indonesianMonths[$month] ?? $monthDate->format('F');
 
-            $monthTotal = Attendance::whereYear('date', $year)->whereMonth('date', $month)->count();
-            $monthHadir = Attendance::whereYear('date', $year)->whereMonth('date', $month)->where('status', 'Hadir')->count();
-            $monthLate = Attendance::whereYear('date', $year)->whereMonth('date', $month)->where('status', 'Terlambat')->count();
+            $monthQuery = Attendance::whereYear('date', $year)->whereMonth('date', $month);
+            $monthTotal = (clone $monthQuery)->count();
+            $monthHadir = (clone $monthQuery)->where('status', 'Hadir')->count();
+            $monthLate = (clone $monthQuery)->where('status', 'Terlambat')->count();
+            $monthSakit = (clone $monthQuery)->where('status', 'Sakit')->count();
+            $monthIzin = (clone $monthQuery)->where('status', 'Izin')->count();
+            $monthAlpa = (clone $monthQuery)->where('status', 'Alpa')->count();
 
-            $presentRateSeries[] = $monthTotal > 0 ? round(($monthHadir / $monthTotal) * 100, 1) : 0;
-            $lateRateSeries[] = $monthTotal > 0 ? round(($monthLate / $monthTotal) * 100, 1) : 0;
+            $presentRate = $monthTotal > 0 ? round(($monthHadir / $monthTotal) * 100, 1) : 0;
+            $lateRate = $monthTotal > 0 ? round(($monthLate / $monthTotal) * 100, 1) : 0;
+            $attendanceRate = $monthTotal > 0 ? round((($monthHadir + $monthLate) / $monthTotal) * 100, 1) : 0;
+
+            $presentRateSeries[] = $presentRate;
+            $lateRateSeries[] = $lateRate;
+
+            $monthlyBreakdown[] = [
+                'month_key' => $monthKey,
+                'label' => $monthNameId,
+                'total' => $monthTotal,
+                'hadir' => $monthHadir,
+                'terlambat' => $monthLate,
+                'sakit' => $monthSakit,
+                'izin' => $monthIzin,
+                'alpha' => $monthAlpa,
+                'hadir_rate' => $presentRate,
+                'terlambat_rate' => $lateRate,
+                'sakit_rate' => $monthTotal > 0 ? round(($monthSakit / $monthTotal) * 100, 1) : 0,
+                'izin_rate' => $monthTotal > 0 ? round(($monthIzin / $monthTotal) * 100, 1) : 0,
+                'alpha_rate' => $monthTotal > 0 ? round(($monthAlpa / $monthTotal) * 100, 1) : 0,
+                'attendance_rate' => $attendanceRate,
+            ];
         }
+
+        // Urutkan tabel rincian bulanan dari bulan terbaru ke terlama
+        $monthlyBreakdown = array_reverse($monthlyBreakdown);
 
         $monthlyStats = [
             'labels' => $monthLabels,
@@ -543,8 +603,13 @@ class AttendanceController extends Controller
             'lateRate' => $lateRateSeries,
         ];
 
-        // 3. Rekap Statistik Semua Siswa Aktif beserta Catatan Presensi & Pelanggaran
-        $students = Student::active()->with(['attendances', 'violations'])->get()->map(function ($student) {
+        // 3. Rekap Statistik Semua Siswa Aktif beserta Catatan Presensi (sesuai periode/bulan) & Pelanggaran
+        $students = Student::active()->with([
+            'attendances' => function ($q) use ($applyDateFilter) {
+                $applyDateFilter($q);
+            },
+            'violations',
+        ])->get()->map(function ($student) {
             $attendances = $student->attendances;
             $hadir = $attendances->where('status', 'Hadir')->count();
             $terlambat = $attendances->where('status', 'Terlambat')->count();
@@ -610,6 +675,9 @@ class AttendanceController extends Controller
 
         return Inertia::render('AttendanceStats', [
             'monthlyStats' => $monthlyStats,
+            'monthlyBreakdown' => $monthlyBreakdown,
+            'activePeriod' => $period,
+            'activeMonth' => $hasValidMonth ? $selectedMonth : '',
             'summaryMetrics' => $summaryMetrics,
             'totalStudents' => Student::active()->count(),
             'atRiskStudents' => $atRiskStudents,
