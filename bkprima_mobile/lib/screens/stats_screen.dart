@@ -24,6 +24,25 @@ class _StatsScreenState extends State<StatsScreen> {
   Map<String, dynamic>? _masterData;
   List<MonthlyTrendPoint>? _monthlyTrend;
 
+  String _scope = 'my_rombel_today';
+  int _selectedMonth = DateTime.now().month;
+  final int _selectedYear = DateTime.now().year;
+
+  static const List<Map<String, dynamic>> _months = [
+    {'value': 1, 'label': 'Januari'},
+    {'value': 2, 'label': 'Februari'},
+    {'value': 3, 'label': 'Maret'},
+    {'value': 4, 'label': 'April'},
+    {'value': 5, 'label': 'Mei'},
+    {'value': 6, 'label': 'Juni'},
+    {'value': 7, 'label': 'Juli'},
+    {'value': 8, 'label': 'Agustus'},
+    {'value': 9, 'label': 'September'},
+    {'value': 10, 'label': 'Oktober'},
+    {'value': 11, 'label': 'November'},
+    {'value': 12, 'label': 'Desember'},
+  ];
+
   @override
   void initState() {
     super.initState();
@@ -37,7 +56,11 @@ class _StatsScreenState extends State<StatsScreen> {
     });
 
     try {
-      final res = await ApiService.getOverallStats();
+      final res = await ApiService.getOverallStats(
+        scope: _scope,
+        month: _scope == 'school_month' ? _selectedMonth : null,
+        year: _scope == 'school_month' ? _selectedYear : null,
+      );
       if (res['success'] == true && res['data'] != null) {
         final data = res['data'] as Map<String, dynamic>;
         final List trendJson = data['monthly_trend'] ?? [];
@@ -145,47 +168,38 @@ class _StatsScreenState extends State<StatsScreen> {
     // Metrik Keseluruhan dari API Database Real
     final summary = _masterData?['summary'] as Map<String, dynamic>?;
     final benchmark = _masterData?['benchmark'] as Map<String, dynamic>?;
+    final isMonthlySchool = _scope == 'school_month';
+    final hasRombel = _masterData?['has_rombel'] != false;
+    final List<String> assignedRombels = List<String>.from(_masterData?['assigned_rombels'] ?? []);
 
     final hadirRate = (summary?['hadir_rate'] as num?)?.toDouble() ?? 0.0;
     final hadirCount = (summary?['hadir_count'] as num?)?.toInt() ?? 0;
+    final totalRecorded = (summary?['total_recorded'] as num?)?.toInt() ?? 0;
     final totalStudents = (summary?['total_students'] as num?)?.toInt() ?? 0;
 
     final terlambatRate = (summary?['terlambat_rate'] as num?)?.toDouble() ?? 0.0;
     final terlambatCount = (summary?['terlambat_count'] as num?)?.toInt() ?? 0;
 
-    final totalViolations = (summary?['total_violations'] as num?)?.toInt() ?? (vio.stats?.totalKasus ?? vio.violations.length);
-    final spCasesCount = (summary?['sp_cases'] as num?)?.toInt() ?? (vio.stats?.panggilanOrtu ?? vio.suratPanggilan.length);
+    final totalViolations = (summary?['total_violations'] as num?)?.toInt() ?? 0;
+    final spCasesCount = (summary?['sp_cases'] as num?)?.toInt() ?? 0;
 
     final targetRate = (benchmark?['target_rate'] as num?)?.toDouble() ?? 90.0;
 
-    // Distribusi Kategori Pelanggaran (dari API atau fallback hitung langsung dari data lokal)
+    // Distribusi Kategori Pelanggaran murni sesuai scope aktif
     final rawDist = _masterData?['category_distribution'] as List?;
-    List<CategoryDistribution> distribution = [];
-    if (rawDist != null && rawDist.isNotEmpty) {
-      distribution = rawDist.map((e) => CategoryDistribution.fromJson(e)).toList();
-    } else if (vio.violations.isNotEmpty) {
-      final Map<String, int> catCounts = {};
-      for (final v in vio.violations) {
-        catCounts[v.category] = (catCounts[v.category] ?? 0) + 1;
-      }
-      final total = vio.violations.length;
-      distribution = catCounts.entries.map((e) {
-        final pct = total > 0 ? (e.value / total) * 100 : 0.0;
-        return CategoryDistribution(
-          name: e.key,
-          count: e.value,
-          percentage: pct,
-          ratio: total > 0 ? e.value / total : 0.0,
-        );
-      }).toList();
-    }
+    final List<CategoryDistribution> distribution = rawDist != null
+        ? rawDist.map((e) => CategoryDistribution.fromJson(e)).toList()
+        : [];
 
-    // Siswa Tahap SP (Seluruh Sekolah)
+    // Siswa Tahap SP sesuai scope aktif
     final List spRaw = _masterData?['surat_panggilan'] ?? [];
-    List<SuratPanggilan> highRiskStudents = spRaw.map((item) => SuratPanggilan.fromJson(item)).toList();
-    if (highRiskStudents.isEmpty && vio.suratPanggilan.isNotEmpty) {
-      highRiskStudents = vio.suratPanggilan;
-    }
+    final List<SuratPanggilan> highRiskStudents =
+        spRaw.map((item) => SuratPanggilan.fromJson(item)).toList();
+
+    final selectedMonthLabel = _months.firstWhere(
+      (m) => m['value'] == _selectedMonth,
+      orElse: () => {'label': 'Bulan $_selectedMonth'},
+    )['label'];
 
     const categoryColors = [
       AppTheme.primary,
@@ -217,54 +231,209 @@ class _StatsScreenState extends State<StatsScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Statistik Kedisiplinan',
-                        style: TextStyle(
-                          fontFamily: AppTheme.fontFamily,
-                          fontSize: 20,
-                          fontWeight: FontWeight.w800,
-                          color: AppTheme.textPrimary,
-                          letterSpacing: -0.4,
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Statistik Kedisiplinan',
+                          style: TextStyle(
+                            fontFamily: AppTheme.fontFamily,
+                            fontSize: 20,
+                            fontWeight: FontWeight.w800,
+                            color: AppTheme.textPrimary,
+                            letterSpacing: -0.4,
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 2),
-                      Row(
-                        children: [
-                          Container(
-                            width: 6,
-                            height: 6,
-                            decoration: BoxDecoration(
-                              color: totalStudents > 0 ? const Color(0xFF059669) : AppTheme.textMuted,
-                              shape: BoxShape.circle,
+                        const SizedBox(height: 2),
+                        Row(
+                          children: [
+                            Container(
+                              width: 6,
+                              height: 6,
+                              decoration: BoxDecoration(
+                                color: totalStudents > 0 ? const Color(0xFF059669) : AppTheme.textMuted,
+                                shape: BoxShape.circle,
+                              ),
                             ),
-                          ),
-                          const SizedBox(width: 5),
-                          Text(
-                            totalStudents > 0
-                                ? 'Data Presensi Siswa • $totalStudents Siswa'
-                                : 'Data Presensi Siswa • Belum Ada Data',
-                            style: const TextStyle(
-                              fontFamily: AppTheme.fontFamily,
-                              fontSize: 11,
-                              fontWeight: FontWeight.w500,
-                              color: AppTheme.textMuted,
+                            const SizedBox(width: 5),
+                            Expanded(
+                              child: Text(
+                                isMonthlySchool
+                                    ? 'Rekap 1 Bulan ($selectedMonthLabel $_selectedYear) • $totalStudents Siswa'
+                                    : (hasRombel
+                                        ? 'Hari Ini (${assignedRombels.join(', ')}) • $totalStudents Siswa'
+                                        : 'Belum ada rombel ditugaskan'),
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                  fontFamily: AppTheme.fontFamily,
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w500,
+                                  color: AppTheme.textMuted,
+                                ),
+                              ),
                             ),
-                          ),
-                        ],
-                      ),
-                    ],
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
-                  if (_isLoading)
+                  if (_isLoading) ...[
+                    const SizedBox(width: 8),
                     const SizedBox(
                       width: 16,
                       height: 16,
                       child: CircularProgressIndicator(strokeWidth: 2, color: AppTheme.primary),
                     ),
+                  ],
                 ],
               ),
+              const SizedBox(height: 12),
+
+              // Menu Pengalih Mode Statistik (1 Hari Rombel Saya vs 1 Bulan Seluruh Siswa)
+              Container(
+                padding: const EdgeInsets.all(4),
+                decoration: BoxDecoration(
+                  color: AppTheme.surfaceMuted,
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: AppTheme.border),
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: InkWell(
+                        onTap: () {
+                          if (_scope != 'my_rombel_today') {
+                            HapticFeedback.selectionClick();
+                            setState(() => _scope = 'my_rombel_today');
+                            _fetchMasterStats();
+                          }
+                        },
+                        borderRadius: BorderRadius.circular(7),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+                          decoration: BoxDecoration(
+                            color: !isMonthlySchool ? AppTheme.surface : Colors.transparent,
+                            borderRadius: BorderRadius.circular(7),
+                            border: !isMonthlySchool ? Border.all(color: AppTheme.border) : null,
+                          ),
+                          child: Text(
+                            'Hari Ini (Rombel)',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontFamily: AppTheme.fontFamily,
+                              fontSize: 11,
+                              fontWeight: !isMonthlySchool ? FontWeight.w700 : FontWeight.w500,
+                              color: !isMonthlySchool ? AppTheme.primary : AppTheme.textSecondary,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 4),
+                    Expanded(
+                      child: InkWell(
+                        onTap: () {
+                          if (_scope != 'school_month') {
+                            HapticFeedback.selectionClick();
+                            setState(() => _scope = 'school_month');
+                            _fetchMasterStats();
+                          }
+                        },
+                        borderRadius: BorderRadius.circular(7),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+                          decoration: BoxDecoration(
+                            color: isMonthlySchool ? AppTheme.surface : Colors.transparent,
+                            borderRadius: BorderRadius.circular(7),
+                            border: isMonthlySchool ? Border.all(color: AppTheme.border) : null,
+                          ),
+                          child: Text(
+                            '1 Bulan (Sekolah)',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontFamily: AppTheme.fontFamily,
+                              fontSize: 11,
+                              fontWeight: isMonthlySchool ? FontWeight.w700 : FontWeight.w500,
+                              color: isMonthlySchool ? AppTheme.primary : AppTheme.textSecondary,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              if (isMonthlySchool) ...[
+                const SizedBox(height: 10),
+                AppSurface(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        'Periode Bulan',
+                        style: TextStyle(
+                          fontFamily: AppTheme.fontFamily,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: AppTheme.textSecondary,
+                        ),
+                      ),
+                      DropdownButtonHideUnderline(
+                        child: DropdownButton<int>(
+                          value: _selectedMonth,
+                          isDense: true,
+                          icon: const Icon(Icons.keyboard_arrow_down_rounded, size: 18, color: AppTheme.primary),
+                          style: const TextStyle(
+                            fontFamily: AppTheme.fontFamily,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                            color: AppTheme.textPrimary,
+                          ),
+                          items: _months.map((m) {
+                            return DropdownMenuItem<int>(
+                              value: m['value'] as int,
+                              child: Text('${m['label']} $_selectedYear'),
+                            );
+                          }).toList(),
+                          onChanged: (val) {
+                            if (val != null && val != _selectedMonth) {
+                              setState(() => _selectedMonth = val);
+                              _fetchMasterStats();
+                            }
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+
+              if (!isMonthlySchool && !hasRombel) ...[
+                const SizedBox(height: 10),
+                AppSurface(
+                  padding: const EdgeInsets.all(12),
+                  child: const Row(
+                    children: [
+                      Icon(Icons.info_outline_rounded, size: 18, color: AppTheme.textSecondary),
+                      SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          'Akun Anda belum memiliki rombel yang ditugaskan. Data hari ini ditampilkan kosong.',
+                          style: TextStyle(
+                            fontFamily: AppTheme.fontFamily,
+                            fontSize: 11,
+                            color: AppTheme.textSecondary,
+                            height: 1.4,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
               const SizedBox(height: 14),
 
               // KPI Grid 2x2
@@ -277,25 +446,25 @@ class _StatsScreenState extends State<StatsScreen> {
                 childAspectRatio: 1.75,
                 children: [
                   StatCard(
-                    title: 'Kehadiran Sekolah',
+                    title: isMonthlySchool ? 'Kehadiran Sekolah' : 'Kehadiran Rombel',
                     value: '${hadirRate.toStringAsFixed(1)}%',
-                    subtitle: '$hadirCount / $totalStudents Siswa',
+                    subtitle: '$hadirCount / ${totalRecorded > 0 ? totalRecorded : totalStudents} Tercatat',
                     valueColor: const Color(0xFF059669),
                   ),
                   StatCard(
                     title: 'Keterlambatan',
                     value: '${terlambatRate.toStringAsFixed(1)}%',
-                    subtitle: '$terlambatCount Siswa Hari Ini',
+                    subtitle: isMonthlySchool ? '$terlambatCount Tercatat Bulan Ini' : '$terlambatCount Siswa Hari Ini',
                     valueColor: const Color(0xFFD97706),
                   ),
                   StatCard(
-                    title: 'Total Pelanggaran',
+                    title: isMonthlySchool ? 'Pelanggaran Bulan Ini' : 'Pelanggaran Hari Ini',
                     value: '$totalViolations',
-                    subtitle: 'Tercatat Semester Ini',
+                    subtitle: isMonthlySchool ? 'Seluruh Siswa ($selectedMonthLabel)' : 'Rombel Guru Hari Ini',
                     valueColor: AppTheme.textPrimary,
                   ),
                   StatCard(
-                    title: 'Kasus SP Sekolah',
+                    title: isMonthlySchool ? 'Kasus SP Bulan Ini' : 'Kasus SP Rombel',
                     value: '$spCasesCount',
                     subtitle: 'Dalam Pembinaan Khusus',
                     valueColor: const Color(0xFFE11D48),
@@ -304,13 +473,15 @@ class _StatsScreenState extends State<StatsScreen> {
               ),
               const SizedBox(height: 14),
 
-              // Grafik Kehadiran
-              AttendanceTrendChart(
-                data: _monthlyTrend,
-                targetRate: targetRate,
-                totalStudents: totalStudents,
-              ),
-              const SizedBox(height: 14),
+              // Grafik Kehadiran 1 Bulan (Hanya tampil di mode 1 Bulan Seluruh Siswa)
+              if (isMonthlySchool) ...[
+                AttendanceTrendChart(
+                  data: _monthlyTrend,
+                  targetRate: targetRate,
+                  totalStudents: totalStudents,
+                ),
+                const SizedBox(height: 14),
+              ],
 
               // Distribusi Kategori
               AppSurface(

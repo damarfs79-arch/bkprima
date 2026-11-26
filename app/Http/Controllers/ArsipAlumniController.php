@@ -37,7 +37,11 @@ class ArsipAlumniController extends Controller
         }
 
         if ($rombel !== 'ALL' && !empty($rombel)) {
-            $query->where('rombel', $rombel);
+            $query->where(function ($q) use ($rombel) {
+                $q->where('last_class_name', $rombel)
+                  ->orWhere('class_name', $rombel)
+                  ->orWhere('rombel', $rombel);
+            });
         }
 
         $alumni = $query->orderBy('graduation_year', 'desc')
@@ -62,11 +66,12 @@ class ArsipAlumniController extends Controller
             ->toArray();
 
         $availableRombels = Student::graduated()
-            ->select('rombel')
-            ->distinct()
-            ->whereNotNull('rombel')
-            ->orderBy('rombel')
-            ->pluck('rombel')
+            ->get(['last_class_name', 'class_name', 'rombel'])
+            ->map(fn ($s) => $s->last_class_name ?: ($s->class_name ?: $s->rombel))
+            ->filter()
+            ->unique()
+            ->sort(SORT_NATURAL | SORT_FLAG_CASE)
+            ->values()
             ->toArray();
 
         // KPI Counts

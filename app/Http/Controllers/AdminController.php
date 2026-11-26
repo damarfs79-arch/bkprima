@@ -8,9 +8,11 @@ use App\Models\Violation;
 use App\Models\User;
 use App\Models\Classroom;
 use App\Models\Major;
+use App\Models\Sanction;
 use App\Models\ConsultationRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Schema;
 
 class AdminController extends Controller
 {
@@ -83,6 +85,29 @@ class AdminController extends Controller
         });
 
         $jurusanList = Major::orderBy('code')->get();
+        $sanksiList = Schema::hasTable('sanctions')
+            ? Sanction::orderBy('sort_order')->orderBy('id')->get()
+            : collect();
+
+        $alumniList = Student::graduated()
+            ->orderByDesc('graduation_year')
+            ->orderBy('name')
+            ->get()
+            ->map(function ($s) {
+                return [
+                    'id' => $s->id,
+                    'nis' => $s->nis,
+                    'nisn' => $s->nis,
+                    'name' => $s->name,
+                    'lastClassName' => $s->last_class_name ?: $s->class_name,
+                    'graduationYear' => $s->graduation_year,
+                    'major' => $s->major,
+                    'gender' => $s->gender,
+                    'parentWa' => $s->parent_phone ?? '-',
+                    'poin' => $s->total_violation_points,
+                    'status' => $s->status,
+                ];
+            });
 
         // 4. Hitung statistik presensi aktual dari database
         $totalAttendances = \App\Models\Attendance::count();
@@ -117,6 +142,8 @@ class AdminController extends Controller
             'initialKelasList' => $kelasList,
             'initialSiswaList' => $siswaList,
             'initialJurusanList' => $jurusanList,
+            'initialSanksiList' => $sanksiList,
+            'initialAlumniList' => $alumniList,
             'settings' => \App\Models\Setting::getAll(),
         ]);
     }
@@ -525,8 +552,8 @@ class AdminController extends Controller
             'gender' => 'required|in:L,P',
             'parentWa' => 'nullable|string|max:50',
         ], [
-            'nis.required' => 'NIS wajib diisi.',
-            'nis.unique' => 'NIS sudah terdaftar.',
+            'nis.required' => 'NISN wajib diisi.',
+            'nis.unique' => 'NISN sudah terdaftar.',
             'name.required' => 'Nama lengkap siswa wajib diisi.',
             'className.required' => 'Kelas rombel wajib dipilih.',
         ]);
@@ -599,8 +626,8 @@ class AdminController extends Controller
             'parentWa' => 'nullable|string|max:50',
             'poin' => 'nullable|integer|min:0',
         ], [
-            'nis.required' => 'NIS wajib diisi.',
-            'nis.unique' => 'NIS sudah digunakan oleh siswa lain.',
+            'nis.required' => 'NISN wajib diisi.',
+            'nis.unique' => 'NISN sudah digunakan oleh siswa lain.',
             'name.required' => 'Nama lengkap siswa wajib diisi.',
             'className.required' => 'Kelas rombel wajib dipilih.',
         ]);
@@ -1195,6 +1222,223 @@ class AdminController extends Controller
         $major->delete();
 
         return redirect()->back()->with('success', 'Jurusan ' . $code . ' berhasil dihapus.');
+    }
+
+    public function storeSanksi(Request $request)
+    {
+        $request->merge([
+            'name' => trim((string) $request->input('name', '')),
+            'description' => trim((string) $request->input('description', '')) ?: null,
+        ]);
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:255|unique:sanctions,name',
+            'description' => 'nullable|string|max:255',
+            'sort_order' => 'nullable|integer|min:0',
+            'is_active' => 'nullable|boolean',
+        ], [
+            'name.required' => 'Nama tindakan/sanksi wajib diisi.',
+            'name.unique' => 'Tindakan/sanksi tersebut sudah terdaftar.',
+        ]);
+
+        $sanction = Sanction::create([
+            'name' => $validated['name'],
+            'description' => $validated['description'] ?? null,
+            'sort_order' => $validated['sort_order'] ?? (Sanction::max('sort_order') + 1),
+            'is_active' => $request->has('is_active') ? (bool) $validated['is_active'] : true,
+        ]);
+
+        return redirect()->back()->with('success', 'Tindakan "' . $sanction->name . '" berhasil ditambahkan!');
+    }
+
+    public function updateSanksi(Request $request, $id)
+    {
+        $sanction = Sanction::findOrFail($id);
+
+        $request->merge([
+            'name' => trim((string) $request->input('name', '')),
+            'description' => trim((string) $request->input('description', '')) ?: null,
+        ]);
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:255|unique:sanctions,name,' . $sanction->id,
+            'description' => 'nullable|string|max:255',
+            'sort_order' => 'nullable|integer|min:0',
+            'is_active' => 'nullable|boolean',
+        ], [
+            'name.required' => 'Nama tindakan/sanksi wajib diisi.',
+            'name.unique' => 'Tindakan/sanksi tersebut sudah terdaftar.',
+        ]);
+
+        $sanction->update([
+            'name' => $validated['name'],
+            'description' => $validated['description'] ?? null,
+            'sort_order' => $validated['sort_order'] ?? $sanction->sort_order,
+            'is_active' => $request->has('is_active') ? (bool) $validated['is_active'] : $sanction->is_active,
+        ]);
+
+        return redirect()->back()->with('success', 'Tindakan "' . $sanction->name . '" berhasil diperbarui!');
+    }
+
+    public function deleteSanksi($id)
+    {
+        $sanction = Sanction::findOrFail($id);
+        $name = $sanction->name;
+        $sanction->delete();
+
+        return redirect()->back()->with('success', 'Tindakan "' . $name . '" berhasil dihapus.');
+    }
+
+    public function storeAlumni(Request $request)
+    {
+        $studentId = $request->input('student_id');
+        $level = trim((string) $request->input('level', ''));
+        $graduationYear = (int) ($request->input('graduation_year') ?: now()->year);
+
+        if ($level !== '') {
+            $roman = match (strtoupper($level)) {
+                '10', 'X' => 'X',
+                '11', 'XI' => 'XI',
+                '12', 'XII' => 'XII',
+                default => null,
+            };
+            $numLevel = match ($roman) {
+                'X' => '10',
+                'XI' => '11',
+                'XII' => '12',
+                default => null,
+            };
+
+            if (!$roman || !$numLevel) {
+                return redirect()->back()->withErrors(['level' => 'Angkatan tidak valid.']);
+            }
+
+            $students = Student::active()
+                ->where(function ($q) use ($roman, $numLevel) {
+                    $q->where('level', $numLevel)
+                      ->orWhere('level', $roman)
+                      ->orWhere('class_name', 'like', $roman . ' %');
+                })
+                ->get();
+
+            if ($students->isEmpty()) {
+                return redirect()->back()->withErrors(['level' => "Tidak ada siswa aktif pada angkatan Kelas {$roman}."]);
+            }
+
+            $count = 0;
+            foreach ($students as $student) {
+                $lastClass = $student->class_name ?: "{$roman} {$student->major} {$student->rombel}";
+                $student->update([
+                    'status' => 'lulus',
+                    'graduation_year' => $graduationYear,
+                    'last_class_name' => $lastClass,
+                ]);
+                $count++;
+            }
+
+            return redirect()->back()->with('success', "Berhasil meluluskan {$count} siswa angkatan Kelas {$roman} ke Arsip Alumni.");
+        }
+
+        if ($studentId) {
+            $student = Student::findOrFail($studentId);
+            $lastClass = trim((string) ($request->input('last_class_name') ?: $student->class_name));
+            $student->update([
+                'status' => 'lulus',
+                'graduation_year' => $graduationYear,
+                'last_class_name' => $lastClass,
+            ]);
+
+            return redirect()->back()->with('success', 'Siswa "' . $student->name . '" berhasil diluluskan ke Arsip Alumni.');
+        }
+
+        $rawNis = trim((string) ($request->input('nisn') ?: $request->input('nis') ?: ''));
+        $request->merge(['nis' => $rawNis]);
+
+        $validated = $request->validate([
+            'nis' => 'required|string|max:50|unique:students,nis',
+            'name' => 'required|string|max:255',
+            'last_class_name' => 'required|string|max:100',
+            'graduation_year' => 'required|integer|min:2000|max:2100',
+            'gender' => 'nullable|in:L,P',
+            'parent_phone' => 'nullable|string|max:50',
+        ], [
+            'nis.required' => 'NISN wajib diisi.',
+            'nis.unique' => 'NISN sudah terdaftar.',
+            'name.required' => 'Nama alumni wajib diisi.',
+            'last_class_name.required' => 'Kelas terakhir wajib diisi.',
+        ]);
+
+        $parts = explode(' ', trim($validated['last_class_name']));
+        $majorCode = strtoupper($parts[1] ?? 'RPL');
+        $rombelNum = end($parts) ?: '1';
+
+        Student::create([
+            'nis' => $validated['nis'],
+            'name' => $validated['name'],
+            'class_name' => $validated['last_class_name'],
+            'last_class_name' => $validated['last_class_name'],
+            'level' => '12',
+            'major' => $majorCode,
+            'rombel' => $rombelNum,
+            'gender' => $validated['gender'] ?? 'L',
+            'parent_phone' => $validated['parent_phone'] ?? '-',
+            'status' => 'lulus',
+            'graduation_year' => $validated['graduation_year'],
+            'total_violation_points' => 0,
+        ]);
+
+        return redirect()->back()->with('success', 'Data alumni "' . $validated['name'] . '" berhasil ditambahkan.');
+    }
+
+    public function updateAlumni(Request $request, $id)
+    {
+        $student = Student::findOrFail($id);
+
+        if ($request->boolean('restore_active')) {
+            $student->update([
+                'status' => 'aktif',
+                'graduation_year' => null,
+            ]);
+
+            return redirect()->back()->with('success', 'Siswa "' . $student->name . '" berhasil dipulihkan ke daftar siswa aktif.');
+        }
+
+        $rawNis = trim((string) ($request->input('nisn') ?: $request->input('nis') ?: $student->nis));
+        $request->merge(['nis' => $rawNis]);
+
+        $validated = $request->validate([
+            'nis' => 'required|string|max:50|unique:students,nis,' . $student->id,
+            'name' => 'required|string|max:255',
+            'last_class_name' => 'required|string|max:100',
+            'graduation_year' => 'required|integer|min:2000|max:2100',
+        ], [
+            'nis.required' => 'NISN wajib diisi.',
+            'nis.unique' => 'NISN sudah digunakan oleh siswa lain.',
+            'name.required' => 'Nama alumni wajib diisi.',
+        ]);
+
+        $parts = explode(' ', trim($validated['last_class_name']));
+        $majorCode = strtoupper($parts[1] ?? $student->major ?? 'RPL');
+
+        $student->update([
+            'nis' => $validated['nis'],
+            'name' => $validated['name'],
+            'last_class_name' => $validated['last_class_name'],
+            'class_name' => $validated['last_class_name'],
+            'major' => $majorCode,
+            'graduation_year' => $validated['graduation_year'],
+        ]);
+
+        return redirect()->back()->with('success', 'Data alumni "' . $student->name . '" berhasil diperbarui.');
+    }
+
+    public function deleteAlumni($id)
+    {
+        $student = Student::findOrFail($id);
+        $name = $student->name;
+        $student->delete();
+
+        return redirect()->back()->with('success', 'Data arsip alumni "' . $name . '" berhasil dihapus.');
     }
 
     public function updateSettings(Request $request)

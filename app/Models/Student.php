@@ -90,7 +90,7 @@ class Student extends Model
      */
     public function scopeActive($query)
     {
-        return $query->where('status', 'aktif');
+        return $query->whereIn('status', ['aktif', 'Aktif']);
     }
 
     /**
@@ -98,7 +98,7 @@ class Student extends Model
      */
     public function scopeGraduated($query)
     {
-        return $query->where('status', 'lulus');
+        return $query->whereIn('status', ['lulus', 'Lulus']);
     }
 
     public function getTingkatAttribute()

@@ -74,6 +74,12 @@ Route::delete('/admin/kelas/{id}', [AdminController::class, 'deleteKelas'])->nam
 Route::post('/admin/jurusan', [AdminController::class, 'storeJurusan'])->name('admin.jurusan.store');
 Route::put('/admin/jurusan/{id}', [AdminController::class, 'updateJurusan'])->name('admin.jurusan.update');
 Route::delete('/admin/jurusan/{id}', [AdminController::class, 'deleteJurusan'])->name('admin.jurusan.delete');
+Route::post('/admin/sanksi', [AdminController::class, 'storeSanksi'])->name('admin.sanksi.store');
+Route::put('/admin/sanksi/{id}', [AdminController::class, 'updateSanksi'])->name('admin.sanksi.update');
+Route::delete('/admin/sanksi/{id}', [AdminController::class, 'deleteSanksi'])->name('admin.sanksi.delete');
+Route::post('/admin/arsip-alumni', [AdminController::class, 'storeAlumni'])->name('admin.alumni.store');
+Route::put('/admin/arsip-alumni/{id}', [AdminController::class, 'updateAlumni'])->name('admin.alumni.update');
+Route::delete('/admin/arsip-alumni/{id}', [AdminController::class, 'deleteAlumni'])->name('admin.alumni.delete');
 Route::post('/admin/siswa', [AdminController::class, 'storeStudent'])->name('admin.siswa.store');
 Route::put('/admin/siswa/{id}', [AdminController::class, 'updateStudent'])->name('admin.siswa.update');
 Route::delete('/admin/siswa/{id}', [AdminController::class, 'deleteStudent'])->name('admin.siswa.delete');

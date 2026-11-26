@@ -3,7 +3,8 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\ApiController;
 
-// Public Authentication
+// Public Health & Authentication
+Route::get('/health', [ApiController::class, 'health']);
 Route::post('/login', [ApiController::class, 'login']);
 
 // Protected or Public BK Prima API Endpoints
@@ -17,6 +18,7 @@ Route::post('/pelanggaran', [ApiController::class, 'storeViolation']);
 
 Route::get('/aturan', [ApiController::class, 'getRules']);
 Route::post('/aturan', [ApiController::class, 'storeRule']);
+Route::get('/sanksi', [ApiController::class, 'getSanctions']);
 
 Route::get('/statistik', [ApiController::class, 'getStats']);
 Route::get('/stats', [ApiController::class, 'getStats']);

@@ -9,6 +9,7 @@ import '../providers/auth_provider.dart';
 import '../providers/profile_provider.dart';
 import '../services/api_service.dart';
 import '../widgets/rule_lookup_sheet.dart';
+import 'login_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -26,11 +27,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
   final _emailController = TextEditingController();
 
   // Password Form Controllers
-  final _currentPasswordController = TextEditingController();
   final _newPasswordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
 
-  bool _obscureCurrent = true;
   bool _obscureNew = true;
   bool _obscureConfirm = true;
   bool _isUpdatingPassword = false;
@@ -67,7 +66,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     _jabatanController.dispose();
     _phoneController.dispose();
     _emailController.dispose();
-    _currentPasswordController.dispose();
     _newPasswordController.dispose();
     _confirmPasswordController.dispose();
     super.dispose();
@@ -231,19 +229,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   void _handleUpdatePassword() async {
-    final currentPassword = _currentPasswordController.text.trim();
     final newPassword = _newPasswordController.text.trim();
     final confirmPassword = _confirmPasswordController.text.trim();
-
-    if (currentPassword.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Password saat ini wajib diisi.'),
-          backgroundColor: AppTheme.danger,
-        ),
-      );
-      return;
-    }
 
     if (newPassword.length < 8) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -269,7 +256,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     final provider = context.read<ProfileProvider>();
     final result = await provider.changePassword(
-      currentPassword: currentPassword,
       password: newPassword,
       passwordConfirmation: confirmPassword,
     );
@@ -279,7 +265,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     if (mounted) {
       final success = result['success'] == true;
       if (success) {
-        _currentPasswordController.clear();
         _newPasswordController.clear();
         _confirmPasswordController.clear();
       }
@@ -364,14 +349,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
               child: ElevatedButton(
                 onPressed: () async {
                   await ApiService.setBaseUrl(controller.text.trim());
+                  final savedUrl = await ApiService.getBaseUrl();
+                  final check = await ApiService.testConnection();
                   if (ctx.mounted) {
                     Navigator.pop(ctx);
                   }
                   if (mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Endpoint server berhasil diperbarui.'),
-                        backgroundColor: AppTheme.success,
+                      SnackBar(
+                        content: Text(
+                          check['success'] == true
+                              ? 'Terhubung ke API: $savedUrl'
+                              : 'Endpoint disimpan ($savedUrl), namun gagal tes koneksi: ${check['message']}',
+                        ),
+                        backgroundColor: check['success'] == true ? AppTheme.success : AppTheme.warning,
                       ),
                     );
                   }
@@ -630,21 +621,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ),
                     const SizedBox(height: 12),
                     AppTextField(
-                      controller: _currentPasswordController,
-                      label: 'Password Saat Ini',
-                      hintText: 'Masukkan password saat ini',
-                      obscureText: _obscureCurrent,
-                      suffixIcon: IconButton(
-                        icon: Icon(
-                          _obscureCurrent ? Icons.visibility_off_outlined : Icons.visibility_outlined,
-                          size: 18,
-                          color: AppTheme.textSecondary,
-                        ),
-                        onPressed: () => setState(() => _obscureCurrent = !_obscureCurrent),
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    AppTextField(
                       controller: _newPasswordController,
                       label: 'Password Baru',
                       hintText: 'Minimal 8 karakter',
@@ -741,7 +717,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     InkWell(
                       onTap: () async {
                         HapticFeedback.selectionClick();
+                        final navigator = Navigator.of(context, rootNavigator: true);
+                        final profileProvider = context.read<ProfileProvider>();
                         await auth.logout();
+                        profileProvider.clearProfile();
+                        navigator.pushAndRemoveUntil(
+                          MaterialPageRoute(builder: (_) => const LoginScreen()),
+                          (route) => false,
+                        );
                       },
                       borderRadius: BorderRadius.circular(8),
                       child: const Padding(

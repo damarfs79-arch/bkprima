@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../core/theme/app_theme.dart';
+import '../providers/auth_provider.dart';
 import '../providers/profile_provider.dart';
 import '../services/api_service.dart';
 import 'login_screen.dart';
@@ -57,6 +58,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
 
       if (profileProvider.profile != null) {
         if (!mounted) return;
+        context.read<AuthProvider>().setUser(profileProvider.profile!);
         Navigator.pushReplacement(
           context,
           PageRouteBuilder(
@@ -66,6 +68,8 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
           ),
         );
         return;
+      } else {
+        await ApiService.removeToken();
       }
     }
 

@@ -214,47 +214,47 @@
               </div>
             </div>
 
-            <!-- Banner Notifikasi Kenaikan / Penurunan Kehadiran Bulan Terpilih -->
+            <!-- Banner Ringkasan Presensi Aktual Database -->
             <div
               class="p-4 rounded-lg border flex flex-col sm:flex-row sm:items-center justify-between gap-3 transition"
-              :class="currentMonthData.trend === 'naik' ? 'bg-emerald-50 border-emerald-200 text-emerald-900' : 'bg-rose-50 border-rose-200 text-rose-900'"
+              :class="currentCohortData.hadir.rate >= 90 ? 'bg-emerald-50 border-emerald-200 text-emerald-900' : 'bg-slate-50 border-slate-200 text-slate-800'"
             >
               <div class="flex items-center gap-3">
                 <div
                   class="w-9 h-9 rounded-lg text-white flex items-center justify-center shrink-0"
-                  :class="currentMonthData.trend === 'naik' ? 'bg-emerald-600' : 'bg-rose-600'"
+                  :class="currentCohortData.hadir.rate >= 90 ? 'bg-emerald-600' : 'bg-slate-600'"
                 >
-                  <svg v-if="currentMonthData.trend === 'naik'" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18" />
-                  </svg>
-                  <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                 </div>
                 <div>
                   <div class="flex items-center gap-2">
                     <span class="text-xs font-semibold">
-                      {{ currentMonthData.trend === 'naik' ? 'Kenaikan Kehadiran Siswa:' : 'Penurunan Kehadiran Siswa:' }}
+                      Ringkasan Presensi Aktual Database:
                     </span>
                     <span
                       class="text-xs font-bold px-2 py-0.5 rounded"
-                      :class="currentMonthData.trend === 'naik' ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'"
+                      :class="currentCohortData.hadir.rate >= 90 ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-200 text-slate-700'"
                     >
-                      {{ currentMonthData.delta }} pada {{ currentMonthData.name }}
+                      {{ currentCohortData.hadir.rate }}% Hadir
                     </span>
                   </div>
-                  <p class="text-xs mt-0.5" :class="currentMonthData.trend === 'naik' ? 'text-emerald-800' : 'text-rose-800'">
-                    Tingkat presensi hadir {{ selectedAngkatanLabel }} tercatat <strong>{{ currentCohortData.hadir.rate }}%</strong>
-                    ({{ currentMonthData.trend === 'naik' ? 'meningkat' : 'menurun' }} dibanding {{ currentMonthData.prevMonthName }} sebesar {{ currentMonthData.prevHadirRate }}%).
-                    {{ currentMonthData.summary }}
+                  <p class="text-xs mt-0.5" :class="currentCohortData.hadir.rate >= 90 ? 'text-emerald-800' : 'text-slate-600'">
+                    <template v-if="(props.attendanceStats?.totalPresensi || 0) > 0">
+                      Tercatat <strong>{{ currentCohortData.hadir.count }}</strong> data hadir dari total <strong>{{ props.attendanceStats.totalPresensi }}</strong> catatan presensi di database.
+                    </template>
+                    <template v-else>
+                      Belum ada data presensi yang tercatat di database.
+                    </template>
                   </p>
                 </div>
               </div>
               <div
                 class="shrink-0 text-xs font-semibold self-start sm:self-auto"
-                :class="currentMonthData.trend === 'naik' ? 'text-emerald-700' : 'text-rose-700'"
+                :class="currentCohortData.hadir.rate >= 90 ? 'text-emerald-700' : 'text-slate-500'"
               >
-                {{ currentMonthData.trend === 'naik' ? 'Tren Positif / Melampaui Target' : 'Perlu Evaluasi Presensi' }}
+                {{ (props.attendanceStats?.totalPresensi || 0) === 0 ? 'Data Kosong' : (currentCohortData.hadir.rate >= 90 ? 'Target Kehadiran Terpenuhi' : 'Perlu Evaluasi Presensi') }}
               </div>
             </div>
 
@@ -832,6 +832,77 @@
       </div>
 
       <!-- ============================================================ -->
+      <!-- TAB 2B: KELOLA DATA JURUSAN                                  -->
+      <!-- ============================================================ -->
+      <div v-if="activeTab === 'jurusan'" class="space-y-4">
+        <div class="bg-white rounded-xl border border-slate-200 shadow-2xs overflow-hidden">
+          <div class="p-4 sm:p-5 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <h2 class="text-sm font-bold text-slate-900">Master Program Keahlian / Jurusan</h2>
+              <p class="text-xs text-slate-500 mt-0.5">
+                Tambah, ubah, atau hapus daftar jurusan yang digunakan pada rombel kelas dan filter presensi.
+              </p>
+            </div>
+            <button
+              type="button"
+              @click="cancelEditJurusan(); openModal('jurusan')"
+              class="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold transition cursor-pointer shrink-0"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+              </svg>
+              <span>Tambah Jurusan</span>
+            </button>
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse text-xs">
+              <thead>
+                <tr class="bg-slate-50 border-b border-slate-200 text-slate-500 font-semibold">
+                  <th class="py-3 px-4 w-12">No</th>
+                  <th class="py-3 px-4 w-28">Kode</th>
+                  <th class="py-3 px-4">Nama Lengkap Jurusan</th>
+                  <th class="py-3 px-4">Keterangan</th>
+                  <th class="py-3 px-4 text-right w-36">Aksi</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-100">
+                <tr v-if="jurusanList.length === 0">
+                  <td colspan="5" class="py-8 text-center text-slate-400">
+                    Belum ada jurusan terdaftar. Klik "Tambah Jurusan" untuk menambahkan.
+                  </td>
+                </tr>
+                <tr v-for="(j, idx) in jurusanList" :key="j.id" class="hover:bg-slate-50/70 transition">
+                  <td class="py-3 px-4 text-slate-400">{{ idx + 1 }}</td>
+                  <td class="py-3 px-4 font-bold text-slate-900">{{ j.code }}</td>
+                  <td class="py-3 px-4 font-semibold text-slate-800">{{ j.name }}</td>
+                  <td class="py-3 px-4 text-slate-500">{{ j.description || '-' }}</td>
+                  <td class="py-3 px-4 text-right">
+                    <div class="inline-flex items-center gap-1.5">
+                      <button
+                        type="button"
+                        @click="editJurusanItem(j); openModal('jurusan')"
+                        class="px-2.5 py-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold transition cursor-pointer"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        type="button"
+                        @click="confirmDeleteJurusan(j)"
+                        class="px-2.5 py-1 rounded bg-rose-50 hover:bg-rose-100 text-rose-700 font-semibold transition cursor-pointer"
+                      >
+                        Hapus
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============================================================ -->
       <!-- TAB 3: KELOLA KELAS / ROMBEL                                  -->
       <!-- ============================================================ -->
       <div v-if="activeTab === 'kelas'" class="space-y-4">
@@ -917,7 +988,7 @@
                 <tr>
                   <th class="py-3 px-4 text-center w-12 text-[11px] font-semibold uppercase tracking-wider text-slate-500">No</th>
                   <th class="py-3 px-4 text-[11px] font-semibold uppercase tracking-wider text-slate-500">Nama Rombel</th>
-                  <th class="py-3 px-4 text-[11px] font-semibold uppercase tracking-wider text-slate-500">Tingkat &amp; Jurusan</th>
+                  <th class="py-3 px-4 text-[11px] font-semibold uppercase tracking-wider text-slate-500">Kelas</th>
                   <th class="py-3 px-4 text-[11px] font-semibold uppercase tracking-wider text-slate-500">Wali Kelas</th>
                   <th class="py-3 px-4 text-[11px] font-semibold uppercase tracking-wider text-slate-500">Guru BK Pendamping</th>
                   <th class="py-3 px-4 text-center text-[11px] font-semibold uppercase tracking-wider text-slate-500">Jumlah Siswa</th>
@@ -937,7 +1008,7 @@
                   </td>
                   <td class="py-3.5 px-4">
                     <span class="text-xs text-slate-600 font-medium">
-                      {{ k.level }} &bull; {{ k.jurusan }}
+                      {{ formatKelasLabel(k.level, k.jurusan) }}
                     </span>
                   </td>
                   <td class="py-3.5 px-4 font-semibold text-slate-800">{{ k.waliKelas }}</td>
@@ -1125,6 +1196,175 @@
       </div>
 
 
+
+      <!-- ============================================================ -->
+      <!-- TAB 4B: KELOLA TINDAKAN / SANKSI PEMBINAAN                   -->
+      <!-- ============================================================ -->
+      <div v-if="activeTab === 'sanksi'" class="space-y-4">
+        <div class="bg-white rounded-xl border border-slate-200 shadow-2xs overflow-hidden">
+          <div class="p-4 sm:p-5 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <h2 class="text-sm font-bold text-slate-900">Master Tindakan &amp; Sanksi Pembinaan</h2>
+              <p class="text-xs text-slate-500 mt-0.5">
+                Daftar pilihan tindakan/sanksi yang tampil di aplikasi Android Guru BK saat mencatat pelanggaran siswa.
+              </p>
+            </div>
+            <button
+              type="button"
+              @click="openSanksiModal()"
+              class="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold transition cursor-pointer shrink-0"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+              </svg>
+              <span>Tambah Tindakan</span>
+            </button>
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse text-xs">
+              <thead>
+                <tr class="bg-slate-50 border-b border-slate-200 text-slate-500 font-semibold">
+                  <th class="py-3 px-4 w-16">Urutan</th>
+                  <th class="py-3 px-4">Nama Tindakan / Sanksi</th>
+                  <th class="py-3 px-4">Keterangan</th>
+                  <th class="py-3 px-4 w-24">Status</th>
+                  <th class="py-3 px-4 text-right w-32">Aksi</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-100">
+                <tr v-if="sanksiList.length === 0">
+                  <td colspan="5" class="py-8 text-center text-slate-400">
+                    Belum ada data tindakan / sanksi. Klik "Tambah Tindakan" untuk menambahkan.
+                  </td>
+                </tr>
+                <tr v-for="s in sanksiList" :key="s.id" class="hover:bg-slate-50/70 transition">
+                  <td class="py-3 px-4 font-mono text-slate-500">{{ s.sort_order }}</td>
+                  <td class="py-3 px-4 font-semibold text-slate-800">{{ s.name }}</td>
+                  <td class="py-3 px-4 text-slate-500">{{ s.description || '-' }}</td>
+                  <td class="py-3 px-4">
+                    <span
+                      class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold"
+                      :class="s.is_active ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-500'"
+                    >
+                      {{ s.is_active ? 'Aktif' : 'Nonaktif' }}
+                    </span>
+                  </td>
+                  <td class="py-3 px-4 text-right">
+                    <div class="inline-flex items-center gap-1.5">
+                      <button
+                        type="button"
+                        @click="openSanksiModal(s)"
+                        class="px-2.5 py-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold transition cursor-pointer"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        type="button"
+                        @click="confirmDeleteSanksi(s)"
+                        class="px-2.5 py-1 rounded bg-rose-50 hover:bg-rose-100 text-rose-700 font-semibold transition cursor-pointer"
+                      >
+                        Hapus
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============================================================ -->
+      <!-- TAB 4C: KELOLA ARSIP ALUMNI (SISWA LULUS)                    -->
+      <!-- ============================================================ -->
+      <div v-if="activeTab === 'arsip'" class="space-y-4">
+        <div class="bg-white rounded-xl border border-slate-200 shadow-2xs overflow-hidden">
+          <div class="p-4 sm:p-5 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <h2 class="text-sm font-bold text-slate-900">Kelola Arsip Siswa Lulus (Alumni)</h2>
+              <p class="text-xs text-slate-500 mt-0.5">
+                Luluskan siswa aktif, tambah data alumni, edit tahun lulus, atau pulihkan kembali ke siswa aktif.
+              </p>
+            </div>
+            <button
+              type="button"
+              @click="openAlumniModal()"
+              class="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold transition cursor-pointer shrink-0"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+              </svg>
+              <span>Tambah / Luluskan Siswa</span>
+            </button>
+          </div>
+
+          <div class="p-4 border-b border-slate-100 bg-slate-50/50 flex flex-col sm:flex-row gap-3">
+            <input
+              v-model="searchAlumni"
+              type="text"
+              placeholder="Cari NISN atau nama alumni..."
+              class="flex-1 bg-white border border-slate-200 rounded-lg px-3.5 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse text-xs">
+              <thead>
+                <tr class="bg-slate-50 border-b border-slate-200 text-slate-500 font-semibold">
+                  <th class="py-3 px-4 w-12">No</th>
+                  <th class="py-3 px-4">NISN</th>
+                  <th class="py-3 px-4">Nama Alumni</th>
+                  <th class="py-3 px-4">Kelas Terakhir</th>
+                  <th class="py-3 px-4">Tahun Lulus</th>
+                  <th class="py-3 px-4">Poin Akhir</th>
+                  <th class="py-3 px-4 text-right">Aksi</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-100">
+                <tr v-if="filteredAlumni.length === 0">
+                  <td colspan="7" class="py-8 text-center text-slate-400">
+                    Belum ada data arsip siswa lulus. Klik "Tambah / Luluskan Siswa" untuk menambahkan.
+                  </td>
+                </tr>
+                <tr v-for="(a, idx) in filteredAlumni" :key="a.id" class="hover:bg-slate-50/70 transition">
+                  <td class="py-3 px-4 text-slate-400">{{ idx + 1 }}</td>
+                  <td class="py-3 px-4 font-mono text-slate-600">{{ a.nisn || a.nis }}</td>
+                  <td class="py-3 px-4 font-semibold text-slate-800">{{ a.name }}</td>
+                  <td class="py-3 px-4 text-slate-600">{{ a.lastClassName || '-' }}</td>
+                  <td class="py-3 px-4 font-semibold text-blue-700">{{ a.graduationYear || '-' }}</td>
+                  <td class="py-3 px-4">{{ a.poin || 0 }} Poin</td>
+                  <td class="py-3 px-4 text-right">
+                    <div class="inline-flex items-center gap-1.5">
+                      <button
+                        type="button"
+                        @click="openAlumniModal(a)"
+                        class="px-2.5 py-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold transition cursor-pointer"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        type="button"
+                        @click="restoreAlumni(a)"
+                        class="px-2.5 py-1 rounded bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-semibold transition cursor-pointer"
+                      >
+                        Pulihkan
+                      </button>
+                      <button
+                        type="button"
+                        @click="confirmDeleteAlumni(a)"
+                        class="px-2.5 py-1 rounded bg-rose-50 hover:bg-rose-100 text-rose-700 font-semibold transition cursor-pointer"
+                      >
+                        Hapus
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
 
       <!-- ============================================================ -->
       <!-- TAB 5: PENGATURAN SEKOLAH, KEPALA SEKOLAH & SEMESTER          -->
@@ -1567,6 +1807,190 @@
       </div>
 
       <!-- ============================================================ -->
+      <!-- MODAL: TAMBAH / EDIT TINDAKAN / SANKSI                       -->
+      <!-- ============================================================ -->
+      <div v-if="modalType === 'sanksi'" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50">
+        <div class="bg-white rounded-xl max-w-md w-full p-6 shadow-xl border border-slate-200 animate-in zoom-in-95 duration-150">
+          <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+            <h3 class="text-sm font-bold text-slate-900">
+              {{ editingSanksi ? 'Edit Tindakan / Sanksi' : 'Tambah Tindakan / Sanksi Baru' }}
+            </h3>
+            <button type="button" @click="closeModal" class="text-slate-400 hover:text-slate-600 cursor-pointer">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+          <form @submit.prevent="saveSanksi" class="mt-4 space-y-3 text-xs">
+            <div v-if="errorMessageSanksi" class="p-2.5 rounded-lg bg-rose-50 border border-rose-200 text-rose-700 font-medium">
+              {{ errorMessageSanksi }}
+            </div>
+            <div>
+              <label class="block font-bold text-slate-700 mb-1">Nama Tindakan / Sanksi *</label>
+              <input
+                v-model="formSanksi.name"
+                type="text"
+                required
+                placeholder="Contoh: Pembinaan Lisan & Pengarahan BK"
+                class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3.5 py-2.5 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            <div>
+              <label class="block font-bold text-slate-700 mb-1">Keterangan (Opsional)</label>
+              <input
+                v-model="formSanksi.description"
+                type="text"
+                placeholder="Penjelasan singkat pelaksanaan sanksi"
+                class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3.5 py-2.5 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block font-bold text-slate-700 mb-1">Urutan Tampil</label>
+                <input
+                  v-model.number="formSanksi.sort_order"
+                  type="number"
+                  min="0"
+                  class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3.5 py-2.5 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div class="flex items-end pb-2">
+                <label class="inline-flex items-center gap-2 cursor-pointer font-semibold text-slate-700">
+                  <input v-model="formSanksi.is_active" type="checkbox" class="rounded border-slate-300 text-blue-600 focus:ring-blue-500" />
+                  <span>Aktif di Aplikasi</span>
+                </label>
+              </div>
+            </div>
+            <div class="flex justify-end gap-2 pt-3 border-t border-slate-100">
+              <button type="button" @click="closeModal" class="px-4 py-2 rounded-lg border border-slate-200 font-bold text-slate-600 hover:bg-slate-100 cursor-pointer">
+                Batal
+              </button>
+              <button
+                type="submit"
+                :disabled="isSavingSanksi"
+                class="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-bold cursor-pointer disabled:opacity-50"
+              >
+                {{ isSavingSanksi ? 'Menyimpan...' : (editingSanksi ? 'Perbarui' : 'Simpan') }}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- ============================================================ -->
+      <!-- MODAL: TAMBAH / EDIT ARSIP ALUMNI                            -->
+      <!-- ============================================================ -->
+      <div v-if="modalType === 'arsip'" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50">
+        <div class="bg-white rounded-xl max-w-md w-full p-6 shadow-xl border border-slate-200 animate-in zoom-in-95 duration-150">
+          <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+            <h3 class="text-sm font-bold text-slate-900">
+              {{ editingAlumni ? 'Edit Data Arsip Alumni' : 'Tambah / Luluskan Siswa ke Arsip' }}
+            </h3>
+            <button type="button" @click="closeModal" class="text-slate-400 hover:text-slate-600 cursor-pointer">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+          <form @submit.prevent="saveAlumni" class="mt-4 space-y-3 text-xs">
+            <div v-if="errorMessageAlumni" class="p-2.5 rounded-lg bg-rose-50 border border-rose-200 text-rose-700 font-medium">
+              {{ errorMessageAlumni }}
+            </div>
+
+            <div v-if="!editingAlumni" class="grid grid-cols-2 gap-2 p-1 bg-slate-100 rounded-lg">
+              <button
+                type="button"
+                @click="alumniInputMode = 'angkatan'"
+                class="py-1.5 rounded-md font-semibold transition cursor-pointer"
+                :class="alumniInputMode === 'angkatan' ? 'bg-white text-blue-700 shadow-2xs' : 'text-slate-600'"
+              >
+                Luluskan 1 Angkatan
+              </button>
+              <button
+                type="button"
+                @click="alumniInputMode = 'manual'"
+                class="py-1.5 rounded-md font-semibold transition cursor-pointer"
+                :class="alumniInputMode === 'manual' ? 'bg-white text-blue-700 shadow-2xs' : 'text-slate-600'"
+              >
+                Input Alumni Baru
+              </button>
+            </div>
+
+            <div v-if="!editingAlumni && alumniInputMode === 'angkatan'">
+              <label class="block font-bold text-slate-700 mb-1">Pilih Angkatan *</label>
+              <select
+                v-model="formAlumni.level"
+                class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3.5 py-2.5 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
+              >
+                <option value="">-- Pilih Angkatan --</option>
+                <option value="XII">Angkatan Kelas XII ({{ angkatanCounts.XII }} siswa aktif)</option>
+                <option value="XI">Angkatan Kelas XI ({{ angkatanCounts.XI }} siswa aktif)</option>
+                <option value="X">Angkatan Kelas X ({{ angkatanCounts.X }} siswa aktif)</option>
+              </select>
+            </div>
+
+            <template v-else>
+              <div>
+                <label class="block font-bold text-slate-700 mb-1">NISN Alumni *</label>
+                <input
+                  v-model="formAlumni.nisn"
+                  type="text"
+                  required
+                  placeholder="Contoh: 0061234561"
+                  class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3.5 py-2.5 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label class="block font-bold text-slate-700 mb-1">Nama Lengkap Alumni *</label>
+                <input
+                  v-model="formAlumni.name"
+                  type="text"
+                  required
+                  placeholder="Nama lengkap siswa"
+                  class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3.5 py-2.5 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label class="block font-bold text-slate-700 mb-1">Kelas Terakhir *</label>
+                <input
+                  v-model="formAlumni.last_class_name"
+                  type="text"
+                  required
+                  placeholder="Contoh: XII RPL 1"
+                  class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3.5 py-2.5 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+            </template>
+
+            <div>
+              <label class="block font-bold text-slate-700 mb-1">Tahun Lulus *</label>
+              <input
+                v-model.number="formAlumni.graduation_year"
+                type="number"
+                min="2000"
+                max="2100"
+                required
+                class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3.5 py-2.5 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+
+            <div class="flex justify-end gap-2 pt-3 border-t border-slate-100">
+              <button type="button" @click="closeModal" class="px-4 py-2 rounded-lg border border-slate-200 font-bold text-slate-600 hover:bg-slate-100 cursor-pointer">
+                Batal
+              </button>
+              <button
+                type="submit"
+                :disabled="isSavingAlumni"
+                class="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-bold cursor-pointer disabled:opacity-50"
+              >
+                {{ isSavingAlumni ? 'Menyimpan...' : (editingAlumni ? 'Perbarui' : 'Simpan') }}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- ============================================================ -->
       <!-- MODAL: TAMBAH SISWA                                           -->
       <!-- ============================================================ -->
       <div v-if="modalType === 'siswa'" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50">
@@ -1869,7 +2293,7 @@
       <!-- ============================================================ -->
       <div
         v-if="confirmModal.show"
-        class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 animate-in fade-in duration-150"
+        class="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-slate-900/50 animate-in fade-in duration-150"
         @click.self="closeConfirmModal"
       >
         <div class="bg-white rounded-xl max-w-md w-full p-6 sm:p-7 shadow-xl border border-slate-200 text-center animate-in zoom-in-95 duration-150">
@@ -2217,21 +2641,41 @@ const props = defineProps({
     type: Array,
     default: () => []
   },
+  initialSanksiList: {
+    type: Array,
+    default: () => []
+  },
+  initialAlumniList: {
+    type: Array,
+    default: () => []
+  },
   settings: {
     type: Object,
     default: () => ({})
   }
 })
 
+const formatKelasLabel = (level, jurusan) => {
+  const raw = String(level || '').toUpperCase()
+  let num = ''
+  if (raw.includes('12') || raw.includes('XII')) num = '12'
+  else if (raw.includes('11') || raw.includes('XI')) num = '11'
+  else if (raw.includes('10') || raw.includes('X')) num = '10'
+  else num = String(level || '').trim()
+
+  const jur = String(jurusan || '').trim()
+  return [num, jur].filter(Boolean).join(' ')
+}
+
 const getSavedTab = () => {
   if (typeof window !== 'undefined') {
     const params = new URLSearchParams(window.location.search)
     const tabParam = params.get('tab')
-    if (tabParam && ['dashboard', 'guru', 'kelas', 'siswa', 'pengaturan'].includes(tabParam)) {
+    if (tabParam && ['dashboard', 'guru', 'jurusan', 'kelas', 'siswa', 'sanksi', 'arsip', 'pengaturan'].includes(tabParam)) {
       return tabParam
     }
     const saved = localStorage.getItem('bkprima_admin_active_tab')
-    if (saved && ['dashboard', 'guru', 'kelas', 'siswa', 'pengaturan'].includes(saved)) {
+    if (saved && ['dashboard', 'guru', 'jurusan', 'kelas', 'siswa', 'sanksi', 'arsip', 'pengaturan'].includes(saved)) {
       return saved
     }
   }
@@ -2306,6 +2750,14 @@ const tabs = computed(() => [
     ])
   },
   {
+    id: 'jurusan',
+    label: 'Kelola Jurusan',
+    count: jurusanList.value.length,
+    icon: () => h('svg', { xmlns: 'http://www.w3.org/2000/svg', class: 'h-4 w-4', fill: 'none', viewBox: '0 0 24 24', stroke: 'currentColor', 'stroke-width': '2' }, [
+      h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', d: 'M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253' })
+    ])
+  },
+  {
     id: 'kelas',
     label: 'Kelola Kelas / Rombel',
     count: kelasList.value.length,
@@ -2319,6 +2771,23 @@ const tabs = computed(() => [
     count: siswaList.value.length,
     icon: () => h('svg', { xmlns: 'http://www.w3.org/2000/svg', class: 'h-4 w-4', fill: 'none', viewBox: '0 0 24 24', stroke: 'currentColor', 'stroke-width': '2' }, [
       h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', d: 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z' })
+    ])
+  },
+  {
+    id: 'sanksi',
+    label: 'Kelola Tindakan / Sanksi',
+    count: sanksiList.value.length,
+    icon: () => h('svg', { xmlns: 'http://www.w3.org/2000/svg', class: 'h-4 w-4', fill: 'none', viewBox: '0 0 24 24', stroke: 'currentColor', 'stroke-width': '2' }, [
+      h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', d: 'M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z' })
+    ])
+  },
+  {
+    id: 'arsip',
+    label: 'Kelola Arsip Alumni',
+    count: alumniList.value.length,
+    icon: () => h('svg', { xmlns: 'http://www.w3.org/2000/svg', class: 'h-4 w-4', fill: 'none', viewBox: '0 0 24 24', stroke: 'currentColor', 'stroke-width': '2' }, [
+      h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', d: 'M12 14l9-5-9-5-9 5 9 5z' }),
+      h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', d: 'M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z' })
     ])
   },
   {
@@ -3029,6 +3498,246 @@ const saveJurusan = (andCreateClass = false) => {
   })
 }
 
+// ==========================================
+// CRUD TINDAKAN / SANKSI PEMBINAAN
+// ==========================================
+const sanksiList = ref(props.initialSanksiList ? [...props.initialSanksiList] : [])
+watch(() => props.initialSanksiList, (newVal) => {
+  if (newVal) sanksiList.value = [...newVal]
+}, { deep: true })
+
+const editingSanksi = ref(null)
+const isSavingSanksi = ref(false)
+const errorMessageSanksi = ref('')
+const formSanksi = ref({
+  name: '',
+  description: '',
+  sort_order: 1,
+  is_active: true,
+})
+
+const openSanksiModal = (s = null) => {
+  errorMessageSanksi.value = ''
+  if (s) {
+    editingSanksi.value = s
+    formSanksi.value = {
+      name: s.name || '',
+      description: s.description || '',
+      sort_order: s.sort_order ?? 1,
+      is_active: s.is_active !== false,
+    }
+  } else {
+    editingSanksi.value = null
+    formSanksi.value = {
+      name: '',
+      description: '',
+      sort_order: sanksiList.value.length + 1,
+      is_active: true,
+    }
+  }
+  modalType.value = 'sanksi'
+}
+
+const saveSanksi = () => {
+  errorMessageSanksi.value = ''
+  if (!formSanksi.value.name.trim()) {
+    errorMessageSanksi.value = 'Nama tindakan/sanksi wajib diisi.'
+    return
+  }
+
+  isSavingSanksi.value = true
+  const isEdit = !!editingSanksi.value
+  const url = isEdit ? `/admin/sanksi/${editingSanksi.value.id}` : '/admin/sanksi'
+  const method = isEdit ? 'put' : 'post'
+
+  router[method](url, formSanksi.value, {
+    preserveScroll: true,
+    preserveState: true,
+    onSuccess: (page) => {
+      isSavingSanksi.value = false
+      modalType.value = null
+      editingSanksi.value = null
+      showToast(page.props.flash?.success || (isEdit ? 'Tindakan berhasil diperbarui.' : 'Tindakan berhasil ditambahkan.'))
+    },
+    onError: (errors) => {
+      isSavingSanksi.value = false
+      errorMessageSanksi.value = Object.values(errors)[0] || 'Gagal menyimpan tindakan.'
+    }
+  })
+}
+
+const confirmDeleteSanksi = (s) => {
+  confirmModal.value = {
+    show: true,
+    type: 'delete',
+    title: 'Hapus Tindakan / Sanksi',
+    message: `Apakah Anda yakin ingin menghapus tindakan "${s.name}"?`,
+    targetInfo: {
+      name: s.name,
+      tag: `Urutan ${s.sort_order}`,
+      sub: s.description || 'Tindakan Pembinaan BK'
+    },
+    confirmText: 'Ya, Hapus',
+    cancelText: 'Batal',
+    onConfirm: () => {
+      router.delete(`/admin/sanksi/${s.id}`, {
+        preserveScroll: true,
+        preserveState: true,
+        onSuccess: (page) => {
+          showToast(page.props.flash?.success || 'Tindakan berhasil dihapus.')
+        },
+        onError: () => {
+          showToast('Gagal menghapus tindakan.')
+        }
+      })
+    }
+  }
+}
+
+// ==========================================
+// CRUD ARSIP ALUMNI (SISWA LULUS)
+// ==========================================
+const alumniList = ref(props.initialAlumniList ? [...props.initialAlumniList] : [])
+watch(() => props.initialAlumniList, (newVal) => {
+  if (newVal) alumniList.value = [...newVal]
+}, { deep: true })
+
+const searchAlumni = ref('')
+const filteredAlumni = computed(() => {
+  const q = searchAlumni.value.trim().toLowerCase()
+  if (!q) return alumniList.value
+  return alumniList.value.filter(a =>
+    (a.name || '').toLowerCase().includes(q) ||
+    (a.nisn || a.nis || '').toLowerCase().includes(q) ||
+    (a.lastClassName || '').toLowerCase().includes(q)
+  )
+})
+
+const activeSiswaOptions = computed(() => {
+  return siswaList.value.filter(s => (s.status || 'aktif').toLowerCase() !== 'lulus')
+})
+
+const angkatanCounts = computed(() => {
+  const counts = { X: 0, XI: 0, XII: 0 }
+  activeSiswaOptions.value.forEach(s => {
+    const cls = (s.className || '').trim().toUpperCase()
+    if (cls.startsWith('XII ')) counts.XII++
+    else if (cls.startsWith('XI ')) counts.XI++
+    else if (cls.startsWith('X ')) counts.X++
+  })
+  return counts
+})
+
+const editingAlumni = ref(null)
+const alumniInputMode = ref('angkatan')
+const isSavingAlumni = ref(false)
+const errorMessageAlumni = ref('')
+const formAlumni = ref({
+  level: 'XII',
+  student_id: '',
+  nisn: '',
+  name: '',
+  last_class_name: '',
+  graduation_year: new Date().getFullYear(),
+})
+
+const openAlumniModal = (a = null) => {
+  errorMessageAlumni.value = ''
+  if (a) {
+    editingAlumni.value = a
+    alumniInputMode.value = 'manual'
+    formAlumni.value = {
+      level: '',
+      student_id: '',
+      nisn: a.nisn || a.nis || '',
+      name: a.name || '',
+      last_class_name: a.lastClassName || '',
+      graduation_year: a.graduationYear || new Date().getFullYear(),
+    }
+  } else {
+    editingAlumni.value = null
+    alumniInputMode.value = 'angkatan'
+    formAlumni.value = {
+      level: 'XII',
+      student_id: '',
+      nisn: '',
+      name: '',
+      last_class_name: '',
+      graduation_year: new Date().getFullYear(),
+    }
+  }
+  modalType.value = 'arsip'
+}
+
+const saveAlumni = () => {
+  errorMessageAlumni.value = ''
+  if (!editingAlumni.value && alumniInputMode.value === 'angkatan' && !formAlumni.value.level) {
+    errorMessageAlumni.value = 'Silakan pilih angkatan yang akan diluluskan.'
+    return
+  }
+
+  isSavingAlumni.value = true
+  const isEdit = !!editingAlumni.value
+  const url = isEdit ? `/admin/arsip-alumni/${editingAlumni.value.id}` : '/admin/arsip-alumni'
+  const method = isEdit ? 'put' : 'post'
+
+  router[method](url, formAlumni.value, {
+    preserveScroll: true,
+    preserveState: true,
+    onSuccess: (page) => {
+      isSavingAlumni.value = false
+      modalType.value = null
+      editingAlumni.value = null
+      showToast(page.props.flash?.success || (isEdit ? 'Data alumni berhasil diperbarui.' : 'Data alumni berhasil disimpan.'))
+    },
+    onError: (errors) => {
+      isSavingAlumni.value = false
+      errorMessageAlumni.value = Object.values(errors)[0] || 'Gagal menyimpan data alumni.'
+    }
+  })
+}
+
+const restoreAlumni = (a) => {
+  router.put(`/admin/arsip-alumni/${a.id}`, { restore_active: true }, {
+    preserveScroll: true,
+    preserveState: true,
+    onSuccess: (page) => {
+      showToast(page.props.flash?.success || 'Siswa dipulihkan ke daftar aktif.')
+    },
+    onError: () => {
+      showToast('Gagal memulihkan siswa.')
+    }
+  })
+}
+
+const confirmDeleteAlumni = (a) => {
+  confirmModal.value = {
+    show: true,
+    type: 'delete',
+    title: 'Hapus Data Arsip Alumni',
+    message: `Apakah Anda yakin ingin menghapus data alumni "${a.name}"?`,
+    targetInfo: {
+      name: a.name,
+      tag: `NISN: ${a.nisn || a.nis}`,
+      sub: `${a.lastClassName || '-'} • Lulus ${a.graduationYear || '-'}`
+    },
+    confirmText: 'Ya, Hapus',
+    cancelText: 'Batal',
+    onConfirm: () => {
+      router.delete(`/admin/arsip-alumni/${a.id}`, {
+        preserveScroll: true,
+        preserveState: true,
+        onSuccess: (page) => {
+          showToast(page.props.flash?.success || 'Data alumni berhasil dihapus.')
+        },
+        onError: () => {
+          showToast('Gagal menghapus data alumni.')
+        }
+      })
+    }
+  }
+}
+
 const confirmDeleteJurusan = (j) => {
   confirmModal.value = {
     show: true,
@@ -3048,8 +3757,10 @@ const confirmDeleteJurusan = (j) => {
         preserveState: true,
         onSuccess: (page) => {
           if (page.props.flash?.error) {
+            errorMessageJurusan.value = page.props.flash.error
             showToast(page.props.flash.error)
           } else {
+            errorMessageJurusan.value = ''
             showToast(`Jurusan ${j.code} berhasil dihapus.`)
             if (editingJurusan.value && editingJurusan.value.id === j.id) {
               cancelEditJurusan()

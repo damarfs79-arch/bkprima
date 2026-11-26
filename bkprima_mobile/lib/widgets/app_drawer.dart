@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../core/theme/app_theme.dart';
 import '../providers/auth_provider.dart';
+import '../providers/profile_provider.dart';
+import '../screens/login_screen.dart';
 import '../screens/violation_records_screen.dart';
 import 'rule_lookup_sheet.dart';
 
@@ -150,8 +152,15 @@ class AppDrawer extends StatelessWidget {
             color: Colors.transparent,
             child: InkWell(
               onTap: () async {
+                final navigator = Navigator.of(context, rootNavigator: true);
+                final profileProvider = context.read<ProfileProvider>();
                 Navigator.pop(context);
                 await auth.logout();
+                profileProvider.clearProfile();
+                navigator.pushAndRemoveUntil(
+                  MaterialPageRoute(builder: (_) => const LoginScreen()),
+                  (route) => false,
+                );
               },
               child: const Padding(
                 padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),

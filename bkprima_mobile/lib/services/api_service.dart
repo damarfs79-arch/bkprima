@@ -24,9 +24,25 @@ class ApiService {
 
   static String? _cachedBaseUrl;
 
+  static String normalizeBaseUrl(String rawUrl) {
+    String url = rawUrl.trim();
+    if (url.isEmpty) return defaultBaseUrl;
+    if (!url.startsWith('http://') && !url.startsWith('https://')) {
+      url = 'http://$url';
+    }
+    while (url.endsWith('/')) {
+      url = url.substring(0, url.length - 1);
+    }
+    if (!url.endsWith('/api')) {
+      url = '$url/api';
+    }
+    return url;
+  }
+
   static Future<String> getBaseUrl() async {
     final prefs = await SharedPreferences.getInstance();
     String current = prefs.getString('server_url') ?? defaultBaseUrl;
+    current = normalizeBaseUrl(current);
 
     // Normalisasi jika running di browser (Flutter Web) tapi tersimpan IP emulator Android
     if (kIsWeb && current.contains('10.0.2.2')) {
@@ -40,8 +56,63 @@ class ApiService {
 
   static Future<void> setBaseUrl(String url) async {
     final prefs = await SharedPreferences.getInstance();
-    _cachedBaseUrl = url.trim();
+    _cachedBaseUrl = normalizeBaseUrl(url);
     await prefs.setString('server_url', _cachedBaseUrl!);
+  }
+
+  static String getRootUrlSync() {
+    final base = _cachedBaseUrl ?? defaultBaseUrl;
+    return base.endsWith('/api') ? base.substring(0, base.length - 4) : base;
+  }
+
+  static String? resolveMediaUrl(String? rawUrl) {
+    if (rawUrl == null || rawUrl.trim().isEmpty) return null;
+    final trimmed = rawUrl.trim();
+    final root = getRootUrlSync();
+    if (trimmed.startsWith('/')) {
+      return '$root$trimmed';
+    }
+    final uri = Uri.tryParse(trimmed);
+    if (uri != null && (uri.host == 'localhost' || uri.host == '127.0.0.1')) {
+      final rootUri = Uri.tryParse(root);
+      if (rootUri != null && rootUri.host.isNotEmpty) {
+        return uri.replace(
+          scheme: rootUri.scheme,
+          host: rootUri.host,
+          port: rootUri.hasPort ? rootUri.port : null,
+        ).toString();
+      }
+    }
+    return trimmed;
+  }
+
+  static Map<String, dynamic> _safeDecode(String body) {
+    try {
+      final decoded = jsonDecode(body);
+      if (decoded is Map<String, dynamic>) {
+        return decoded;
+      }
+      return {};
+    } catch (_) {
+      return {};
+    }
+  }
+
+  static Future<Map<String, dynamic>> testConnection([String? customUrl]) async {
+    try {
+      final url = customUrl != null ? normalizeBaseUrl(customUrl) : await getBaseUrl();
+      final response = await http.get(
+        Uri.parse('$url/health'),
+        headers: {'Accept': 'application/json'},
+      ).timeout(const Duration(seconds: 6));
+      final data = _safeDecode(response.body);
+      if (response.statusCode == 200 && data['success'] == true) {
+        return {'success': true, 'message': 'Terhubung ke server BK Prima.'};
+      }
+      return {'success': false, 'message': 'Server merespons (${response.statusCode}), tetapi endpoint API tidak sesuai.'};
+    } catch (e) {
+      return {'success': false, 'message': 'Tidak dapat menjangkau server: $e'};
+    }
   }
 
   static Future<String?> getToken() async {
@@ -81,7 +152,7 @@ class ApiService {
         }),
       ).timeout(const Duration(seconds: 12));
 
-      final data = jsonDecode(response.body);
+      final data = _safeDecode(response.body);
       if (response.statusCode == 200 && data['success'] == true) {
         if (data['token'] != null) {
           await saveToken(data['token']);
@@ -105,6 +176,21 @@ class ApiService {
     }
   }
 
+  /// 1b. Auth: Logout
+  static Future<void> logout() async {
+    try {
+      final url = await getBaseUrl();
+      await http.post(
+        Uri.parse('$url/logout'),
+        headers: await _headers(),
+      ).timeout(const Duration(seconds: 5));
+    } catch (_) {
+      // Tetap lanjut hapus token lokal meskipun jaringan sedang offline
+    } finally {
+      await removeToken();
+    }
+  }
+
   /// 2. Presensi Harian
   static Future<Map<String, dynamic>> getAttendance({
     String? date,
@@ -124,7 +210,7 @@ class ApiService {
       final response = await http.get(uri, headers: await _headers()).timeout(const Duration(seconds: 12));
 
       if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
+        final data = _safeDecode(response.body);
         final stats = AttendanceStats.fromJson(data['stats'] ?? {});
         final List studentsJson = data['students'] ?? [];
         final students = studentsJson.map((s) => AttendanceStudent.fromJson(s)).toList();
@@ -153,7 +239,7 @@ class ApiService {
         Uri.parse('$url/absensi/sync'),
         headers: await _headers(),
       ).timeout(const Duration(seconds: 15));
-      final data = jsonDecode(response.body);
+      final data = _safeDecode(response.body);
       return {
         'success': response.statusCode == 200 && data['success'] == true,
         'message': data['message'] ?? 'Sinkronisasi selesai.',
@@ -187,7 +273,7 @@ class ApiService {
         body: jsonEncode(payload),
       ).timeout(const Duration(seconds: 12));
 
-      final data = jsonDecode(response.body);
+      final data = _safeDecode(response.body);
       return {
         'success': response.statusCode == 200 && data['success'] == true,
         'message': data['message'] ?? 'Status presensi berhasil diperbarui.',
@@ -220,7 +306,7 @@ class ApiService {
         body: jsonEncode(payload),
       ).timeout(const Duration(seconds: 15));
 
-      final data = jsonDecode(response.body);
+      final data = _safeDecode(response.body);
       return {
         'success': response.statusCode == 200 && data['success'] == true,
         'message': data['message'] ?? 'Presensi massal berhasil diperbarui.',
@@ -231,17 +317,26 @@ class ApiService {
     }
   }
 
-  /// 3c. Statistik Keseluruhan Sekolah Master Admin (Data Real Database)
-  static Future<Map<String, dynamic>> getOverallStats() async {
+  /// 3c. Statistik Kehadiran & Kedisiplinan (Rombel Guru Hari Ini / 1 Bulan Seluruh Siswa)
+  static Future<Map<String, dynamic>> getOverallStats({
+    String scope = 'my_rombel_today',
+    int? month,
+    int? year,
+  }) async {
     try {
       final url = await getBaseUrl();
+      final queryParams = <String, String>{'scope': scope};
+      if (month != null) queryParams['month'] = month.toString();
+      if (year != null) queryParams['year'] = year.toString();
+
+      final uri = Uri.parse('$url/statistik').replace(queryParameters: queryParams);
       final response = await http.get(
-        Uri.parse('$url/statistik'),
+        uri,
         headers: await _headers(),
       ).timeout(const Duration(seconds: 12));
 
       if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
+        final data = _safeDecode(response.body);
         return {
           'success': true,
           'data': data,
@@ -271,7 +366,7 @@ class ApiService {
       ).timeout(const Duration(seconds: 12));
 
       if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
+        final data = _safeDecode(response.body);
         return {
           'success': true,
           'data': data,
@@ -293,7 +388,7 @@ class ApiService {
       ).timeout(const Duration(seconds: 12));
 
       if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
+        final data = _safeDecode(response.body);
         final stats = ViolationStats.fromJson(data['stats'] ?? {});
         final List vList = data['violations'] ?? [];
         final List spList = data['surat_panggilan'] ?? [];
@@ -349,7 +444,7 @@ class ApiService {
 
       final streamedResponse = await request.send().timeout(const Duration(seconds: 25));
       final response = await http.Response.fromStream(streamedResponse);
-      final data = jsonDecode(response.body);
+      final data = _safeDecode(response.body);
 
       if (response.statusCode == 201 || response.statusCode == 200) {
         return {'success': true, 'message': data['message'] ?? 'Catatan pelanggaran tersimpan.'};
@@ -370,7 +465,7 @@ class ApiService {
         headers: await _headers(),
       ).timeout(const Duration(seconds: 12));
       if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
+        final data = _safeDecode(response.body);
         return {
           'success': true,
           'user': UserModel.fromJson(data['profile']),
@@ -423,7 +518,7 @@ class ApiService {
 
       final streamedResponse = await request.send().timeout(const Duration(seconds: 20));
       final response = await http.Response.fromStream(streamedResponse);
-      final data = jsonDecode(response.body);
+      final data = _safeDecode(response.body);
 
       if (response.statusCode == 200 && data['success'] == true) {
         UserModel? updatedUser;
@@ -448,7 +543,6 @@ class ApiService {
 
   /// 8. Ubah Password Guru BK
   static Future<Map<String, dynamic>> changePassword({
-    required String currentPassword,
     required String password,
     required String passwordConfirmation,
   }) async {
@@ -458,14 +552,16 @@ class ApiService {
         Uri.parse('$url/profile/password'),
         headers: await _headers(),
         body: jsonEncode({
-          'current_password': currentPassword,
           'password': password,
           'password_confirmation': passwordConfirmation,
         }),
       ).timeout(const Duration(seconds: 12));
 
-      final data = jsonDecode(response.body);
+      final data = _safeDecode(response.body);
       if (response.statusCode == 200 && data['success'] == true) {
+        if (data['token'] != null) {
+          await saveToken(data['token'].toString());
+        }
         return {
           'success': true,
           'message': data['message'] ?? 'Password berhasil diperbarui.',
@@ -491,7 +587,7 @@ class ApiService {
       final response = await http.get(uri, headers: await _headers()).timeout(const Duration(seconds: 10));
 
       if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
+        final data = _safeDecode(response.body);
         return {
           'success': true,
           'rules': data['rules'] ?? [],
@@ -501,6 +597,28 @@ class ApiService {
     } catch (e) {
       return {'success': false, 'rules': [], 'message': '$e'};
     }
+  }
+
+  /// 10b. Ambil Daftar Tindakan / Sanksi Pembinaan dari Backend
+  static Future<List<String>> getSanctions() async {
+    try {
+      final url = await getBaseUrl();
+      final response = await http.get(
+        Uri.parse('$url/sanksi'),
+        headers: await _headers(),
+      ).timeout(const Duration(seconds: 10));
+
+      if (response.statusCode == 200) {
+        final data = _safeDecode(response.body);
+        final List raw = data['sanctions'] ?? [];
+        final list = raw
+            .map((item) => (item is Map ? item['name']?.toString() : item?.toString()) ?? '')
+            .where((name) => name.trim().isNotEmpty)
+            .toList();
+        if (list.isNotEmpty) return list;
+      }
+    } catch (_) {}
+    return [];
   }
 
   /// 10. Tambah Aturan / Jenis Pelanggaran Baru ke Backend
@@ -523,7 +641,7 @@ class ApiService {
         }),
       ).timeout(const Duration(seconds: 10));
 
-      final data = jsonDecode(response.body);
+      final data = _safeDecode(response.body);
       if (response.statusCode == 201 && data['success'] == true) {
         return {
           'success': true,

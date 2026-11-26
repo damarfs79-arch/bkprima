@@ -1,3 +1,5 @@
+import '../services/api_service.dart';
+
 class ViolationRecord {
   final int id;
   final int? studentId;
@@ -46,7 +48,7 @@ class ViolationRecord {
       penaltyAction: json['penalty_action'] ?? 'Pembinaan Lisan',
       status: json['status'] ?? 'Dalam Pembinaan',
       notes: json['notes'] ?? '',
-      fotoBukti: json['foto_bukti'],
+      fotoBukti: ApiService.resolveMediaUrl(json['foto_bukti']),
     );
   }
 }

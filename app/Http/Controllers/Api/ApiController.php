@@ -11,27 +11,64 @@ use App\Models\Student;
 use App\Models\Attendance;
 use App\Models\Violation;
 use App\Models\Rule;
+use App\Models\Sanction;
+use Illuminate\Support\Facades\Schema;
 
 class ApiController extends Controller
 {
     /**
-     * Helper to authenticate from Bearer token or return default user.
+     * GET /api/health
+     */
+    public function health()
+    {
+        return response()->json([
+            'success' => true,
+            'app' => 'BK Prima API',
+            'status' => 'online',
+        ]);
+    }
+
+    /**
+     * Resolve storage path or URL against the incoming request host so Android clients
+     * (10.0.2.2 or LAN IP) can load avatars and evidence photos reliably.
+     */
+    protected function resolvePublicUrl(Request $request, ?string $path): ?string
+    {
+        if (!$path) {
+            return null;
+        }
+        if (str_starts_with($path, 'http://') || str_starts_with($path, 'https://')) {
+            return $path;
+        }
+
+        return rtrim($request->getSchemeAndHttpHost(), '/') . '/storage/' . ltrim($path, '/');
+    }
+
+    /**
+     * Helper to authenticate from Bearer token or return default user when no token is sent.
      */
     protected function getAuthenticatedUser(Request $request)
     {
         $token = $request->bearerToken();
         if ($token) {
-            $decoded = base64_decode($token);
+            $decoded = base64_decode($token, true);
+            if ($decoded === false) {
+                return null;
+            }
             $parts = explode('|', $decoded);
             if (count($parts) >= 2) {
-                $userId = $parts[0];
-                $user = User::find($userId);
-                if ($user) {
-                    return $user;
+                $user = User::find($parts[0]);
+                if (!$user) {
+                    return null;
                 }
+                if (count($parts) >= 3 && !hash_equals(md5($user->password), $parts[2])) {
+                    return null;
+                }
+                return $user;
             }
+            return null;
         }
-        // Fallback default Guru BK
+        // Fallback default Guru BK when accessed without Authorization header
         return User::where('role', 'guru')->first() ?? User::first();
     }
 
@@ -121,7 +158,7 @@ class ApiController extends Controller
                 'name' => $user->name,
                 'username' => $user->username,
                 'avatar' => $user->avatar,
-                'avatar_url' => $user->avatar_url,
+                'avatar_url' => $this->resolvePublicUrl($request, $user->avatar),
                 'email' => $user->email,
                 'phone' => $user->phone,
                 'role' => $user->role,
@@ -129,6 +166,34 @@ class ApiController extends Controller
                 'rombel' => $rombel,
             ],
         ]);
+    }
+
+    /**
+     * Ambil daftar rombel kelas yang dipegang oleh user guru BK.
+     */
+    protected function getUserAssignedRombels(?User $user): array
+    {
+        if (!$user) {
+            return [];
+        }
+
+        $assignedRombels = [];
+        if ($user->rombel) {
+            $decoded = json_decode($user->rombel, true);
+            $assignedRombels = is_array($decoded)
+                ? $decoded
+                : array_values(array_filter(array_map('trim', explode(',', $user->rombel))));
+        }
+
+        $assignedRombels = array_filter($assignedRombels, function ($r) {
+            return !empty($r) && !str_contains(strtolower($r), 'semua');
+        });
+
+        $classroomNames = $user->classrooms()->pluck('name')->toArray();
+        $merged = array_values(array_unique(array_filter(array_merge($assignedRombels, $classroomNames))));
+        sort($merged, SORT_NATURAL | SORT_FLAG_CASE);
+
+        return $merged;
     }
 
     /**
@@ -140,7 +205,28 @@ class ApiController extends Controller
         $className = $request->input('class_name');
         $search = $request->input('search');
 
+        $user = $this->getAuthenticatedUser($request);
+        $assignedRombels = ($user && $user->role === 'guru') ? $this->getUserAssignedRombels($user) : null;
+
+        if ($assignedRombels !== null && empty($assignedRombels)) {
+            return response()->json([
+                'success' => true,
+                'date' => $date,
+                'stats' => [
+                    'total' => 0,
+                    'hadir' => 0,
+                    'terlambat' => 0,
+                    'alpa_izin_sakit' => 0,
+                ],
+                'available_classes' => [],
+                'students' => [],
+            ]);
+        }
+
         $studentsQuery = Student::query();
+        if ($assignedRombels !== null) {
+            $studentsQuery->whereIn('class_name', $assignedRombels);
+        }
 
         if ($className && $className !== 'Semua Kelas' && $className !== 'Semua Rombel') {
             $studentsQuery->where('class_name', $className);
@@ -191,8 +277,10 @@ class ApiController extends Controller
             ];
         });
 
-        // Ambil daftar kelas untuk filter
-        $availableClasses = Student::select('class_name')->distinct()->orderBy('class_name')->pluck('class_name')->toArray();
+        // Ambil daftar kelas untuk filter (khusus rombel guru jika login sebagai guru)
+        $availableClasses = $assignedRombels !== null
+            ? $assignedRombels
+            : Student::select('class_name')->distinct()->orderBy('class_name')->pluck('class_name')->toArray();
 
         return response()->json([
             'success' => true,
@@ -328,7 +416,19 @@ class ApiController extends Controller
         $status = $request->input('status', 'Hadir');
         $date = $request->input('date') ?: now()->toDateString();
 
+        $user = $this->getAuthenticatedUser($request);
+        $assignedRombels = ($user && $user->role === 'guru') ? $this->getUserAssignedRombels($user) : null;
+        if ($assignedRombels !== null && empty($assignedRombels)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Akun Anda belum memiliki rombel kelas yang ditugaskan.',
+            ], 403);
+        }
+
         $query = Student::query();
+        if ($assignedRombels !== null) {
+            $query->whereIn('class_name', $assignedRombels);
+        }
         if ($className && $className !== 'Semua Kelas' && $className !== 'Semua Rombel') {
             $query->where('class_name', $className);
         }
@@ -370,7 +470,33 @@ class ApiController extends Controller
      */
     public function getViolations(Request $request)
     {
-        $violations = Violation::orderBy('date', 'desc')->orderBy('time', 'desc')->get()->map(function ($v) {
+        $user = $this->getAuthenticatedUser($request);
+        $assignedRombels = ($user && $user->role === 'guru') ? $this->getUserAssignedRombels($user) : null;
+
+        if ($assignedRombels !== null && empty($assignedRombels)) {
+            return response()->json([
+                'success' => true,
+                'stats' => [
+                    'total_kasus' => 0,
+                    'kasus_ringan' => 0,
+                    'peringatan_sp' => 0,
+                    'panggilan_ortu' => 0,
+                ],
+                'violations' => [],
+                'surat_panggilan' => [],
+            ]);
+        }
+
+        $violationQuery = Violation::orderBy('date', 'desc')->orderBy('time', 'desc');
+        if ($assignedRombels !== null) {
+            $allowedStudentIds = Student::whereIn('class_name', $assignedRombels)->pluck('id');
+            $violationQuery->where(function ($q) use ($allowedStudentIds, $assignedRombels) {
+                $q->whereIn('student_id', $allowedStudentIds)
+                  ->orWhereIn('student_class', $assignedRombels);
+            });
+        }
+
+        $violations = $violationQuery->get()->map(function ($v) use ($request) {
             return [
                 'id' => $v->id,
                 'student_id' => $v->student_id,
@@ -385,7 +511,7 @@ class ApiController extends Controller
                 'penalty_action' => $v->penalty_action ?? 'Pembinaan Lisan',
                 'status' => $v->status ?? 'Dalam Pembinaan',
                 'notes' => $v->notes ?? '',
-                'foto_bukti' => $v->foto_bukti ? asset('storage/' . $v->foto_bukti) : null,
+                'foto_bukti' => $this->resolvePublicUrl($request, $v->foto_bukti),
             ];
         });
 
@@ -396,7 +522,11 @@ class ApiController extends Controller
         $panggilanOrtu = $violations->where('points', '>=', 30)->count();
 
         // Surat Panggilan Siswa (Siswa dengan total poin >= 30)
-        $spList = Student::where('total_violation_points', '>=', 30)->get()->map(function ($s) {
+        $spQuery = Student::where('total_violation_points', '>=', 30);
+        if ($assignedRombels !== null) {
+            $spQuery->whereIn('class_name', $assignedRombels);
+        }
+        $spList = $spQuery->get()->map(function ($s) {
             return [
                 'student_id' => $s->id,
                 'name' => $s->name,
@@ -463,7 +593,7 @@ class ApiController extends Controller
             'status' => 'Dalam Pembinaan',
             'notes' => $validated['notes'] ?? '',
             'foto_bukti' => $photoPath,
-            'photo_url' => $photoPath ? asset('storage/' . $photoPath) : null,
+            'photo_url' => $this->resolvePublicUrl($request, $photoPath),
         ]);
 
         // Update total poin siswa jika terhubung
@@ -564,11 +694,52 @@ class ApiController extends Controller
     }
 
     /**
+     * GET /api/sanksi
+     * Daftar tindakan/sanksi pembinaan aktif untuk dropdown aplikasi mobile & web
+     */
+    public function getSanctions()
+    {
+        if (Schema::hasTable('sanctions')) {
+            $items = Sanction::where('is_active', true)
+                ->orderBy('sort_order')
+                ->orderBy('id')
+                ->get(['id', 'name', 'description', 'sort_order']);
+
+            if ($items->isNotEmpty()) {
+                return response()->json([
+                    'success' => true,
+                    'sanctions' => $items,
+                ]);
+            }
+        }
+
+        $defaults = collect(Sanction::defaultNames())->values()->map(function ($name, $idx) {
+            return [
+                'id' => $idx + 1,
+                'name' => $name,
+                'description' => null,
+                'sort_order' => $idx + 1,
+            ];
+        });
+
+        return response()->json([
+            'success' => true,
+            'sanctions' => $defaults,
+        ]);
+    }
+
+    /**
      * GET /api/profil or /api/profile
      */
     public function getProfile(Request $request)
     {
         $user = $this->getAuthenticatedUser($request);
+        if (!$user) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Sesi tidak valid. Silakan masuk kembali.',
+            ], 401);
+        }
 
         $rombel = [];
         if ($user && $user->rombel) {
@@ -598,6 +769,12 @@ class ApiController extends Controller
     public function updateProfile(Request $request)
     {
         $user = $this->getAuthenticatedUser($request);
+        if (!$user) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Sesi tidak valid. Silakan masuk kembali.',
+            ], 401);
+        }
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
@@ -655,12 +832,16 @@ class ApiController extends Controller
     public function changePassword(Request $request)
     {
         $user = $this->getAuthenticatedUser($request);
+        if (!$user) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Sesi tidak valid. Silakan masuk kembali.',
+            ], 401);
+        }
 
         $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
-            'current_password' => 'required|string',
             'password' => 'required|string|min:8|confirmed',
         ], [
-            'current_password.required' => 'Password saat ini wajib diisi.',
             'password.required' => 'Password baru wajib diisi.',
             'password.min' => 'Password baru minimal 8 karakter.',
             'password.confirmed' => 'Konfirmasi password baru tidak cocok.',
@@ -674,22 +855,15 @@ class ApiController extends Controller
             ], 422);
         }
 
-        if (!Hash::check($request->current_password, $user->password)) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Password saat ini tidak sesuai.',
-                'errors' => [
-                    'current_password' => ['Password saat ini tidak sesuai.']
-                ]
-            ], 422);
-        }
-
         $user->password = Hash::make($request->password);
         $user->save();
+
+        $newToken = base64_encode($user->id . '|' . time() . '|' . md5($user->password));
 
         return response()->json([
             'success' => true,
             'message' => 'Password berhasil diperbarui.',
+            'token' => $newToken,
         ]);
     }
 
@@ -997,39 +1171,14 @@ class ApiController extends Controller
 
     /**
      * GET /api/statistik atau /api/stats
-     * Mengembalikan data statistik kehadiran & kedisiplinan nyata dari database
+     * scope=my_rombel_today (default): data 1 hari (hari ini) khusus rombel yang dipegang guru login
+     * scope=school_month: data 1 bulan (berdasarkan month & year) untuk seluruh siswa sekolah
      */
     public function getStats(Request $request)
     {
-        $totalStudents = Student::count();
-        $totalAttendances = Attendance::count();
-        $hadirCount = Attendance::where('status', 'Hadir')->count();
-        $terlambatCount = Attendance::where('status', 'Terlambat')->count();
-        $alpaCount = Attendance::whereIn('status', ['Alpha', 'Alpa'])->count();
-        $izinSakitCount = Attendance::whereIn('status', ['Izin', 'Sakit'])->count();
+        $scope = $request->query('scope', 'my_rombel_today');
+        $today = now()->toDateString();
 
-        $totalRecorded = $hadirCount + $terlambatCount + $alpaCount + $izinSakitCount;
-        $hadirRate = $totalRecorded > 0 ? round(($hadirCount / $totalRecorded) * 100, 1) : 0.0;
-        $terlambatRate = $totalRecorded > 0 ? round(($terlambatCount / $totalRecorded) * 100, 1) : 0.0;
-        $alpaRate = $totalRecorded > 0 ? round(($alpaCount / $totalRecorded) * 100, 1) : 0.0;
-        $izinSakitRate = $totalRecorded > 0 ? round(($izinSakitCount / $totalRecorded) * 100, 1) : 0.0;
-
-        $violationsCount = Violation::count();
-
-        $spStudents = Student::where('total_violation_points', '>=', 30)->get()->map(function ($s) {
-            return [
-                'student_id' => $s->id,
-                'name' => $s->name,
-                'nisn' => $s->nisn,
-                'class_name' => $s->class_name,
-                'total_points' => $s->total_violation_points,
-                'parent_name' => $s->parent_name ?? 'Wali Murid',
-                'parent_phone' => $s->parent_phone ?? '-',
-                'sp_level' => $s->total_violation_points >= 50 ? 'SP-3 (Skorsing)' : ($s->total_violation_points >= 40 ? 'SP-2' : 'SP-1'),
-            ];
-        });
-
-        // Hitung tren kehadiran bulanan murni dari data Attendance nyata
         $monthNames = [
             1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
             5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
@@ -1041,44 +1190,220 @@ class ApiController extends Controller
             9 => 'Sep', 10 => 'Okt', 11 => 'Nov', 12 => 'Des'
         ];
 
-        $monthlyTrend = [];
-        $monthlyRecords = Attendance::select(
-            \Illuminate\Support\Facades\DB::raw('MONTH(date) as month_num'),
-            \Illuminate\Support\Facades\DB::raw('COUNT(*) as total_attendance'),
-            \Illuminate\Support\Facades\DB::raw("SUM(CASE WHEN status = 'Hadir' THEN 1 ELSE 0 END) as hadir_count")
-        )
-        ->groupBy(\Illuminate\Support\Facades\DB::raw('MONTH(date)'))
-        ->orderBy('month_num')
-        ->get();
+        if ($scope === 'school_month') {
+            $month = max(1, min(12, (int) $request->query('month', now()->month)));
+            $year = max(2020, min(2100, (int) $request->query('year', now()->year)));
 
-        foreach ($monthlyRecords as $rec) {
-            $mNum = (int)$rec->month_num;
-            $mTotal = (int)$rec->total_attendance;
-            $mHadir = (int)$rec->hadir_count;
-            $rate = $mTotal > 0 ? round(($mHadir / $mTotal) * 100, 1) : 0.0;
-            $monthlyTrend[] = [
-                'month' => $mNum,
-                'short_name' => $shortMonthNames[$mNum] ?? "Bln $mNum",
-                'month_name' => $monthNames[$mNum] ?? "Bulan $mNum",
-                'val_2026' => $rate,
-                'val_2025' => $rate,
-                'rate' => $rate,
-                'total_recorded' => $mTotal,
-                'hadir_count' => $mHadir,
-                'note' => "$mHadir dari $mTotal siswa tercatat Hadir",
-            ];
+            $totalStudents = Student::count();
+            $attendanceBase = Attendance::whereYear('date', $year)->whereMonth('date', $month);
+
+            $hadirCount = (clone $attendanceBase)->where('status', 'Hadir')->count();
+            $terlambatCount = (clone $attendanceBase)->where('status', 'Terlambat')->count();
+            $alpaCount = (clone $attendanceBase)->whereIn('status', ['Alpha', 'Alpa'])->count();
+            $izinSakitCount = (clone $attendanceBase)->whereIn('status', ['Izin', 'Sakit'])->count();
+
+            $totalRecorded = $hadirCount + $terlambatCount + $alpaCount + $izinSakitCount;
+            $hadirRate = $totalRecorded > 0 ? round(($hadirCount / $totalRecorded) * 100, 1) : 0.0;
+            $terlambatRate = $totalRecorded > 0 ? round(($terlambatCount / $totalRecorded) * 100, 1) : 0.0;
+            $alpaRate = $totalRecorded > 0 ? round(($alpaCount / $totalRecorded) * 100, 1) : 0.0;
+            $izinSakitRate = $totalRecorded > 0 ? round(($izinSakitCount / $totalRecorded) * 100, 1) : 0.0;
+
+            $violationsBase = Violation::whereYear('date', $year)->whereMonth('date', $month);
+            $violationsCount = (clone $violationsBase)->count();
+
+            $violatorIds = (clone $violationsBase)->whereNotNull('student_id')->pluck('student_id')->unique();
+            $spStudents = Student::where('total_violation_points', '>=', 30)
+                ->when($violatorIds->isNotEmpty(), fn ($q) => $q->whereIn('id', $violatorIds), fn ($q) => $q->whereRaw('1 = 0'))
+                ->get()
+                ->map(function ($s) {
+                    return [
+                        'student_id' => $s->id,
+                        'name' => $s->name,
+                        'nisn' => $s->nisn,
+                        'class_name' => $s->class_name,
+                        'total_points' => $s->total_violation_points,
+                        'parent_name' => $s->parent_name ?? 'Wali Murid',
+                        'parent_phone' => $s->parent_phone ?? '-',
+                        'sp_level' => $s->total_violation_points >= 50 ? 'SP-3 (Skorsing)' : ($s->total_violation_points >= 40 ? 'SP-2' : 'SP-1'),
+                    ];
+                });
+
+            // Tren harian dalam 1 bulan terpilih untuk seluruh siswa sekolah
+            $dailyRecords = Attendance::select(
+                \Illuminate\Support\Facades\DB::raw('DAY(date) as day_num'),
+                \Illuminate\Support\Facades\DB::raw('COUNT(*) as total_attendance'),
+                \Illuminate\Support\Facades\DB::raw("SUM(CASE WHEN status = 'Hadir' THEN 1 ELSE 0 END) as hadir_count")
+            )
+            ->whereYear('date', $year)
+            ->whereMonth('date', $month)
+            ->groupBy(\Illuminate\Support\Facades\DB::raw('DAY(date)'))
+            ->orderBy('day_num')
+            ->get();
+
+            $monthLabel = $monthNames[$month] ?? "Bulan $month";
+            $monthlyTrend = [];
+            foreach ($dailyRecords as $rec) {
+                $dNum = (int) $rec->day_num;
+                $dTotal = (int) $rec->total_attendance;
+                $dHadir = (int) $rec->hadir_count;
+                $rate = $dTotal > 0 ? round(($dHadir / $dTotal) * 100, 1) : 0.0;
+                $dayPadded = str_pad((string) $dNum, 2, '0', STR_PAD_LEFT);
+                $monthlyTrend[] = [
+                    'month' => $dNum,
+                    'short_name' => $dayPadded,
+                    'month_name' => "$dayPadded $monthLabel $year",
+                    'val_2026' => $rate,
+                    'val_2025' => $rate,
+                    'rate' => $rate,
+                    'total_recorded' => $dTotal,
+                    'hadir_count' => $dHadir,
+                    'note' => "$dHadir dari $dTotal siswa tercatat Hadir",
+                ];
+            }
+
+            $categoryDistribution = [];
+            if ($violationsCount > 0) {
+                $catRecords = (clone $violationsBase)
+                    ->select('category', \Illuminate\Support\Facades\DB::raw('COUNT(*) as total'))
+                    ->groupBy('category')
+                    ->get();
+                foreach ($catRecords as $cat) {
+                    $categoryDistribution[] = [
+                        'name' => $cat->category ?: 'Lainnya',
+                        'count' => (int) $cat->total,
+                        'percentage' => round(($cat->total / $violationsCount) * 100, 1),
+                        'ratio' => round($cat->total / $violationsCount, 2),
+                    ];
+                }
+            }
+
+            return response()->json([
+                'success' => true,
+                'scope' => 'school_month',
+                'month' => $month,
+                'year' => $year,
+                'month_name' => $monthLabel,
+                'has_rombel' => true,
+                'assigned_rombels' => [],
+                'source' => 'real_database',
+                'summary' => [
+                    'total_students' => $totalStudents,
+                    'hadir_rate' => $hadirRate,
+                    'hadir_count' => $hadirCount,
+                    'terlambat_rate' => $terlambatRate,
+                    'terlambat_count' => $terlambatCount,
+                    'alpa_rate' => $alpaRate,
+                    'alpa_count' => $alpaCount,
+                    'izin_sakit_rate' => $izinSakitRate,
+                    'izin_sakit_count' => $izinSakitCount,
+                    'total_recorded' => $totalRecorded,
+                    'total_violations' => $violationsCount,
+                    'sp_cases' => $spStudents->count(),
+                ],
+                'benchmark' => [
+                    'target_rate' => 90.0,
+                    'avg_attendance' => $hadirRate,
+                ],
+                'monthly_trend' => $monthlyTrend,
+                'category_distribution' => $categoryDistribution,
+                'surat_panggilan' => $spStudents,
+            ]);
         }
 
-        // Distribusi kategori pelanggaran murni dari tabel violations
+        // Default: scope=my_rombel_today (1 hari ini khusus rombel yang dipegang akun guru)
+        $user = $this->getAuthenticatedUser($request);
+        $assignedRombels = [];
+        if ($user) {
+            if ($user->rombel) {
+                $decoded = json_decode($user->rombel, true);
+                $assignedRombels = is_array($decoded)
+                    ? $decoded
+                    : array_values(array_filter(array_map('trim', explode(',', $user->rombel))));
+            }
+            $classroomNames = $user->classrooms()->pluck('name')->toArray();
+            $assignedRombels = array_values(array_unique(array_filter(array_merge($assignedRombels, $classroomNames))));
+        }
+
+        if (empty($assignedRombels)) {
+            return response()->json([
+                'success' => true,
+                'scope' => 'my_rombel_today',
+                'date' => $today,
+                'has_rombel' => false,
+                'assigned_rombels' => [],
+                'source' => 'real_database',
+                'summary' => [
+                    'total_students' => 0,
+                    'hadir_rate' => 0.0,
+                    'hadir_count' => 0,
+                    'terlambat_rate' => 0.0,
+                    'terlambat_count' => 0,
+                    'alpa_rate' => 0.0,
+                    'alpa_count' => 0,
+                    'izin_sakit_rate' => 0.0,
+                    'izin_sakit_count' => 0,
+                    'total_recorded' => 0,
+                    'total_violations' => 0,
+                    'sp_cases' => 0,
+                ],
+                'benchmark' => [
+                    'target_rate' => 90.0,
+                    'avg_attendance' => 0.0,
+                ],
+                'monthly_trend' => [],
+                'category_distribution' => [],
+                'surat_panggilan' => [],
+            ]);
+        }
+
+        $studentQuery = Student::whereIn('class_name', $assignedRombels);
+        $totalStudents = (clone $studentQuery)->count();
+        $studentIds = (clone $studentQuery)->pluck('id');
+
+        $attendanceToday = Attendance::where('date', $today)->whereIn('student_id', $studentIds);
+        $hadirCount = (clone $attendanceToday)->where('status', 'Hadir')->count();
+        $terlambatCount = (clone $attendanceToday)->where('status', 'Terlambat')->count();
+        $alpaCount = (clone $attendanceToday)->whereIn('status', ['Alpha', 'Alpa'])->count();
+        $izinSakitCount = (clone $attendanceToday)->whereIn('status', ['Izin', 'Sakit'])->count();
+
+        $totalRecorded = $hadirCount + $terlambatCount + $alpaCount + $izinSakitCount;
+        $hadirRate = $totalRecorded > 0 ? round(($hadirCount / $totalRecorded) * 100, 1) : 0.0;
+        $terlambatRate = $totalRecorded > 0 ? round(($terlambatCount / $totalRecorded) * 100, 1) : 0.0;
+        $alpaRate = $totalRecorded > 0 ? round(($alpaCount / $totalRecorded) * 100, 1) : 0.0;
+        $izinSakitRate = $totalRecorded > 0 ? round(($izinSakitCount / $totalRecorded) * 100, 1) : 0.0;
+
+        $violationsToday = Violation::where('date', $today)->where(function ($q) use ($studentIds, $assignedRombels) {
+            $q->whereIn('student_id', $studentIds)
+              ->orWhereIn('student_class', $assignedRombels);
+        });
+        $violationsCount = (clone $violationsToday)->count();
+
+        $spStudents = Student::whereIn('class_name', $assignedRombels)
+            ->where('total_violation_points', '>=', 30)
+            ->get()
+            ->map(function ($s) {
+                return [
+                    'student_id' => $s->id,
+                    'name' => $s->name,
+                    'nisn' => $s->nisn,
+                    'class_name' => $s->class_name,
+                    'total_points' => $s->total_violation_points,
+                    'parent_name' => $s->parent_name ?? 'Wali Murid',
+                    'parent_phone' => $s->parent_phone ?? '-',
+                    'sp_level' => $s->total_violation_points >= 50 ? 'SP-3 (Skorsing)' : ($s->total_violation_points >= 40 ? 'SP-2' : 'SP-1'),
+                ];
+            });
+
         $categoryDistribution = [];
         if ($violationsCount > 0) {
-            $catRecords = Violation::select('category', \Illuminate\Support\Facades\DB::raw('COUNT(*) as total'))
+            $catRecords = (clone $violationsToday)
+                ->select('category', \Illuminate\Support\Facades\DB::raw('COUNT(*) as total'))
                 ->groupBy('category')
                 ->get();
             foreach ($catRecords as $cat) {
                 $categoryDistribution[] = [
                     'name' => $cat->category ?: 'Lainnya',
-                    'count' => (int)$cat->total,
+                    'count' => (int) $cat->total,
                     'percentage' => round(($cat->total / $violationsCount) * 100, 1),
                     'ratio' => round($cat->total / $violationsCount, 2),
                 ];
@@ -1087,6 +1412,10 @@ class ApiController extends Controller
 
         return response()->json([
             'success' => true,
+            'scope' => 'my_rombel_today',
+            'date' => $today,
+            'has_rombel' => true,
+            'assigned_rombels' => $assignedRombels,
             'source' => 'real_database',
             'summary' => [
                 'total_students' => $totalStudents,
@@ -1106,7 +1435,7 @@ class ApiController extends Controller
                 'target_rate' => 90.0,
                 'avg_attendance' => $hadirRate,
             ],
-            'monthly_trend' => $monthlyTrend,
+            'monthly_trend' => [],
             'category_distribution' => $categoryDistribution,
             'surat_panggilan' => $spStudents,
         ]);

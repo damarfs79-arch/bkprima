@@ -23,21 +23,19 @@ class AttendanceController extends Controller
         $user = Auth::user();
         if ($user && $user->role === 'guru') {
             $userRombel = (string)($user->rombel ?? '');
-            // Jika guru ditugaskan untuk "Semua Rombel" atau kosong, beri akses ke seluruh kelas
-            if (empty($userRombel) || str_contains(strtolower($userRombel), 'semua')) {
-                return $allDbClasses;
-            }
 
             $fromClassrooms = Classroom::where('guru_bk_id', $user->id)
                 ->orWhere('guru_bk_name', $user->name)
                 ->pluck('name')->toArray();
-            
+
             $fromUserRombel = [];
-            $decoded = json_decode($userRombel, true);
-            if (is_array($decoded)) {
-                $fromUserRombel = $decoded;
-            } else {
-                $fromUserRombel = array_map('trim', explode(',', $userRombel));
+            if (!empty($userRombel)) {
+                $decoded = json_decode($userRombel, true);
+                if (is_array($decoded)) {
+                    $fromUserRombel = $decoded;
+                } else {
+                    $fromUserRombel = array_map('trim', explode(',', $userRombel));
+                }
             }
 
             // Bersihkan string non-kelas seperti "Semua Rombel"
@@ -46,9 +44,8 @@ class AttendanceController extends Controller
             });
 
             $guruRombels = array_values(array_unique(array_filter(array_merge($fromClassrooms, $fromUserRombel))));
-            if (!empty($guruRombels)) {
-                return $guruRombels;
-            }
+            sort($guruRombels, SORT_NATURAL | SORT_FLAG_CASE);
+            return $guruRombels;
         }
 
         return $allDbClasses;
@@ -64,8 +61,12 @@ class AttendanceController extends Controller
         }]);
 
         $user = Auth::user();
-        if ($user && $user->role === 'guru' && !empty($authorizedClasses)) {
-            $studentQuery->whereIn('class_name', $authorizedClasses);
+        if ($user && $user->role === 'guru') {
+            if (!empty($authorizedClasses)) {
+                $studentQuery->whereIn('class_name', $authorizedClasses);
+            } else {
+                $studentQuery->whereRaw('1 = 0');
+            }
         }
 
         $students = $studentQuery->orderBy('class_name')->orderBy('name')->get();
@@ -81,7 +82,16 @@ class AttendanceController extends Controller
             'alphaToday' => Attendance::whereIn('student_id', $visibleStudentIds)->where('date', $today)->where('status', 'Alpa')->count(),
         ];
 
-        $dbRombels = Classroom::orderBy('level')->orderBy('name')->get()->map(function ($r) {
+        $rombelQuery = Classroom::orderBy('level')->orderBy('name');
+        if ($user && $user->role === 'guru') {
+            if (!empty($authorizedClasses)) {
+                $rombelQuery->whereIn('name', $authorizedClasses);
+            } else {
+                $rombelQuery->whereRaw('1 = 0');
+            }
+        }
+
+        $dbRombels = $rombelQuery->get()->map(function ($r) {
             return [
                 'id' => $r->id,
                 'name' => $r->name,
@@ -93,11 +103,14 @@ class AttendanceController extends Controller
             ];
         });
 
+        $majors = Major::orderBy('code')->get(['id', 'code', 'name']);
+
         return Inertia::render('AttendanceList', [
             'dbStudents' => $students,
             'classes' => $classes,
             'rombelList' => $dbRombels,
             'rombels' => $dbRombels,
+            'majors' => $majors,
             'stats' => $stats,
             'todayDate' => now()->translatedFormat('l, d M Y'),
             'initialFilters' => [
@@ -263,6 +276,7 @@ class AttendanceController extends Controller
         $validated = $request->validate([
             'nis' => 'nullable|string|max:50',
             'nisn' => 'nullable|string|max:50',
+            'nisn' => 'nullable|string|max:50',
             'name' => 'required|string|max:255',
             'class_name' => 'nullable|string|max:50',
             'level' => 'nullable|string|max:20',
@@ -275,10 +289,10 @@ class AttendanceController extends Controller
 
         $nis = !empty($validated['nis']) ? trim($validated['nis']) : (!empty($validated['nisn']) ? trim($validated['nisn']) : '');
         if (empty($nis)) {
-            return redirect()->back()->withErrors(['nis' => 'NIS wajib diisi.']);
+            return redirect()->back()->withErrors(['nis' => 'NISN wajib diisi.']);
         }
         if (Student::where('nis', $nis)->exists()) {
-            return redirect()->back()->withErrors(['nis' => 'NIS sudah terdaftar. Silakan gunakan NIS lain.']);
+            return redirect()->back()->withErrors(['nis' => 'NISN sudah terdaftar. Silakan gunakan NISN lain.']);
         }
 
         // Resolusi Tingkat (Level), Jurusan (Major), dan Rombel
@@ -367,6 +381,7 @@ class AttendanceController extends Controller
         $validated = $request->validate([
             'nis' => 'nullable|string|max:50',
             'nisn' => 'nullable|string|max:50',
+            'nisn' => 'nullable|string|max:50',
             'name' => 'required|string|max:255',
             'class_name' => 'nullable|string|max:50',
             'level' => 'nullable|string|max:20',
@@ -379,7 +394,7 @@ class AttendanceController extends Controller
 
         $nis = !empty($validated['nis']) ? trim($validated['nis']) : (!empty($validated['nisn']) ? trim($validated['nisn']) : $student->nis);
         if (Student::where('nis', $nis)->where('id', '!=', $student->id)->exists()) {
-            return redirect()->back()->withErrors(['nis' => 'NIS sudah digunakan oleh siswa lain.']);
+            return redirect()->back()->withErrors(['nis' => 'NISN sudah digunakan oleh siswa lain.']);
         }
 
         $rawLevel = trim((string)($request->input('level') ?? ''));
@@ -490,13 +505,28 @@ class AttendanceController extends Controller
 
     public function stats(Request $request)
     {
+        $user = Auth::user();
+        $authorizedClasses = $this->getAuthorizedClasses();
+
+        $studentBaseQuery = Student::active();
+        if ($user && $user->role === 'guru') {
+            if (!empty($authorizedClasses)) {
+                $studentBaseQuery->whereIn('class_name', $authorizedClasses);
+            } else {
+                $studentBaseQuery->whereRaw('1 = 0');
+            }
+        }
+
+        $visibleStudentIds = (clone $studentBaseQuery)->pluck('id');
+        $attendanceBaseQuery = Attendance::whereIn('student_id', $visibleStudentIds);
+
         // 1. Hitung ringkasan presensi aktual dari database
-        $totalAttendances = Attendance::count();
-        $hadirCount = Attendance::where('status', 'Hadir')->count();
-        $terlambatCount = Attendance::where('status', 'Terlambat')->count();
-        $sakitCount = Attendance::where('status', 'Sakit')->count();
-        $izinCount = Attendance::where('status', 'Izin')->count();
-        $alphaCount = Attendance::where('status', 'Alpa')->count();
+        $totalAttendances = (clone $attendanceBaseQuery)->count();
+        $hadirCount = (clone $attendanceBaseQuery)->where('status', 'Hadir')->count();
+        $terlambatCount = (clone $attendanceBaseQuery)->where('status', 'Terlambat')->count();
+        $sakitCount = (clone $attendanceBaseQuery)->where('status', 'Sakit')->count();
+        $izinCount = (clone $attendanceBaseQuery)->where('status', 'Izin')->count();
+        $alphaCount = (clone $attendanceBaseQuery)->whereIn('status', ['Alpa', 'Alpha'])->count();
 
         $hadirRate = $totalAttendances > 0 ? round(($hadirCount / $totalAttendances) * 100, 1) : 0;
         $terlambatRate = $totalAttendances > 0 ? round(($terlambatCount / $totalAttendances) * 100, 1) : 0;
@@ -529,9 +559,9 @@ class AttendanceController extends Controller
             $year = $monthDate->year;
             $month = $monthDate->month;
 
-            $monthTotal = Attendance::whereYear('date', $year)->whereMonth('date', $month)->count();
-            $monthHadir = Attendance::whereYear('date', $year)->whereMonth('date', $month)->where('status', 'Hadir')->count();
-            $monthLate = Attendance::whereYear('date', $year)->whereMonth('date', $month)->where('status', 'Terlambat')->count();
+            $monthTotal = (clone $attendanceBaseQuery)->whereYear('date', $year)->whereMonth('date', $month)->count();
+            $monthHadir = (clone $attendanceBaseQuery)->whereYear('date', $year)->whereMonth('date', $month)->where('status', 'Hadir')->count();
+            $monthLate = (clone $attendanceBaseQuery)->whereYear('date', $year)->whereMonth('date', $month)->where('status', 'Terlambat')->count();
 
             $presentRateSeries[] = $monthTotal > 0 ? round(($monthHadir / $monthTotal) * 100, 1) : 0;
             $lateRateSeries[] = $monthTotal > 0 ? round(($monthLate / $monthTotal) * 100, 1) : 0;
@@ -543,14 +573,14 @@ class AttendanceController extends Controller
             'lateRate' => $lateRateSeries,
         ];
 
-        // 3. Rekap Statistik Semua Siswa Aktif beserta Catatan Presensi & Pelanggaran
-        $students = Student::active()->with(['attendances', 'violations'])->get()->map(function ($student) {
+        // 3. Rekap Statistik Siswa Aktif sesuai rombel guru beserta Catatan Presensi & Pelanggaran
+        $students = (clone $studentBaseQuery)->with(['attendances', 'violations'])->get()->map(function ($student) {
             $attendances = $student->attendances;
             $hadir = $attendances->where('status', 'Hadir')->count();
             $terlambat = $attendances->where('status', 'Terlambat')->count();
             $sakit = $attendances->where('status', 'Sakit')->count();
             $izin = $attendances->where('status', 'Izin')->count();
-            $alpa = $attendances->where('status', 'Alpa')->count();
+            $alpa = $attendances->filter(fn ($a) => in_array($a->status, ['Alpa', 'Alpha']))->count();
             $total = $attendances->count();
 
             $rate = $total > 0 ? round((($hadir + $terlambat) / $total) * 100, 1) : 100.0;
@@ -604,14 +634,14 @@ class AttendanceController extends Controller
         })
         ->values();
 
-        // Opsi Tingkat dan Jurusan dari database riil
-        $availableMajors = Student::active()->whereNotNull('major')->where('major', '!=', '')->distinct()->pluck('major')->sort()->values();
+        // Opsi Tingkat dan Jurusan dari master jurusan Admin
+        $availableMajors = Major::orderBy('code')->pluck('code')->values();
         $availableLevels = collect(['10', '11', '12']);
 
         return Inertia::render('AttendanceStats', [
             'monthlyStats' => $monthlyStats,
             'summaryMetrics' => $summaryMetrics,
-            'totalStudents' => Student::active()->count(),
+            'totalStudents' => $students->count(),
             'atRiskStudents' => $atRiskStudents,
             'allStudents' => $students->values(),
             'availableMajors' => $availableMajors,

@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import '../core/theme/app_theme.dart';
 import '../core/widgets/app_text_field.dart';
 import '../models/violation_type_model.dart';
+import '../services/api_service.dart';
 import '../services/violation_type_service.dart';
 
 class AddViolationTypeSheet extends StatefulWidget {
@@ -49,7 +50,7 @@ class _AddViolationTypeSheetState extends State<AddViolationTypeSheet> {
 
   static const List<int> _pointOptions = [0, 5, 10, 15, 20, 25, 50];
 
-  static const List<String> _penaltyOptions = [
+  List<String> _penaltyOptions = [
     'Pembinaan Lisan & Pengarahan BK',
     'Piket Kebersihan Lingkungan Sekolah',
     'Teguran Tertulis & Surat Perjanjian',
@@ -64,6 +65,19 @@ class _AddViolationTypeSheetState extends State<AddViolationTypeSheet> {
     _selectedCategory = _categoryOptions.contains(widget.initialCategory)
         ? widget.initialCategory
         : _categoryOptions.first;
+    _loadSanctions();
+  }
+
+  Future<void> _loadSanctions() async {
+    final fetched = await ApiService.getSanctions();
+    if (fetched.isNotEmpty && mounted) {
+      setState(() {
+        _penaltyOptions = fetched;
+        if (!_penaltyOptions.contains(_selectedPenalty)) {
+          _selectedPenalty = _penaltyOptions.first;
+        }
+      });
+    }
   }
 
   @override

@@ -90,7 +90,7 @@
                   >
                     <option :value="null">Pilih siswa...</option>
                     <option v-for="s in filteredStudentsByClass" :key="s.id" :value="s.id">
-                      {{ s.name }} &bull; {{ s.class_name }} (NIS: {{ s.nis || s.nisn }})
+                      {{ s.name }} &bull; {{ s.class_name }} (NISN: {{ s.nis || s.nisn }})
                     </option>
                   </select>
                   <div class="absolute inset-y-0 right-0 flex items-center pr-2.5 pointer-events-none text-slate-400">
@@ -110,7 +110,7 @@
               <div>
                 <h4 class="font-bold text-slate-900 text-xs">{{ selectedStudentObj.name }}</h4>
                 <p class="text-slate-500 text-[11px] mt-0.5">
-                  NIS: {{ selectedStudentObj.nis || selectedStudentObj.nisn }} &bull; Kelas: {{ selectedStudentObj.class_name }} &bull; Poin: {{ selectedStudentObj.total_violation_points || 0 }}
+                  NISN: {{ selectedStudentObj.nis || selectedStudentObj.nisn }} &bull; Kelas: {{ selectedStudentObj.class_name }} &bull; Poin: {{ selectedStudentObj.total_violation_points || 0 }}
                 </p>
               </div>
 

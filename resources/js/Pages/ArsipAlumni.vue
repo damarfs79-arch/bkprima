@@ -74,7 +74,7 @@
               v-model="searchQuery"
               @input="handleSearchDebounced"
               type="text"
-              placeholder="Cari nama atau NIS alumni..."
+              placeholder="Cari nama atau NISN alumni..."
               class="w-full bg-slate-50 hover:bg-white focus:bg-white border border-slate-200 rounded-lg pl-9 pr-3 py-2 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-slate-400 transition"
             />
             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
@@ -146,7 +146,7 @@
             <thead class="bg-slate-50/75 border-b border-slate-200">
               <tr>
                 <th class="py-3 px-4 text-center w-12 text-[11px] font-semibold text-slate-500 uppercase tracking-wider">No</th>
-                <th class="py-3 px-4 text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Nama &amp; NIS Alumni</th>
+                <th class="py-3 px-4 text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Nama &amp; NISN Alumni</th>
                 <th class="py-3 px-4 text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Kelas Terakhir</th>
                 <th class="py-3 px-4 text-center text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Tahun Lulus</th>
                 <th class="py-3 px-4 text-center text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Total Poin Akhir</th>
@@ -163,7 +163,7 @@
                 <!-- Nama & NIS -->
                 <td class="py-3.5 px-4">
                   <div class="font-semibold text-slate-900 text-xs sm:text-sm">{{ student.name }}</div>
-                  <div class="text-[11px] text-slate-400 font-mono mt-0.5">NIS: {{ student.nis || student.nisn }}</div>
+                  <div class="text-[11px] text-slate-400 font-mono mt-0.5">NISN: {{ student.nis || student.nisn }}</div>
                 </td>
 
                 <!-- Kelas Terakhir -->
@@ -273,7 +273,7 @@
             <div>
               <div class="text-sm font-bold text-slate-900">{{ activeStudent?.name }}</div>
               <div class="text-xs text-slate-500 font-mono mt-0.5">
-                NIS: {{ activeStudent?.nis || activeStudent?.nisn }} &bull; Kelas Terakhir: {{ activeStudent?.last_class_name || activeStudent?.class_name }}
+                NISN: {{ activeStudent?.nis || activeStudent?.nisn }} &bull; Kelas Terakhir: {{ activeStudent?.last_class_name || activeStudent?.class_name }}
               </div>
               <div class="text-[11px] text-slate-500 mt-1">
                 Tahun Kelulusan: <strong class="text-slate-800">{{ activeStudent?.graduation_year || '-' }}</strong> &bull; Jurusan: {{ activeStudent?.major }}
@@ -487,7 +487,7 @@ const copySkkbSummary = () => {
   if (!activeStudent.value) return
   const s = activeStudent.value
   const status = s.total_violation_points === 0 ? 'BERKELAKUAN BAIK (Tanpa Catatan Pelanggaran)' : `TERCATAT PEMBINAAN (${s.total_violation_points} Poin)`
-  const text = `INFORMASI ARSIP ALUMNI SMK PGRI 05 JEMBER\nNama: ${s.name}\nNIS: ${s.nis || s.nisn}\nTahun Lulus: ${s.graduation_year || '-'}\nKelas Terakhir: ${s.last_class_name || s.class_name}\nStatus Kedisiplinan: ${status}\nTotal Poin Sanksi Akhir: ${s.total_violation_points} Poin.`
+  const text = `INFORMASI ARSIP ALUMNI SMK PGRI 05 JEMBER\nNama: ${s.name}\nNISN: ${s.nis || s.nisn}\nTahun Lulus: ${s.graduation_year || '-'}\nKelas Terakhir: ${s.last_class_name || s.class_name}\nStatus Kedisiplinan: ${status}\nTotal Poin Sanksi Akhir: ${s.total_violation_points} Poin.`
   navigator.clipboard?.writeText(text).then(() => {
     alert('Ringkasan data SKKB berhasil disalin ke clipboard.')
   })

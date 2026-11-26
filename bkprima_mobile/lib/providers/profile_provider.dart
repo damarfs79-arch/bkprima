@@ -67,14 +67,18 @@ class ProfileProvider extends ChangeNotifier {
   }
 
   Future<Map<String, dynamic>> changePassword({
-    required String currentPassword,
     required String password,
     required String passwordConfirmation,
   }) async {
     return await ApiService.changePassword(
-      currentPassword: currentPassword,
       password: password,
       passwordConfirmation: passwordConfirmation,
     );
+  }
+
+  void clearProfile() {
+    _profile = null;
+    _message = null;
+    notifyListeners();
   }
 }

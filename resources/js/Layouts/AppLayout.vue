@@ -202,7 +202,7 @@
         
         <!-- Sliding Elevated Animated Indicator (Geser & Naik ke Atas / Tidak Sejajar) -->
         <div 
-          class="absolute top-0 bottom-0 left-0 w-1/4 flex items-center justify-center pointer-events-none transition-transform duration-300 ease-[cubic-bezier(0.34,1.35,0.64,1)] z-10"
+          class="absolute top-0 bottom-0 left-0 w-1/3 flex items-center justify-center pointer-events-none transition-transform duration-300 ease-[cubic-bezier(0.34,1.35,0.64,1)] z-10"
           :style="{
             transform: `translateX(${activeBottomIndex * 100}%)`
           }"
@@ -410,14 +410,6 @@ const menuItems = [
     ])
   },
   {
-    key: 'statistik',
-    label: 'Statistik Siswa',
-    path: '/statistik',
-    icon: () => h('svg', { xmlns: 'http://www.w3.org/2000/svg', class: 'h-4 w-4', fill: 'none', viewBox: '0 0 24 24', stroke: 'currentColor', 'stroke-width': '2' }, [
-      h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', d: 'M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z' })
-    ])
-  },
-  {
     key: 'alumni',
     label: 'Arsip Siswa Lulus',
     path: '/arsip-lulus',
@@ -425,14 +417,6 @@ const menuItems = [
       h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', d: 'M12 14l9-5-9-5-9 5 9 5z' }),
       h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', d: 'M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z' }),
       h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', d: 'M12 14v7' })
-    ])
-  },
-  {
-    key: 'panduan',
-    label: 'Tata Tertib & Poin',
-    path: '/panduan',
-    icon: () => h('svg', { xmlns: 'http://www.w3.org/2000/svg', class: 'h-4 w-4', fill: 'none', viewBox: '0 0 24 24', stroke: 'currentColor', 'stroke-width': '2' }, [
-      h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', d: 'M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253' })
     ])
   },
   {
@@ -499,17 +483,6 @@ const bottomNavTabs = [
     ])
   },
   {
-    key: 'statistik',
-    path: '/statistik',
-    label: 'Statistik',
-    activeIcon: () => h('svg', { xmlns: 'http://www.w3.org/2000/svg', class: 'h-5 w-5', viewBox: '0 0 20 20', fill: 'currentColor' }, [
-      h('path', { d: 'M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z' })
-    ]),
-    inactiveIcon: () => h('svg', { xmlns: 'http://www.w3.org/2000/svg', class: 'h-5 w-5', fill: 'none', viewBox: '0 0 24 24', stroke: 'currentColor', 'stroke-width': '2' }, [
-      h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', d: 'M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z' })
-    ])
-  },
-  {
     key: 'profil',
     path: '/profil',
     label: 'Profil BK',
@@ -526,8 +499,7 @@ const manualBottomTab = ref(null)
 
 const activeBottomIndex = computed(() => {
   if (manualBottomTab.value !== null) return manualBottomTab.value
-  if (isRouteActive('profil')) return 3
-  if (isRouteActive('statistik')) return 2
+  if (isRouteActive('profil')) return 2
   if (isRouteActive('verifikasi')) return 1
   return 0 // beranda / absensi
 })

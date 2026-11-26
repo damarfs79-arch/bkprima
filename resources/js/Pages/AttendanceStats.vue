@@ -17,7 +17,7 @@
             <input
               v-model="searchQuery"
               type="text"
-              placeholder="Cari siswa / NIS..."
+              placeholder="Cari siswa / NISN..."
               class="bg-white hover:bg-slate-50 border border-slate-200 rounded-lg pl-8 pr-3 py-1.5 text-xs text-slate-700 placeholder-slate-400 focus:outline-none focus:border-slate-400 transition w-36 sm:w-44"
             />
             <div class="absolute inset-y-0 left-0 pl-2.5 flex items-center pointer-events-none text-slate-400">
@@ -59,37 +59,23 @@
             </div>
           </div>
 
-          <!-- Toggle Period -->
-          <div class="flex bg-slate-100 p-0.5 rounded-lg border border-slate-200">
-            <button
-              @click="period = 'minggu'"
-              class="px-2.5 py-1 rounded-md text-xs transition cursor-pointer"
-              :class="period === 'minggu' ? 'bg-white text-slate-900 font-semibold shadow-xs' : 'text-slate-600 hover:text-slate-900'"
-            >
-              1 Minggu
-            </button>
-            <button
-              @click="period = 'bulan'"
-              class="px-2.5 py-1 rounded-md text-xs transition cursor-pointer"
-              :class="period === 'bulan' ? 'bg-white text-slate-900 font-semibold shadow-xs' : 'text-slate-600 hover:text-slate-900'"
-            >
-              1 Bulan
-            </button>
-            <button
-              @click="period = 'tahun'"
-              class="px-2.5 py-1 rounded-md text-xs transition cursor-pointer"
-              :class="period === 'tahun' ? 'bg-white text-slate-900 font-semibold shadow-xs' : 'text-slate-600 hover:text-slate-900'"
-            >
-              1 Tahun
-            </button>
-          </div>
+          <button
+            @click="downloadReport"
+            type="button"
+            class="px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-white font-medium rounded-lg inline-flex items-center gap-1.5 transition cursor-pointer"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+            </svg>
+            <span>Unduh</span>
+          </button>
         </div>
       </div>
 
       <!-- ============================================================ -->
-      <!-- 2. METRIC CARDS                                              -->
+      <!-- 2. METRIC CARDS (4 KARTU RINGKAS)                            -->
       <!-- ============================================================ -->
-      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <!-- Hadir -->
         <div class="bg-white rounded-xl p-4 border border-slate-200 shadow-xs">
           <div class="text-xs font-medium text-slate-500 mb-1">Hadir</div>
@@ -108,26 +94,17 @@
           </div>
         </div>
 
-        <!-- Sakit -->
+        <!-- Izin & Sakit -->
         <div class="bg-white rounded-xl p-4 border border-slate-200 shadow-xs">
-          <div class="text-xs font-medium text-slate-500 mb-1">Sakit</div>
+          <div class="text-xs font-medium text-slate-500 mb-1">Izin / Sakit</div>
           <div class="flex items-baseline gap-1.5">
-            <span class="text-2xl font-bold text-slate-900">{{ metrics.sakitRate }}%</span>
-            <span class="text-xs text-slate-400">{{ metrics.sakitCount }} data</span>
-          </div>
-        </div>
-
-        <!-- Izin -->
-        <div class="bg-white rounded-xl p-4 border border-slate-200 shadow-xs">
-          <div class="text-xs font-medium text-slate-500 mb-1">Izin</div>
-          <div class="flex items-baseline gap-1.5">
-            <span class="text-2xl font-bold text-slate-900">{{ metrics.izinRate }}%</span>
-            <span class="text-xs text-slate-400">{{ metrics.izinCount }} data</span>
+            <span class="text-2xl font-bold text-slate-900">{{ (Number(metrics.izinRate) + Number(metrics.sakitRate)).toFixed(0) }}%</span>
+            <span class="text-xs text-slate-400">{{ metrics.izinCount + metrics.sakitCount }} data</span>
           </div>
         </div>
 
         <!-- Alpa -->
-        <div class="bg-white rounded-xl p-4 border border-slate-200 shadow-xs col-span-2 sm:col-span-1">
+        <div class="bg-white rounded-xl p-4 border border-slate-200 shadow-xs">
           <div class="text-xs font-medium text-rose-600 mb-1">Alpa</div>
           <div class="flex items-baseline gap-1.5">
             <span class="text-2xl font-bold text-rose-600">{{ metrics.alphaRate }}%</span>
@@ -200,7 +177,6 @@
                 <th class="py-2.5 px-4 text-[11px] font-medium text-slate-500">Kelas</th>
                 <th class="py-2.5 px-4 text-[11px] font-medium text-slate-500">Rekap Presensi</th>
                 <th class="py-2.5 px-4 text-[11px] font-medium text-slate-500">Status Kedisiplinan</th>
-                <th class="py-2.5 px-4 text-[11px] font-medium text-slate-500">Kontak Wali</th>
                 <th class="py-2.5 px-4 text-right text-[11px] font-medium text-slate-500">Aksi</th>
               </tr>
             </thead>
@@ -209,7 +185,7 @@
                 <!-- Siswa (Nama & NIS) -->
                 <td class="py-3 px-4">
                   <div class="font-semibold text-slate-900 text-xs">{{ student.name }}</div>
-                  <div class="text-[11px] text-slate-400">NIS: {{ student.nis || student.nisn || '-' }}</div>
+                  <div class="text-[11px] text-slate-400">NISN: {{ student.nis || student.nisn || '-' }}</div>
                 </td>
 
                 <!-- Kelas -->
@@ -259,12 +235,6 @@
                   </div>
                 </td>
 
-                <!-- Kontak Wali -->
-                <td class="py-3 px-4">
-                  <div class="text-slate-800 font-medium text-xs">{{ student.parent_name }}</div>
-                  <div class="text-[11px] text-slate-400">{{ student.parent_phone }}</div>
-                </td>
-
                 <!-- Aksi -->
                 <td class="py-3 px-4 text-right">
                   <div class="inline-flex items-center gap-1.5">
@@ -287,38 +257,13 @@
               </tr>
 
               <tr v-if="displayedStudents.length === 0">
-                <td colspan="6" class="py-8 text-center text-slate-400 text-xs">
+                <td colspan="5" class="py-8 text-center text-slate-400 text-xs">
                   Tidak ditemukan data siswa yang sesuai dengan filter.
                 </td>
               </tr>
             </tbody>
           </table>
         </div>
-      </div>
-
-      <!-- ============================================================ -->
-      <!-- 6. LINE CHART COMPONENT                                      -->
-      <!-- ============================================================ -->
-      <DimensionComparisonLineChart />
-
-      <!-- ============================================================ -->
-      <!-- 7. DOWNLOAD / EXPORT BANNER                                  -->
-      <!-- ============================================================ -->
-      <div class="bg-white rounded-xl p-4 border border-slate-200 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
-        <div>
-          <div class="font-semibold text-slate-900 text-xs sm:text-sm">Ekspor Laporan Statistik</div>
-          <div class="text-slate-400 text-[11px] mt-0.5">Unduh rekap presensi bulanan dan daftar evaluasi kedisiplinan</div>
-        </div>
-
-        <button
-          @click="downloadReport"
-          class="px-3.5 py-2 bg-slate-900 hover:bg-slate-800 text-white font-medium rounded-lg inline-flex items-center gap-1.5 transition cursor-pointer shrink-0"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-          </svg>
-          <span>Unduh Laporan</span>
-        </button>
       </div>
 
       <!-- ============================================================ -->
@@ -343,7 +288,7 @@
             <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-1">
               <div class="font-bold text-slate-900 text-sm">{{ selectedStudent.name }}</div>
               <div class="text-xs text-slate-600 font-mono">
-                NIS: {{ selectedStudent.nis || selectedStudent.nisn || '-' }} &bull; Kelas: {{ selectedStudent.class_name }}
+                NISN: {{ selectedStudent.nis || selectedStudent.nisn || '-' }} &bull; Kelas: {{ selectedStudent.class_name }}
               </div>
               <div class="text-[11px] text-slate-500">
                 Catatan: {{ selectedStudent.alpha_count > 0 ? selectedStudent.alpha_count + ' Hari Alpa' : (selectedStudent.terlambat_count > 0 ? selectedStudent.terlambat_count + ' Kali Terlambat' : 'Koordinasi Pembinaan BK') }}
@@ -555,10 +500,7 @@ const metrics = computed(() => {
 })
 
 const majorOptions = computed(() => {
-  if (props.availableMajors && props.availableMajors.length > 0) {
-    return props.availableMajors
-  }
-  return ['RPL', 'TSM', 'TKKR']
+  return props.availableMajors || []
 })
 
 const levelOptions = computed(() => {
@@ -595,7 +537,7 @@ const displayedStudents = computed(() => {
   let list = rawStudentsList.value
 
   if (activeTab.value === 'atensi') {
-    list = atRiskList.value.length > 0 ? atRiskList.value : rawStudentsList.value
+    list = atRiskList.value
   } else if (activeTab.value === 'kritis') {
     list = criticalSummonsList.value
   }

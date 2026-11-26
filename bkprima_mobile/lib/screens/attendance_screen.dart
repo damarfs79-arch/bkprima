@@ -7,8 +7,6 @@ import '../core/theme/app_theme.dart';
 import '../core/widgets/searchable_bottom_sheet.dart';
 import '../models/attendance_model.dart';
 import '../providers/attendance_provider.dart';
-import '../widgets/rule_lookup_sheet.dart';
-import 'violation_records_screen.dart';
 
 class AttendanceScreen extends StatefulWidget {
   final ValueChanged<int>? onNavigateToTab;
@@ -143,7 +141,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                           ),
                           const SizedBox(height: 2),
                           Text(
-                            '${student.className} • NIS: ${student.nisn}',
+                            '${student.className} • NISN: ${student.nisn}',
                             style: const TextStyle(
                               fontFamily: AppTheme.fontFamily,
                               fontSize: 11,
@@ -350,7 +348,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(color: AppTheme.border, width: 1),
                 ),
-                padding: const EdgeInsets.all(14),
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                 child: Column(
                   children: [
                     // Top row: Presensi Hari Ini di kiri, tanggal ringkas di kanan
@@ -362,8 +360,8 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                           'Presensi Hari Ini',
                           style: TextStyle(
                             fontFamily: AppTheme.fontFamily,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w700,
                             color: AppTheme.textPrimary,
                             letterSpacing: -0.2,
                           ),
@@ -379,9 +377,9 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 10),
                     const Divider(height: 1, thickness: 1, color: AppTheme.border),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 10),
                     // 3 kartu metrik kompak: Hadir, Terlambat, Alpa
                     IntrinsicHeight(
                       child: Row(
@@ -417,108 +415,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
               ),
               const SizedBox(height: 10),
 
-              // 2. Aksi Cepat (Tata Tertib & Catatan Kasus)
-              Row(
-                children: [
-                  Expanded(
-                    child: InkWell(
-                      onTap: () {
-                        HapticFeedback.selectionClick();
-                        RuleLookupSheet.show(context);
-                      },
-                      borderRadius: BorderRadius.circular(10),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                        decoration: BoxDecoration(
-                          color: AppTheme.surface,
-                          borderRadius: BorderRadius.circular(10),
-                          border: Border.all(color: AppTheme.border, width: 1),
-                        ),
-                        child: Row(
-                          children: [
-                            Container(
-                              width: 30,
-                              height: 30,
-                              decoration: BoxDecoration(
-                                color: AppTheme.primaryLight,
-                                borderRadius: BorderRadius.circular(6),
-                              ),
-                              alignment: Alignment.center,
-                              child: const Icon(
-                                Icons.menu_book_outlined,
-                                size: 16,
-                                color: AppTheme.primary,
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            const Text(
-                              'Tata Tertib',
-                              style: TextStyle(
-                                fontFamily: AppTheme.fontFamily,
-                                fontSize: 13,
-                                fontWeight: FontWeight.w600,
-                                color: AppTheme.textPrimary,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: InkWell(
-                      onTap: () {
-                        HapticFeedback.selectionClick();
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (_) => const ViolationRecordsScreen()),
-                        );
-                      },
-                      borderRadius: BorderRadius.circular(10),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                        decoration: BoxDecoration(
-                          color: AppTheme.surface,
-                          borderRadius: BorderRadius.circular(10),
-                          border: Border.all(color: AppTheme.border, width: 1),
-                        ),
-                        child: Row(
-                          children: [
-                            Container(
-                              width: 30,
-                              height: 30,
-                              decoration: BoxDecoration(
-                                color: AppTheme.primaryLight,
-                                borderRadius: BorderRadius.circular(6),
-                              ),
-                              alignment: Alignment.center,
-                              child: const Icon(
-                                Icons.assignment_outlined,
-                                size: 16,
-                                color: AppTheme.primary,
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            const Text(
-                              'Catatan Kasus',
-                              style: TextStyle(
-                                fontFamily: AppTheme.fontFamily,
-                                fontSize: 13,
-                                fontWeight: FontWeight.w600,
-                                color: AppTheme.textPrimary,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-
-              // 3. Pencarian & Filter Rombel
+              // 2. Pencarian & Filter Rombel
               Row(
                 children: [
                   Expanded(
@@ -539,7 +436,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                           color: AppTheme.textPrimary,
                         ),
                         decoration: InputDecoration(
-                          hintText: 'Cari nama / NIS',
+                          hintText: 'Cari nama / NISN',
                           hintStyle: const TextStyle(
                             fontFamily: AppTheme.fontFamily,
                             fontSize: 12,

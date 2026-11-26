@@ -296,7 +296,7 @@
                 <!-- Nama & NIS -->
                 <td class="py-3.5 px-4">
                   <div class="font-semibold text-slate-900 text-xs sm:text-sm">{{ student.name }}</div>
-                  <div class="text-xs text-slate-500 font-normal mt-0.5">NIS: {{ student.nis || student.nisn }}</div>
+                  <div class="text-xs text-slate-500 font-normal mt-0.5">NISN: {{ student.nis || student.nisn }}</div>
                 </td>
 
                 <!-- Kelas, Tingkat, Jurusan, Rombel -->
@@ -807,7 +807,7 @@
             <div class="p-3 bg-slate-50 rounded-lg border border-slate-200">
               <div class="font-bold text-slate-900 text-sm">{{ selectedStudent.name }}</div>
               <div class="text-[11px] text-slate-500 font-mono mt-0.5">
-                NIS: {{ selectedStudent.nis || selectedStudent.nisn }} &bull; Kelas: {{ selectedStudent.class_name }}
+                NISN: {{ selectedStudent.nis || selectedStudent.nisn }} &bull; Kelas: {{ selectedStudent.class_name }}
               </div>
             </div>
 
@@ -1378,7 +1378,7 @@
                 >
                   <div>
                     <span class="font-semibold text-slate-800">{{ cand.name }}</span>
-                    <span class="text-slate-400 text-[11px] ml-1.5">({{ cand.class_name }} &bull; NIS: {{ cand.nis || cand.nisn }})</span>
+                    <span class="text-slate-400 text-[11px] ml-1.5">({{ cand.class_name }} &bull; NISN: {{ cand.nis || cand.nisn }})</span>
                   </div>
                   <span
                     class="text-[11px] font-semibold"
@@ -1567,6 +1567,10 @@ const props = defineProps({
     type: Array,
     default: () => []
   },
+  majors: {
+    type: Array,
+    default: () => []
+  },
   stats: {
     type: Object,
     default: () => ({})
@@ -1602,16 +1606,18 @@ const selectedJurusan = ref(props.initialFilters?.jurusan || 'ALL')
 const selectedClass = ref(props.initialFilters?.kelas || 'ALL')
 const searchQuery = ref('')
 
-// Master rombel & jurusan mapping
-const allJurusanMaster = [
-  { code: 'RPL', name: 'Rekayasa Perangkat Lunak' },
-  { code: 'TSM', name: 'Teknik Sepeda Motor' },
-  { code: 'DKV', name: 'Desain Komunikasi Visual' },
-  { code: 'TKKR', name: 'Teknik Kendaraan Ringan' },
-  { code: 'TKJ', name: 'Teknik Komputer Jaringan' },
-  { code: 'AKL', name: 'Akuntansi & Keuangan Lembaga' },
-  { code: 'OTKP', name: 'Otomatisasi Perkantoran' }
-]
+// Jurusan options murni dari master jurusan yang ditambahkan di Admin
+const jurusanOptions = computed(() => {
+  const jurMap = new Map()
+  if (props.majors && props.majors.length > 0) {
+    props.majors.forEach(j => {
+      if (j.code && !jurMap.has(j.code)) {
+        jurMap.set(j.code, { code: j.code, name: j.name || j.code })
+      }
+    })
+  }
+  return Array.from(jurMap.values())
+})
 
 // Unified classes list strictly from authorized classes or student records
 const allClasses = computed(() => {
@@ -1632,55 +1638,6 @@ const availableRombels = computed(() => {
     name: cls,
     nama_rombel: cls,
   }))
-})
-
-// Jurusan options dinamis mencakup seluruh data siswa, kelas terdaftar, dan master kejuruan
-const jurusanOptions = computed(() => {
-  const jurMap = new Map()
-  allJurusanMaster.forEach(j => jurMap.set(j.code, j))
-
-  // Ambil jurusan dari data siswa aktif
-  props.dbStudents.forEach(s => {
-    if (s.major && !jurMap.has(s.major)) {
-      jurMap.set(s.major, { code: s.major, name: s.major })
-    }
-  })
-
-  // Ambil jurusan dari data rombel database
-  if (props.rombelList && props.rombelList.length) {
-    props.rombelList.forEach(r => {
-      if (r.major && !jurMap.has(r.major)) {
-        jurMap.set(r.major, { code: r.major, name: r.major })
-      }
-    })
-  }
-
-  // Parse dari nama kelas jika ada kode jurusan baru (misal X TKKR 1 -> TKKR)
-  allClasses.value.forEach(cls => {
-    const parts = cls.split(' ')
-    if (parts.length > 1 && parts[1]) {
-      const code = parts[1].toUpperCase()
-      if (!jurMap.has(code)) {
-        jurMap.set(code, { code, name: code })
-      }
-    }
-  })
-
-  // Filter kode yang relevan dengan kelas yang ada
-  const usedCodes = new Set()
-  allClasses.value.forEach(cls => {
-    const upper = cls.toUpperCase()
-    for (const [code] of jurMap) {
-      if (upper.includes(code)) {
-        usedCodes.add(code)
-      }
-    }
-  })
-
-  if (usedCodes.size === 0) {
-    return Array.from(jurMap.values())
-  }
-  return Array.from(jurMap.values()).filter(j => usedCodes.has(j.code))
 })
 
 // Tingkat options only for levels present in authorized classes

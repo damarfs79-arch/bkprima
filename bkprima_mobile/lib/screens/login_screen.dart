@@ -149,14 +149,20 @@ class _LoginScreenState extends State<LoginScreen> {
                     final newUrl = urlController.text.trim();
                     if (newUrl.isNotEmpty) {
                       await ApiService.setBaseUrl(newUrl);
+                      final savedUrl = await ApiService.getBaseUrl();
+                      final check = await ApiService.testConnection();
                       if (ctx.mounted) {
                         Navigator.pop(ctx);
                       }
                       if (mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
-                            content: Text('Server URL diperbarui: $newUrl'),
-                            backgroundColor: AppTheme.success,
+                            content: Text(
+                              check['success'] == true
+                                  ? 'Terhubung ke API: $savedUrl'
+                                  : 'Endpoint disimpan ($savedUrl), namun gagal tes koneksi: ${check['message']}',
+                            ),
+                            backgroundColor: check['success'] == true ? AppTheme.success : AppTheme.warning,
                           ),
                         );
                       }

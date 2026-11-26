@@ -33,8 +33,13 @@ class AuthProvider extends ChangeNotifier {
   }
 
   Future<void> logout() async {
-    await ApiService.removeToken();
+    await ApiService.logout();
     _user = null;
+    notifyListeners();
+  }
+
+  void setUser(UserModel newUser) {
+    _user = newUser;
     notifyListeners();
   }
 
