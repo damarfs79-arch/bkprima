@@ -59,6 +59,34 @@
             </div>
           </div>
 
+          <!-- Toggle Period -->
+          <div class="flex bg-slate-100 p-0.5 rounded-lg border border-slate-200">
+            <button
+              @click="changePeriod('minggu')"
+              type="button"
+              class="px-2.5 py-1 rounded-md text-xs transition cursor-pointer"
+              :class="period === 'minggu' && !selectedMonth ? 'bg-white text-slate-900 font-semibold shadow-xs' : 'text-slate-600 hover:text-slate-900'"
+            >
+              1 Minggu
+            </button>
+            <button
+              @click="changePeriod('bulan')"
+              type="button"
+              class="px-2.5 py-1 rounded-md text-xs transition cursor-pointer"
+              :class="period === 'bulan' && !selectedMonth ? 'bg-white text-slate-900 font-semibold shadow-xs' : 'text-slate-600 hover:text-slate-900'"
+            >
+              1 Bulan
+            </button>
+            <button
+              @click="changePeriod('tahun')"
+              type="button"
+              class="px-2.5 py-1 rounded-md text-xs transition cursor-pointer"
+              :class="period === 'tahun' && !selectedMonth ? 'bg-white text-slate-900 font-semibold shadow-xs' : 'text-slate-600 hover:text-slate-900'"
+            >
+              1 Tahun
+            </button>
+          </div>
+
           <button
             @click="downloadReport"
             type="button"
@@ -114,7 +142,139 @@
       </div>
 
       <!-- ============================================================ -->
-      <!-- 3. DAFTAR STATISTIK SISWA & PEMANGGILAN                      -->
+      <!-- 3. TABEL RINCIAN KEHADIRAN SISWA PER BULAN (DINAMIS)         -->
+      <!-- ============================================================ -->
+      <div class="bg-white rounded-xl border border-slate-200 shadow-xs overflow-hidden">
+        <div class="px-4 py-3 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <h3 class="text-sm font-semibold text-slate-900">
+              Tabel Rincian Kehadiran Siswa Per Bulan
+            </h3>
+            <p class="text-xs text-slate-500 mt-0.5">
+              Pilih bulan untuk menyaring ringkasan presensi dan daftar evaluasi siswa secara dinamis
+            </p>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-2 text-xs">
+            <div class="relative">
+              <select
+                v-model="selectedMonth"
+                @change="selectMonth(selectedMonth)"
+                class="bg-white hover:bg-slate-50 border border-slate-200 rounded-lg pl-3 pr-7 py-1.5 text-xs text-slate-700 focus:outline-none focus:border-slate-400 appearance-none cursor-pointer transition"
+              >
+                <option value="">Semua Bulan (Sesuai Periode)</option>
+                <option v-for="m in monthlyBreakdownList" :key="m.month_key" :value="m.month_key">
+                  {{ m.label }}
+                </option>
+              </select>
+              <div class="absolute inset-y-0 right-0 pr-2 flex items-center pointer-events-none text-slate-400">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </div>
+            </div>
+
+            <input
+              type="month"
+              v-model="customMonthInput"
+              @change="selectMonth(customMonthInput)"
+              title="Pilih bulan dan tahun tertentu"
+              class="bg-white hover:bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs text-slate-700 focus:outline-none focus:border-slate-400 cursor-pointer transition"
+            />
+
+            <button
+              v-if="selectedMonth"
+              @click="selectMonth('')"
+              type="button"
+              class="px-2.5 py-1.5 rounded-lg border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 font-medium transition cursor-pointer"
+            >
+              Reset
+            </button>
+          </div>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs whitespace-nowrap">
+            <thead class="bg-slate-50/50 border-b border-slate-100">
+              <tr>
+                <th class="py-2.5 px-4 text-[11px] font-medium text-slate-500">Bulan</th>
+                <th class="py-2.5 px-4 text-center text-[11px] font-medium text-slate-500">Total Data</th>
+                <th class="py-2.5 px-4 text-center text-[11px] font-medium text-slate-500">Hadir</th>
+                <th class="py-2.5 px-4 text-center text-[11px] font-medium text-slate-500">Terlambat</th>
+                <th class="py-2.5 px-4 text-center text-[11px] font-medium text-slate-500">Sakit</th>
+                <th class="py-2.5 px-4 text-center text-[11px] font-medium text-slate-500">Izin</th>
+                <th class="py-2.5 px-4 text-center text-[11px] font-medium text-slate-500">Alpa</th>
+                <th class="py-2.5 px-4 text-[11px] font-medium text-slate-500">Tingkat Kehadiran</th>
+                <th class="py-2.5 px-4 text-right text-[11px] font-medium text-slate-500">Filter</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100 bg-white">
+              <tr
+                v-for="row in displayedMonthlyRows"
+                :key="row.month_key"
+                @click="selectMonth(selectedMonth === row.month_key ? '' : row.month_key)"
+                class="transition cursor-pointer"
+                :class="selectedMonth === row.month_key ? 'bg-slate-100/80' : 'hover:bg-slate-50/60'"
+              >
+                <td class="py-3 px-4 font-semibold text-slate-900">
+                  {{ row.label }}
+                </td>
+                <td class="py-3 px-4 text-center font-mono text-slate-600">
+                  {{ row.total }}
+                </td>
+                <td class="py-3 px-4 text-center">
+                  <span class="font-semibold text-slate-800">{{ row.hadir }}</span>
+                  <span class="text-[11px] text-slate-400 ml-1">({{ row.hadir_rate }}%)</span>
+                </td>
+                <td class="py-3 px-4 text-center">
+                  <span class="font-semibold text-amber-700">{{ row.terlambat }}</span>
+                  <span class="text-[11px] text-slate-400 ml-1">({{ row.terlambat_rate }}%)</span>
+                </td>
+                <td class="py-3 px-4 text-center">
+                  <span class="font-medium text-slate-700">{{ row.sakit }}</span>
+                  <span class="text-[11px] text-slate-400 ml-1">({{ row.sakit_rate }}%)</span>
+                </td>
+                <td class="py-3 px-4 text-center">
+                  <span class="font-medium text-slate-700">{{ row.izin }}</span>
+                  <span class="text-[11px] text-slate-400 ml-1">({{ row.izin_rate }}%)</span>
+                </td>
+                <td class="py-3 px-4 text-center">
+                  <span class="font-semibold" :class="row.alpha > 0 ? 'text-rose-600' : 'text-slate-700'">{{ row.alpha }}</span>
+                  <span class="text-[11px] text-slate-400 ml-1">({{ row.alpha_rate }}%)</span>
+                </td>
+                <td class="py-3 px-4 min-w-[150px]">
+                  <div class="flex items-center gap-2">
+                    <div class="flex-1 bg-slate-100 h-1.5 rounded-full overflow-hidden">
+                      <div
+                        class="h-full rounded-full transition-all duration-300"
+                        :class="row.attendance_rate >= 85 ? 'bg-emerald-600' : (row.attendance_rate >= 70 ? 'bg-amber-500' : 'bg-rose-500')"
+                        :style="{ width: row.attendance_rate + '%' }"
+                      ></div>
+                    </div>
+                    <span class="font-semibold text-slate-700 w-10 text-right">{{ row.attendance_rate }}%</span>
+                  </div>
+                </td>
+                <td class="py-3 px-4 text-right">
+                  <span
+                    class="inline-block px-2.5 py-1 rounded-md text-[11px] font-medium border transition"
+                    :class="selectedMonth === row.month_key ? 'bg-slate-900 text-white border-slate-900' : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'"
+                  >
+                    {{ selectedMonth === row.month_key ? 'Aktif' : 'Tampilkan' }}
+                  </span>
+                </td>
+              </tr>
+              <tr v-if="displayedMonthlyRows.length === 0">
+                <td colspan="9" class="py-8 text-center text-slate-400">
+                  Belum ada rincian presensi bulanan yang tersedia.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ============================================================ -->
+      <!-- 4. DAFTAR STATISTIK SISWA & PEMANGGILAN                      -->
       <!-- ============================================================ -->
       <div id="daftar-alpa-kritis" class="bg-white rounded-xl border border-slate-200 shadow-xs overflow-hidden">
         
@@ -412,13 +572,25 @@
 <script setup>
 import AppLayout from '../Layouts/AppLayout.vue'
 import DimensionComparisonLineChart from '../Components/DimensionComparisonLineChart.vue'
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { router, Link } from '@inertiajs/vue3'
 
 const props = defineProps({
   monthlyStats: {
     type: Object,
     default: () => ({})
+  },
+  monthlyBreakdown: {
+    type: Array,
+    default: () => []
+  },
+  activePeriod: {
+    type: String,
+    default: 'bulan'
+  },
+  activeMonth: {
+    type: String,
+    default: ''
   },
   summaryMetrics: {
     type: Object,
@@ -446,11 +618,57 @@ const props = defineProps({
   }
 })
 
-const period = ref('bulan')
+const period = ref(props.activePeriod || 'bulan')
+const selectedMonth = ref(props.activeMonth || '')
+const customMonthInput = ref(props.activeMonth || '')
 const selectedLevel = ref('semua')
 const selectedMajor = ref('semua')
 const searchQuery = ref('')
 const activeTab = ref('atensi') // 'atensi', 'semua', 'kritis'
+
+watch(() => props.activePeriod, (val) => {
+  if (val) period.value = val
+})
+
+watch(() => props.activeMonth, (val) => {
+  selectedMonth.value = val || ''
+  customMonthInput.value = val || ''
+})
+
+const changePeriod = (newPeriod) => {
+  period.value = newPeriod
+  selectedMonth.value = ''
+  customMonthInput.value = ''
+  router.get('/statistik', { period: newPeriod }, {
+    preserveState: true,
+    preserveScroll: true,
+    replace: true,
+  })
+}
+
+const selectMonth = (monthKey) => {
+  const normalized = monthKey || ''
+  selectedMonth.value = normalized
+  customMonthInput.value = normalized
+  const query = normalized ? { period: period.value, month: normalized } : { period: period.value }
+  router.get('/statistik', query, {
+    preserveState: true,
+    preserveScroll: true,
+    replace: true,
+  })
+}
+
+const monthlyBreakdownList = computed(() => {
+  return Array.isArray(props.monthlyBreakdown) ? props.monthlyBreakdown : []
+})
+
+const displayedMonthlyRows = computed(() => {
+  if (selectedMonth.value) {
+    const match = monthlyBreakdownList.value.filter(m => m.month_key === selectedMonth.value)
+    if (match.length > 0) return match
+  }
+  return monthlyBreakdownList.value
+})
 
 const showSummonsModal = ref(false)
 const selectedStudent = ref({})
@@ -474,18 +692,74 @@ const summonsForm = ref({
 })
 
 const metrics = computed(() => {
+  const hasFilter = selectedLevel.value !== 'semua' || selectedMajor.value !== 'semua' || (searchQuery.value && searchQuery.value.trim() !== '')
+  if (!hasFilter) {
+    return {
+      totalPresensi: props.summaryMetrics?.totalPresensi || 0,
+      hadirCount: props.summaryMetrics?.hadirCount || 0,
+      terlambatCount: props.summaryMetrics?.terlambatCount || 0,
+      sakitCount: props.summaryMetrics?.sakitCount || 0,
+      izinCount: props.summaryMetrics?.izinCount || 0,
+      alphaCount: props.summaryMetrics?.alphaCount || 0,
+      hadirRate: props.summaryMetrics?.hadirRate !== undefined ? props.summaryMetrics.hadirRate : 0,
+      terlambatRate: props.summaryMetrics?.terlambatRate !== undefined ? props.summaryMetrics.terlambatRate : 0,
+      sakitRate: props.summaryMetrics?.sakitRate !== undefined ? props.summaryMetrics.sakitRate : 0,
+      izinRate: props.summaryMetrics?.izinRate !== undefined ? props.summaryMetrics.izinRate : 0,
+      alphaRate: props.summaryMetrics?.alphaRate !== undefined ? props.summaryMetrics.alphaRate : 0,
+    }
+  }
+
+  let list = rawStudentsList.value
+  if (selectedLevel.value !== 'semua') {
+    list = list.filter(s => {
+      const lvl = String(s.level || '')
+      const className = String(s.class_name || '')
+      if (selectedLevel.value === '10') return lvl === '10' || className.startsWith('X ') || className.startsWith('10 ')
+      if (selectedLevel.value === '11') return lvl === '11' || className.startsWith('XI ') || className.startsWith('11 ')
+      if (selectedLevel.value === '12') return lvl === '12' || className.startsWith('XII ') || className.startsWith('12 ')
+      return true
+    })
+  }
+  if (selectedMajor.value !== 'semua') {
+    list = list.filter(s => {
+      const mj = String(s.major || '').toLowerCase()
+      const className = String(s.class_name || '').toLowerCase()
+      const target = selectedMajor.value.toLowerCase()
+      return mj === target || className.includes(target)
+    })
+  }
+  if (searchQuery.value && searchQuery.value.trim() !== '') {
+    const q = searchQuery.value.toLowerCase().trim()
+    list = list.filter(s => {
+      const name = String(s.name || '').toLowerCase()
+      const nis = String(s.nis || s.nisn || '').toLowerCase()
+      const className = String(s.class_name || '').toLowerCase()
+      return name.includes(q) || nis.includes(q) || className.includes(q)
+    })
+  }
+
+  let total = 0, hadir = 0, terlambat = 0, sakit = 0, izin = 0, alpa = 0
+  list.forEach(s => {
+    hadir += Number(s.hadir_count || 0)
+    terlambat += Number(s.terlambat_count || 0)
+    sakit += Number(s.sakit_count || 0)
+    izin += Number(s.izin_count || 0)
+    alpa += Number(s.alpha_count || 0)
+  })
+  total = hadir + terlambat + sakit + izin + alpa
+
   return {
-    totalPresensi: props.summaryMetrics?.totalPresensi || 0,
-    hadirCount: props.summaryMetrics?.hadirCount || 0,
-    terlambatCount: props.summaryMetrics?.terlambatCount || 0,
-    sakitCount: props.summaryMetrics?.sakitCount || 0,
-    izinCount: props.summaryMetrics?.izinCount || 0,
-    alphaCount: props.summaryMetrics?.alphaCount || 0,
-    hadirRate: props.summaryMetrics?.hadirRate !== undefined ? props.summaryMetrics.hadirRate : 0,
-    terlambatRate: props.summaryMetrics?.terlambatRate !== undefined ? props.summaryMetrics.terlambatRate : 0,
-    sakitRate: props.summaryMetrics?.sakitRate !== undefined ? props.summaryMetrics.sakitRate : 0,
-    izinRate: props.summaryMetrics?.izinRate !== undefined ? props.summaryMetrics.izinRate : 0,
-    alphaRate: props.summaryMetrics?.alphaRate !== undefined ? props.summaryMetrics.alphaRate : 0,
+    totalPresensi: total,
+    hadirCount: hadir,
+    terlambatCount: terlambat,
+    sakitCount: sakit,
+    izinCount: izin,
+    alphaCount: alpa,
+    hadirRate: total > 0 ? Number(((hadir / total) * 100).toFixed(1)) : 0,
+    terlambatRate: total > 0 ? Number(((terlambat / total) * 100).toFixed(1)) : 0,
+    sakitRate: total > 0 ? Number(((sakit / total) * 100).toFixed(1)) : 0,
+    izinRate: total > 0 ? Number(((izin / total) * 100).toFixed(1)) : 0,
+    alphaRate: total > 0 ? Number(((alpa / total) * 100).toFixed(1)) : 0,
   }
 })
 

@@ -150,13 +150,13 @@
                 <div class="relative">
                   <select
                     v-model="selectedMonth"
+                    @change="applyAdminDashboardFilter"
                     class="appearance-none bg-white hover:bg-slate-50 border border-slate-200 rounded-lg px-3.5 py-2 pr-8 text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer transition"
                   >
-                    <option value="mei">Bulan Mei 2026 (Aktif)</option>
-                    <option value="april">Bulan April 2026</option>
-                    <option value="maret">Bulan Maret 2026</option>
-                    <option value="februari">Bulan Februari 2026</option>
-                    <option value="januari">Bulan Januari 2026</option>
+                    <option value="">Semua Bulan (Akumulasi)</option>
+                    <option v-for="m in monthlyBreakdownList" :key="m.month_key" :value="m.month_key">
+                      {{ m.label }}
+                    </option>
                   </select>
                   <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2.5 text-slate-400">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -169,6 +169,7 @@
                 <div class="relative">
                   <select
                     v-model="selectedAngkatan"
+                    @change="applyAdminDashboardFilter"
                     class="appearance-none bg-white hover:bg-slate-50 border border-slate-200 rounded-lg px-3.5 py-2 pr-8 text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer transition"
                   >
                     <option value="all">Semua Angkatan (Gabungan Siswa)</option>
@@ -520,12 +521,12 @@
                   </span>
                 </div>
 
-                <div class="grid grid-cols-2 sm:grid-cols-5 gap-2.5 pt-1">
+                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5 pt-1">
                   <button
                     v-for="m in monthlyList"
                     :key="m.id"
                     type="button"
-                    @click="selectedMonth = m.id"
+                    @click="selectAdminMonth(selectedMonth === m.id ? '' : m.id)"
                     class="p-3 rounded-lg border text-left transition cursor-pointer relative overflow-hidden group"
                     :class="[
                       selectedMonth === m.id
@@ -550,7 +551,7 @@
                     </div>
 
                     <div class="text-lg font-bold text-slate-900 tracking-tight">{{ m.hadirRate }}%</div>
-                    <span class="text-[10px] text-slate-400 block mt-0.5">Hadir Siswa</span>
+                    <span class="text-[10px] text-slate-400 block mt-0.5">Hadir ({{ m.hadir }}/{{ m.total }})</span>
 
                     <!-- Mini bar progress -->
                     <div class="w-full bg-slate-200 h-1.5 rounded-full mt-2 overflow-hidden">
@@ -563,6 +564,187 @@
                       ></div>
                     </div>
                   </button>
+                </div>
+              </div>
+
+              <!-- TABEL RINCIAN KEHADIRAN SISWA PER BULAN (DINAMIS SUPER ADMIN) -->
+              <div class="bg-white rounded-lg border border-slate-200 overflow-hidden">
+                <div class="p-4 sm:p-5 border-b border-slate-100 flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+                  <div>
+                    <h3 class="font-bold text-slate-900 text-sm">
+                      Tabel Rincian Kehadiran Siswa Per Bulan
+                    </h3>
+                    <p class="text-xs text-slate-500 mt-0.5">
+                      Data rincian presensi riil dari database ({{ selectedAngkatanLabel }}{{ selectedMonth ? ' • ' + currentMonthData.name : '' }})
+                    </p>
+                  </div>
+
+                  <div class="flex flex-wrap items-center gap-2 text-xs">
+                    <!-- Switch Mode: Ringkasan Bulanan vs Per Siswa -->
+                    <div class="inline-flex bg-slate-100 p-0.5 rounded-lg border border-slate-200">
+                      <button
+                        type="button"
+                        @click="monthlyTableMode = 'bulanan'"
+                        class="px-2.5 py-1 rounded-md transition cursor-pointer"
+                        :class="monthlyTableMode === 'bulanan' ? 'bg-white text-slate-900 font-semibold shadow-xs' : 'text-slate-600 hover:text-slate-900'"
+                      >
+                        Ringkasan Bulanan
+                      </button>
+                      <button
+                        type="button"
+                        @click="monthlyTableMode = 'siswa'"
+                        class="px-2.5 py-1 rounded-md transition cursor-pointer"
+                        :class="monthlyTableMode === 'siswa' ? 'bg-white text-slate-900 font-semibold shadow-xs' : 'text-slate-600 hover:text-slate-900'"
+                      >
+                        Rincian Per Siswa ({{ filteredStudentMonthlyDetails.length }})
+                      </button>
+                    </div>
+
+                    <!-- Custom Month Picker -->
+                    <input
+                      type="month"
+                      v-model="customAdminMonthInput"
+                      @change="selectAdminMonth(customAdminMonthInput)"
+                      title="Pilih bulan dan tahun tertentu"
+                      class="bg-white hover:bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs text-slate-700 focus:outline-none focus:border-slate-400 cursor-pointer transition"
+                    />
+
+                    <!-- Search Siswa (khusus mode Rincian Per Siswa) -->
+                    <input
+                      v-if="monthlyTableMode === 'siswa'"
+                      v-model="searchMonthlyStudent"
+                      type="text"
+                      placeholder="Cari siswa / kelas..."
+                      class="bg-white border border-slate-200 rounded-lg px-3 py-1.5 text-xs text-slate-700 placeholder-slate-400 focus:outline-none focus:border-slate-400 w-40"
+                    />
+
+                    <button
+                      v-if="selectedMonth"
+                      type="button"
+                      @click="selectAdminMonth('')"
+                      class="px-2.5 py-1.5 rounded-lg border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 font-medium transition cursor-pointer"
+                    >
+                      Reset Bulan
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Mode 1: Ringkasan Per Bulan -->
+                <div v-if="monthlyTableMode === 'bulanan'" class="overflow-x-auto">
+                  <table class="w-full text-left text-xs whitespace-nowrap">
+                    <thead class="bg-slate-50/50 border-b border-slate-200">
+                      <tr>
+                        <th class="py-2.5 px-4 text-[11px] font-semibold uppercase tracking-wider text-slate-500">Bulan</th>
+                        <th class="py-2.5 px-4 text-center text-[11px] font-semibold uppercase tracking-wider text-slate-500">Total Data</th>
+                        <th class="py-2.5 px-4 text-center text-[11px] font-semibold uppercase tracking-wider text-slate-500">Hadir</th>
+                        <th class="py-2.5 px-4 text-center text-[11px] font-semibold uppercase tracking-wider text-slate-500">Terlambat</th>
+                        <th class="py-2.5 px-4 text-center text-[11px] font-semibold uppercase tracking-wider text-slate-500">Sakit</th>
+                        <th class="py-2.5 px-4 text-center text-[11px] font-semibold uppercase tracking-wider text-slate-500">Izin</th>
+                        <th class="py-2.5 px-4 text-center text-[11px] font-semibold uppercase tracking-wider text-slate-500">Alpa</th>
+                        <th class="py-2.5 px-4 text-[11px] font-semibold uppercase tracking-wider text-slate-500">Tingkat Kehadiran</th>
+                        <th class="py-2.5 px-4 text-right text-[11px] font-semibold uppercase tracking-wider text-slate-500">Aksi</th>
+                      </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100 bg-white">
+                      <tr
+                        v-for="row in monthlyBreakdownList"
+                        :key="row.month_key"
+                        @click="selectAdminMonth(selectedMonth === row.month_key ? '' : row.month_key)"
+                        class="transition cursor-pointer"
+                        :class="selectedMonth === row.month_key ? 'bg-slate-100/80' : 'hover:bg-slate-50'"
+                      >
+                        <td class="py-3 px-4 font-semibold text-slate-900">{{ row.label }}</td>
+                        <td class="py-3 px-4 text-center font-mono text-slate-600">{{ row.total }}</td>
+                        <td class="py-3 px-4 text-center">
+                          <span class="font-semibold text-slate-800">{{ row.hadir }}</span>
+                          <span class="text-[11px] text-slate-400 ml-1">({{ row.hadir_rate }}%)</span>
+                        </td>
+                        <td class="py-3 px-4 text-center">
+                          <span class="font-semibold text-amber-700">{{ row.terlambat }}</span>
+                          <span class="text-[11px] text-slate-400 ml-1">({{ row.terlambat_rate }}%)</span>
+                        </td>
+                        <td class="py-3 px-4 text-center">
+                          <span class="font-medium text-slate-700">{{ row.sakit }}</span>
+                          <span class="text-[11px] text-slate-400 ml-1">({{ row.sakit_rate }}%)</span>
+                        </td>
+                        <td class="py-3 px-4 text-center">
+                          <span class="font-medium text-slate-700">{{ row.izin }}</span>
+                          <span class="text-[11px] text-slate-400 ml-1">({{ row.izin_rate }}%)</span>
+                        </td>
+                        <td class="py-3 px-4 text-center">
+                          <span class="font-semibold" :class="row.alpha > 0 ? 'text-rose-600' : 'text-slate-700'">{{ row.alpha }}</span>
+                          <span class="text-[11px] text-slate-400 ml-1">({{ row.alpha_rate }}%)</span>
+                        </td>
+                        <td class="py-3 px-4 min-w-[150px]">
+                          <div class="flex items-center gap-2">
+                            <div class="flex-1 bg-slate-100 h-1.5 rounded-full overflow-hidden">
+                              <div
+                                class="h-full rounded-full transition-all duration-300"
+                                :class="row.attendance_rate >= 85 ? 'bg-emerald-600' : (row.attendance_rate >= 70 ? 'bg-amber-500' : 'bg-rose-500')"
+                                :style="{ width: row.attendance_rate + '%' }"
+                              ></div>
+                            </div>
+                            <span class="font-semibold text-slate-700 w-10 text-right">{{ row.attendance_rate }}%</span>
+                          </div>
+                        </td>
+                        <td class="py-3 px-4 text-right">
+                          <span
+                            class="inline-block px-2.5 py-1 rounded-md text-[11px] font-medium border transition"
+                            :class="selectedMonth === row.month_key ? 'bg-slate-900 text-white border-slate-900' : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'"
+                          >
+                            {{ selectedMonth === row.month_key ? 'Aktif' : 'Tampilkan' }}
+                          </span>
+                        </td>
+                      </tr>
+                      <tr v-if="monthlyBreakdownList.length === 0">
+                        <td colspan="9" class="py-8 text-center text-slate-400">
+                          Belum ada data presensi bulanan yang tersedia.
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+
+                <!-- Mode 2: Rincian Per Siswa -->
+                <div v-else class="overflow-x-auto max-h-96 overflow-y-auto">
+                  <table class="w-full text-left text-xs whitespace-nowrap">
+                    <thead class="bg-slate-50/90 border-b border-slate-200 sticky top-0">
+                      <tr>
+                        <th class="py-2.5 px-4 text-center w-10 text-[11px] font-semibold uppercase tracking-wider text-slate-500">No</th>
+                        <th class="py-2.5 px-4 text-[11px] font-semibold uppercase tracking-wider text-slate-500">Siswa</th>
+                        <th class="py-2.5 px-4 text-[11px] font-semibold uppercase tracking-wider text-slate-500">Kelas</th>
+                        <th class="py-2.5 px-4 text-center text-[11px] font-semibold uppercase tracking-wider text-slate-500">Hadir</th>
+                        <th class="py-2.5 px-4 text-center text-[11px] font-semibold uppercase tracking-wider text-slate-500">Terlambat</th>
+                        <th class="py-2.5 px-4 text-center text-[11px] font-semibold uppercase tracking-wider text-slate-500">Sakit</th>
+                        <th class="py-2.5 px-4 text-center text-[11px] font-semibold uppercase tracking-wider text-slate-500">Izin</th>
+                        <th class="py-2.5 px-4 text-center text-[11px] font-semibold uppercase tracking-wider text-slate-500">Alpa</th>
+                        <th class="py-2.5 px-4 text-right text-[11px] font-semibold uppercase tracking-wider text-slate-500">Kehadiran</th>
+                      </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100 bg-white">
+                      <tr v-for="(st, idx) in filteredStudentMonthlyDetails" :key="st.id" class="hover:bg-slate-50 transition">
+                        <td class="py-2.5 px-4 text-center text-slate-400 font-medium">{{ idx + 1 }}</td>
+                        <td class="py-2.5 px-4">
+                          <div class="font-semibold text-slate-900">{{ st.name }}</div>
+                          <div class="text-[11px] text-slate-400">NIS: {{ st.nis || '-' }}</div>
+                        </td>
+                        <td class="py-2.5 px-4 font-medium text-slate-700">{{ st.class_name }}</td>
+                        <td class="py-2.5 px-4 text-center font-semibold text-slate-800">{{ st.hadir }}</td>
+                        <td class="py-2.5 px-4 text-center font-semibold text-amber-700">{{ st.terlambat }}</td>
+                        <td class="py-2.5 px-4 text-center text-slate-700">{{ st.sakit }}</td>
+                        <td class="py-2.5 px-4 text-center text-slate-700">{{ st.izin }}</td>
+                        <td class="py-2.5 px-4 text-center font-semibold" :class="st.alpha > 0 ? 'text-rose-600' : 'text-slate-700'">{{ st.alpha }}</td>
+                        <td class="py-2.5 px-4 text-right font-semibold" :class="st.rate >= 85 ? 'text-emerald-700' : (st.rate >= 70 ? 'text-amber-700' : 'text-rose-600')">
+                          {{ st.total > 0 ? st.rate + '%' : '-' }}
+                        </td>
+                      </tr>
+                      <tr v-if="filteredStudentMonthlyDetails.length === 0">
+                        <td colspan="9" class="py-8 text-center text-slate-400">
+                          Tidak ada data siswa yang sesuai dengan filter.
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
                 </div>
               </div>
 
@@ -2611,6 +2793,22 @@ const props = defineProps({
     type: Number,
     default: 0
   },
+  monthlyBreakdown: {
+    type: Array,
+    default: () => []
+  },
+  studentMonthlyDetails: {
+    type: Array,
+    default: () => []
+  },
+  activeMonth: {
+    type: String,
+    default: ''
+  },
+  activeAngkatan: {
+    type: String,
+    default: 'all'
+  },
   initialGuruBkList: {
     type: Array,
     default: () => []
@@ -2816,12 +3014,59 @@ const saveSettings = () => {
 }
 
 // ==========================================
-// 1. STATISTIKA PRESENSI SISWA (DIAGRAM BULAT PENUH 1 BULAN SEPERTI FOTO 1)
+// 1. STATISTIKA PRESENSI SISWA (DINAMIS DARI DATABASE)
 // ==========================================
 const chartViewMode = ref('bulat') // 'bulat' (default) atau 'garis'
-const selectedMonth = ref('mei') // Default Bulan Mei 2026 sesuai instruksi user
-const selectedAngkatan = ref('all') // 'all', 'x', 'xi', 'xii'
+const selectedMonth = ref(props.activeMonth || '')
+const customAdminMonthInput = ref(props.activeMonth || '')
+const selectedAngkatan = ref(props.activeAngkatan || 'all') // 'all', 'x', 'xi', 'xii'
+const monthlyTableMode = ref('bulanan') // 'bulanan' atau 'siswa'
+const searchMonthlyStudent = ref('')
 const hoveredPieSlice = ref(null)
+
+watch(() => props.activeMonth, (val) => {
+  selectedMonth.value = val || ''
+  customAdminMonthInput.value = val || ''
+})
+
+watch(() => props.activeAngkatan, (val) => {
+  if (val) selectedAngkatan.value = val
+})
+
+const applyAdminDashboardFilter = () => {
+  const query = {}
+  if (selectedMonth.value) query.month = selectedMonth.value
+  if (selectedAngkatan.value && selectedAngkatan.value !== 'all') query.angkatan = selectedAngkatan.value
+  router.get('/admin', query, {
+    preserveState: true,
+    preserveScroll: true,
+    replace: true,
+  })
+}
+
+const selectAdminMonth = (monthKey) => {
+  const normalized = monthKey || ''
+  selectedMonth.value = normalized
+  customAdminMonthInput.value = normalized
+  applyAdminDashboardFilter()
+}
+
+const monthlyBreakdownList = computed(() => {
+  return Array.isArray(props.monthlyBreakdown) ? props.monthlyBreakdown : []
+})
+
+const filteredStudentMonthlyDetails = computed(() => {
+  const list = Array.isArray(props.studentMonthlyDetails) ? props.studentMonthlyDetails : []
+  if (!searchMonthlyStudent.value || searchMonthlyStudent.value.trim() === '') {
+    return list
+  }
+  const q = searchMonthlyStudent.value.toLowerCase().trim()
+  return list.filter(s =>
+    (s.name || '').toLowerCase().includes(q) ||
+    (s.nis || '').toLowerCase().includes(q) ||
+    (s.class_name || '').toLowerCase().includes(q)
+  )
+})
 
 const monthlyAttendanceDb = {
   mei: {
@@ -3032,7 +3277,44 @@ const monthlyAttendanceDb = {
 }
 
 const currentMonthData = computed(() => {
-  return monthlyAttendanceDb[selectedMonth.value] || monthlyAttendanceDb.mei
+  const list = monthlyBreakdownList.value
+  if (selectedMonth.value) {
+    const found = list.find(m => m.month_key === selectedMonth.value)
+    if (found) {
+      return {
+        id: found.month_key,
+        name: found.label,
+        shortName: found.shortName,
+        trend: found.trend || 'naik',
+        delta: found.delta || '+0%',
+        prevMonthName: 'Bulan Sebelumnya',
+        prevHadirRate: found.hadirRate || 0,
+        summary: `Total ${found.total} catatan presensi pada ${found.label}.`,
+      }
+    }
+    return {
+      id: selectedMonth.value,
+      name: `Bulan ${selectedMonth.value}`,
+      shortName: selectedMonth.value,
+      trend: 'naik',
+      delta: '+0%',
+      prevMonthName: 'Bulan Sebelumnya',
+      prevHadirRate: 0,
+      summary: 'Data presensi sesuai bulan terpilih.',
+    }
+  }
+
+  const latest = list[0]
+  return {
+    id: 'all',
+    name: 'Semua Bulan (Akumulasi)',
+    shortName: latest ? latest.shortName : 'Bulan Ini',
+    trend: latest ? latest.trend : 'naik',
+    delta: latest ? latest.delta : '+0%',
+    prevMonthName: 'Bulan Sebelumnya',
+    prevHadirRate: latest ? latest.hadirRate : 0,
+    summary: 'Akumulasi data presensi aktual dari database.',
+  }
 })
 
 const currentCohortData = computed(() => {
@@ -3073,7 +3355,7 @@ const totalAbsenCount = computed(() => {
 })
 
 const monthlyList = computed(() => {
-  return []
+  return monthlyBreakdownList.value
 })
 
 const pieSlices = computed(() => {
