@@ -174,7 +174,7 @@
                   <p class="text-[11px] text-slate-400">Kelas binaan &amp; pendampingan BK</p>
                 </div>
               </div>
-              <span class="text-[11px] font-semibold text-slate-500 bg-slate-100 border border-slate-200 px-2 py-0.5 rounded-md">{{ form.rombel.length }} kelas</span>
+              <span class="text-xs font-semibold text-slate-500">{{ form.rombel.length }} kelas</span>
             </div>
 
             <!-- Rombel Tags -->

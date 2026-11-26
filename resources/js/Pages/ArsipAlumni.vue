@@ -175,7 +175,7 @@
 
                 <!-- Tahun Lulus -->
                 <td class="py-3.5 px-4 text-center">
-                  <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-slate-100 text-slate-700 border border-slate-200">
+                  <span class="text-xs font-semibold text-slate-700">
                     {{ student.graduation_year || '-' }}
                   </span>
                 </td>
@@ -183,8 +183,8 @@
                 <!-- Total Poin Akhir -->
                 <td class="py-3.5 px-4 text-center">
                   <span
-                    class="inline-flex items-center px-2 py-0.5 rounded text-xs font-bold"
-                    :class="student.total_violation_points === 0 ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : (student.total_violation_points >= 26 ? 'bg-rose-50 text-rose-700 border border-rose-200' : 'bg-amber-50 text-amber-700 border border-amber-200')"
+                    class="text-xs font-semibold"
+                    :class="student.total_violation_points === 0 ? 'text-emerald-700' : (student.total_violation_points >= 26 ? 'text-rose-700' : 'text-amber-700')"
                   >
                     {{ student.total_violation_points }} Poin
                   </span>
@@ -250,7 +250,7 @@
     <!-- ============================================================ -->
     <!-- 5. SLIDE-OVER / MODAL: REKAM JEJAK ALUMNI (SKKB REFERENCE)    -->
     <!-- ============================================================ -->
-    <div v-if="showModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
+    <div v-if="showModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60">
       <div class="bg-white rounded-2xl max-w-2xl w-full border border-slate-200 shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
         
         <!-- Modal Header -->
@@ -342,7 +342,8 @@
                 <div class="flex items-center justify-between text-xs">
                   <div class="flex items-center gap-2">
                     <span class="font-semibold text-slate-900">{{ item.violation_name }}</span>
-                    <span class="text-[10px] px-2 py-0.5 rounded font-medium bg-slate-100 text-slate-600 border border-slate-200">
+                    <span class="text-[11px] text-slate-400">&bull;</span>
+                    <span class="text-[11px] font-medium text-slate-500">
                       {{ item.class_snapshot || 'Kelas Tidak Diketahui' }}
                     </span>
                   </div>

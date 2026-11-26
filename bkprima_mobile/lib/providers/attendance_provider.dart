@@ -1,40 +1,71 @@
 import 'package:flutter/material.dart';
 import '../models/attendance_model.dart';
+import '../models/absence_alert_model.dart';
 import '../services/api_service.dart';
 
 class AttendanceProvider extends ChangeNotifier {
   AttendanceStats? _stats;
   List<AttendanceStudent> _students = [];
   List<String> _availableClasses = [];
+  List<AbsenceAlert> _absenceAlerts = [];
   String _selectedClass = 'Semua Rombel';
   String _searchQuery = '';
   bool _isLoading = false;
   bool _isSyncing = false;
+  bool _hasShownStartupAlert = false;
   String? _message;
 
   AttendanceStats? get stats => _stats;
   List<AttendanceStudent> get students => _students;
   List<String> get availableClasses => _availableClasses;
+  List<AbsenceAlert> get absenceAlerts => _absenceAlerts;
+  int get absenceAlertCount => _absenceAlerts.length;
+  bool get hasShownStartupAlert => _hasShownStartupAlert;
   String get selectedClass => _selectedClass;
   String get searchQuery => _searchQuery;
   bool get isLoading => _isLoading;
   bool get isSyncing => _isSyncing;
   String? get message => _message;
 
+  void markStartupAlertShown() {
+    _hasShownStartupAlert = true;
+  }
+
+  void resetStartupAlert() {
+    _hasShownStartupAlert = false;
+  }
+
+  Future<void> fetchAbsenceAlerts() async {
+    final res = await ApiService.getAbsenceAlerts();
+    if (res['success'] == true) {
+      _absenceAlerts = (res['alerts'] as List<AbsenceAlert>?) ?? [];
+      notifyListeners();
+    }
+  }
+
   Future<void> fetchAttendance() async {
     _isLoading = true;
     notifyListeners();
 
-    final result = await ApiService.getAttendance(
-      className: _selectedClass == 'Semua Rombel' ? null : _selectedClass,
-      search: _searchQuery,
-    );
+    final results = await Future.wait([
+      ApiService.getAttendance(
+        className: _selectedClass == 'Semua Rombel' ? null : _selectedClass,
+        search: _searchQuery,
+      ),
+      ApiService.getAbsenceAlerts(),
+    ]);
+
+    final result = results[0];
+    final alertResult = results[1];
 
     _isLoading = false;
     if (result['success'] == true) {
       _stats = result['stats'];
       _students = result['students'];
       _availableClasses = ['Semua Rombel', ...(result['available_classes'] as List<String>)];
+    }
+    if (alertResult['success'] == true) {
+      _absenceAlerts = (alertResult['alerts'] as List<AbsenceAlert>?) ?? [];
     }
     notifyListeners();
   }
@@ -112,6 +143,7 @@ class AttendanceProvider extends ChangeNotifier {
         _students = serverRes['students'];
         notifyListeners();
       }
+      await fetchAbsenceAlerts();
       return true;
     }
 

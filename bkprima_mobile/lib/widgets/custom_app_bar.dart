@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../core/theme/app_theme.dart';
 import '../providers/auth_provider.dart';
+import '../providers/attendance_provider.dart';
+import 'absence_alert_sheet.dart';
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String? title;
@@ -19,6 +21,9 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     final auth = context.watch<AuthProvider>();
+    final attendance = context.watch<AttendanceProvider>();
+    final alerts = attendance.absenceAlerts;
+    final alertCount = alerts.length;
     final user = auth.user;
     final initial = user != null && user.name.isNotEmpty
         ? user.name.trim().split(' ').map((e) => e[0]).take(2).join('').toUpperCase()
@@ -52,6 +57,45 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
             ),
       actions: actions ??
           [
+            IconButton(
+              tooltip: 'Notifikasi Absensi (>= 3 Hari)',
+              onPressed: () => AbsenceAlertDialogs.showListSheet(context, alerts),
+              icon: Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  Icon(
+                    alertCount > 0
+                        ? Icons.notifications_active_outlined
+                        : Icons.notifications_outlined,
+                    size: 22,
+                    color: alertCount > 0 ? AppTheme.danger : AppTheme.textSecondary,
+                  ),
+                  if (alertCount > 0)
+                    Positioned(
+                      right: -4,
+                      top: -4,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+                        constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
+                        decoration: BoxDecoration(
+                          color: AppTheme.danger,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        alignment: Alignment.center,
+                        child: Text(
+                          alertCount > 99 ? '99+' : '$alertCount',
+                          style: const TextStyle(
+                            fontFamily: AppTheme.fontFamily,
+                            color: Colors.white,
+                            fontSize: 9,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ),
             Padding(
               padding: const EdgeInsets.only(right: 16),
               child: Container(

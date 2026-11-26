@@ -213,14 +213,14 @@
                     <td class="py-3.5 px-4 text-center">
                       <span 
                         v-if="item.points !== null && item.points !== undefined && item.points !== ''"
-                        class="px-2.5 py-1 rounded-full text-xs font-black inline-block shadow-2xs"
-                        :class="item.points >= 25 ? 'bg-rose-100 text-rose-700 border border-rose-200' : (item.points >= 15 ? 'bg-amber-100 text-amber-700 border border-amber-200' : 'bg-blue-100 text-blue-700 border border-blue-200')"
+                        class="text-xs font-semibold"
+                        :class="item.points >= 25 ? 'text-rose-700' : (item.points >= 15 ? 'text-amber-700' : 'text-blue-700')"
                       >
                         +{{ item.points }} Poin
                       </span>
                       <span 
                         v-else
-                        class="px-2 py-0.5 rounded-full text-[11px] font-semibold inline-block bg-slate-100 text-slate-600 border border-slate-200"
+                        class="text-xs font-medium text-slate-500"
                         title="Kasus pembinaan dan teguran lisan tanpa pengurangan poin tatib"
                       >
                         Pembinaan
@@ -229,19 +229,19 @@
                     <td class="py-3.5 px-4 text-center">
                       <span 
                         v-if="item.status === 'Panggilan Ortu'" 
-                        class="px-3 py-1 bg-rose-50 text-rose-700 font-bold rounded-full border border-rose-200 text-[11px]"
+                        class="text-xs font-semibold text-rose-700"
                       >
                         Panggilan Ortu
                       </span>
                       <span 
                         v-else-if="item.status === 'Dalam Pembinaan'" 
-                        class="px-3 py-1 bg-amber-50 text-amber-700 font-bold rounded-full border border-amber-200 text-[11px]"
+                        class="text-xs font-semibold text-amber-700"
                       >
                         Dalam Pembinaan
                       </span>
                       <span 
                         v-else 
-                        class="px-3 py-1 bg-emerald-50 text-emerald-700 font-bold rounded-full border border-emerald-200 text-[11px]"
+                        class="text-xs font-semibold text-emerald-700"
                       >
                         Selesai Dibina
                       </span>
@@ -350,19 +350,20 @@
                     <td class="py-3.5 px-4 max-w-xs">
                       <div class="font-bold text-slate-800 truncate">{{ item.caseTitle }}</div>
                       <div class="text-[11px] text-slate-500 flex items-center gap-1.5 mt-0.5">
-                        <span class="px-1.5 py-0.2 rounded font-black text-[10px] bg-rose-100 text-rose-700">
+                        <span class="font-semibold text-[11px] text-rose-700">
                           +{{ item.points }} Poin
                         </span>
+                        <span>&bull;</span>
                         <span class="truncate">{{ item.caseDescription }}</span>
                       </div>
                     </td>
                     <td class="py-3.5 px-3 text-center">
                       <span
-                        class="px-2.5 py-1 rounded-full text-[10px] font-black border"
+                        class="text-xs font-semibold"
                         :class="{
-                          'bg-amber-50 text-amber-700 border-amber-200': item.stage === 'SP-1',
-                          'bg-orange-50 text-orange-700 border-orange-200': item.stage === 'SP-2',
-                          'bg-rose-50 text-rose-700 border-rose-300': item.stage === 'SP-3'
+                          'text-amber-700': item.stage === 'SP-1',
+                          'text-orange-700': item.stage === 'SP-2',
+                          'text-rose-700': item.stage === 'SP-3'
                         }"
                       >
                         {{ item.stage }}
@@ -392,11 +393,11 @@
                     </td>
                     <td class="py-3.5 px-3 text-center">
                       <span
-                        class="px-2.5 py-0.5 rounded-full text-[10px] font-bold border"
+                        class="text-xs font-semibold"
                         :class="{
-                          'bg-blue-50 text-blue-700 border-blue-200': item.status === 'Menunggu Kehadiran',
-                          'bg-emerald-50 text-emerald-700 border-emerald-200': item.status === 'Mediasi Selesai',
-                          'bg-rose-50 text-rose-700 border-rose-200': item.status === 'Mangkir / Panggil Ulang'
+                          'text-blue-700': item.status === 'Menunggu Kehadiran',
+                          'text-emerald-700': item.status === 'Mediasi Selesai',
+                          'text-rose-700': item.status === 'Mangkir / Panggil Ulang'
                         }"
                       >
                         {{ item.status }}
@@ -459,7 +460,7 @@
       <!-- ============================================================ -->
       <!-- MODAL 1: FORM TERBITKAN SURAT PANGGILAN BARU                 -->
       <!-- ============================================================ -->
-      <div v-if="showNewSummonsModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in">
+      <div v-if="showNewSummonsModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 animate-in fade-in">
         <div class="bg-white rounded-2xl max-w-xl w-full border border-slate-200 shadow-xl overflow-hidden animate-in zoom-in-95 duration-200 max-h-[90vh] flex flex-col">
           
           <div class="p-4 sm:p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50">
@@ -619,8 +620,8 @@
       <!-- ============================================================ -->
       <!-- MODAL 2: PRATINJAU & CETAK SURAT DINAS RESMI (KOP SEKOLAH)   -->
       <!-- ============================================================ -->
-      <div v-if="showLetterModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in">
-        <div class="bg-white rounded-3xl max-w-2xl w-full border border-slate-200 shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200 max-h-[92vh] flex flex-col">
+      <div v-if="showLetterModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 animate-in fade-in">
+        <div class="bg-white rounded-xl max-w-2xl w-full border border-slate-200 shadow-lg overflow-hidden animate-in zoom-in-95 duration-200 max-h-[92vh] flex flex-col">
           
           <div class="p-4 border-b border-slate-200 flex items-center justify-between bg-slate-50 no-print">
             <div class="flex items-center gap-2">
@@ -760,8 +761,8 @@
       <!-- ============================================================ -->
       <!-- MODAL 3: CATAT BERITA ACARA MEDIASI                          -->
       <!-- ============================================================ -->
-      <div v-if="showMediationModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in">
-        <div class="bg-white rounded-3xl max-w-lg w-full border border-slate-200 shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
+      <div v-if="showMediationModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 animate-in fade-in">
+        <div class="bg-white rounded-xl max-w-lg w-full border border-slate-200 shadow-lg overflow-hidden animate-in zoom-in-95 duration-200">
           
           <div class="p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50">
             <div>
@@ -833,7 +834,7 @@
       <!-- ============================================================ -->
       <div 
         v-if="previewPhotoItem" 
-        class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-xs animate-in fade-in" 
+        class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 animate-in fade-in" 
         @click.self="previewPhotoItem = null"
       >
         <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-lg w-full overflow-hidden shadow-2xl text-slate-100 flex flex-col">

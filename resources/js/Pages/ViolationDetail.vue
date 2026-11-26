@@ -107,7 +107,7 @@
                 <p class="text-xs text-slate-500 mt-0.5">{{ violation?.date || 'Tanggal Pelaporan' }} &bull; {{ violation?.time || 'Waktu tercatat' }}</p>
               </div>
               <div class="text-right">
-                <span class="inline-block bg-red-100 text-red-600 text-xs font-bold px-2.5 py-1 rounded-full mb-1">+{{ studentPoints }} Poin</span>
+                <span class="inline-block text-rose-700 text-xs font-semibold mb-1">+{{ studentPoints }} Poin</span>
               </div>
             </div>
           </div>
@@ -156,16 +156,11 @@
           </button>
         </div>
 
-        <div v-if="photoUrl" class="relative rounded-xl overflow-hidden mb-4 border border-slate-200 bg-slate-950">
+        <div v-if="photoUrl" class="rounded-xl overflow-hidden mb-4 border border-slate-200 bg-slate-950">
           <img :src="photoUrl" alt="Bukti Kejadian" class="w-full max-h-72 object-contain mx-auto">
-          <div class="absolute top-2 left-2 bg-black/60 backdrop-blur-xs text-white text-[10px] px-2 py-1 rounded flex items-center gap-1">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
-              <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd" />
-            </svg>
+          <div class="bg-slate-900 px-3 py-2 flex items-center justify-between text-[11px] text-slate-300 border-t border-slate-800">
             <span>Bukti Foto Terlampir &bull; {{ violation?.time || '07.00 WIB' }}</span>
-          </div>
-          <div class="absolute bottom-2 right-2 bg-blue-600 text-white text-[10px] px-2 py-0.5 rounded font-bold">
-            Verifikasi BK
+            <span class="font-semibold text-blue-400">Verifikasi BK</span>
           </div>
         </div>
         <div v-else class="p-4 rounded-xl border border-dashed border-slate-200 text-center text-xs text-slate-400 mb-4 bg-slate-50">

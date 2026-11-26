@@ -195,23 +195,13 @@
 
                 <!-- Rekap Presensi (H, T, S, I, A) -->
                 <td class="py-3 px-4">
-                  <div class="flex items-center gap-2">
-                    <span class="inline-block px-1.5 py-0.5 rounded bg-slate-100 text-slate-700 font-mono text-[11px]">
-                      H: {{ student.hadir_count }}
-                    </span>
-                    <span v-if="student.terlambat_count > 0" class="inline-block px-1.5 py-0.5 rounded bg-amber-50 text-amber-700 font-mono text-[11px]">
-                      T: {{ student.terlambat_count }}
-                    </span>
-                    <span v-if="student.sakit_count > 0" class="inline-block px-1.5 py-0.5 rounded bg-blue-50 text-blue-700 font-mono text-[11px]">
-                      S: {{ student.sakit_count }}
-                    </span>
-                    <span v-if="student.izin_count > 0" class="inline-block px-1.5 py-0.5 rounded bg-cyan-50 text-cyan-700 font-mono text-[11px]">
-                      I: {{ student.izin_count }}
-                    </span>
-                    <span v-if="student.alpha_count > 0" class="inline-block px-1.5 py-0.5 rounded bg-rose-50 text-rose-700 font-bold font-mono text-[11px]">
-                      A: {{ student.alpha_count }}
-                    </span>
-                    <span class="text-slate-400 text-[11px]">({{ student.rate }}%)</span>
+                  <div class="flex items-center gap-2 font-mono text-[11px]">
+                    <span class="text-slate-700">H: {{ student.hadir_count }}</span>
+                    <span v-if="student.terlambat_count > 0" class="text-amber-700">T: {{ student.terlambat_count }}</span>
+                    <span v-if="student.sakit_count > 0" class="text-blue-700">S: {{ student.sakit_count }}</span>
+                    <span v-if="student.izin_count > 0" class="text-cyan-700">I: {{ student.izin_count }}</span>
+                    <span v-if="student.alpha_count > 0" class="text-rose-700 font-semibold">A: {{ student.alpha_count }}</span>
+                    <span class="text-slate-400 font-sans">({{ student.rate }}%)</span>
                   </div>
                 </td>
 
@@ -219,18 +209,18 @@
                 <td class="py-3 px-4">
                   <div class="flex items-center gap-1.5">
                     <span
-                      class="px-2 py-0.5 rounded text-[11px] font-medium"
+                      class="text-xs font-medium"
                       :class="{
-                        'bg-rose-50 text-rose-700 border border-rose-200': student.badge_type === 'critical',
-                        'bg-amber-50 text-amber-700 border border-amber-200': student.badge_type === 'warning',
-                        'bg-slate-100 text-slate-700 border border-slate-200': student.badge_type === 'attention',
-                        'bg-emerald-50 text-emerald-700 border border-emerald-200': student.badge_type === 'good'
+                        'text-rose-700 font-semibold': student.badge_type === 'critical',
+                        'text-amber-700': student.badge_type === 'warning',
+                        'text-slate-700': student.badge_type === 'attention',
+                        'text-emerald-700': student.badge_type === 'good'
                       }"
                     >
                       {{ student.risk_level }}
                     </span>
                     <span v-if="student.violation_points > 0" class="text-[11px] text-slate-400">
-                      {{ student.violation_points }} Poin
+                      &bull; {{ student.violation_points }} Poin
                     </span>
                   </div>
                 </td>
@@ -269,7 +259,7 @@
       <!-- ============================================================ -->
       <!-- MODAL: TERBITKAN SURAT PANGGILAN CEPAT (SP-1 / SP-2)         -->
       <!-- ============================================================ -->
-      <div v-if="showSummonsModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
+      <div v-if="showSummonsModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60">
         <div class="bg-white rounded-2xl max-w-lg w-full border border-slate-200 shadow-2xl overflow-hidden">
           
           <div class="p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50">
@@ -589,7 +579,7 @@ const openQuickSummonsModal = (student) => {
     meetingTime: '08.30 WIB',
     room: 'Ruang BK Gedung A',
     parentName: student.parent_name || `Bpk/Ibu ${student.name}`,
-    parentPhone: student.parent_phone || '081234567890',
+    parentPhone: student.parent_phone || '-',
     counselor: 'Guru BK'
   }
   showSummonsModal.value = true

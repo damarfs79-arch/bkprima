@@ -41,12 +41,12 @@ class Setting extends Model
     public static function getAll(): array
     {
         $defaults = [
-            'kepala_sekolah' => 'Drs. H. Saiful Bahri, M.Pd',
-            'nip_kepala_sekolah' => '19680315 199403 1 008',
+            'kepala_sekolah' => 'Saiful Anwar, S.Pd.',
+            'nip_kepala_sekolah' => '19780707 200902 1 002',
             'semester' => 'Semester Genap 24/25',
             'tahun_ajaran' => '2024/2025',
             'school_name' => 'SMK PGRI 05 JEMBER',
-            'school_address' => 'Jl. Krakatau No. 54 Tanggul, Kab. Jember - Jawa Timur',
+            'school_address' => 'Jl. Krakatau No. 60, Kencong, Kab. Jember - Jawa Timur',
         ];
 
         try {

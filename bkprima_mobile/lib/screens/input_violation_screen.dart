@@ -162,6 +162,153 @@ class _InputViolationScreenState extends State<InputViolationScreen> {
     }
   }
 
+  Future<void> _showSuccessModalCard({
+    required String studentName,
+    required String studentClass,
+    required String violationName,
+    required int points,
+    required String penaltyAction,
+    required bool hasPhoto,
+  }) async {
+    await showDialog<void>(
+      context: context,
+      barrierDismissible: true,
+      builder: (dialogCtx) => Dialog(
+        backgroundColor: AppTheme.surface,
+        elevation: 0,
+        insetPadding: const EdgeInsets.symmetric(horizontal: 24),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(14),
+          side: const BorderSide(color: AppTheme.border, width: 1),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  color: AppTheme.successLight,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: AppTheme.successBorder, width: 1),
+                ),
+                child: const Icon(
+                  Icons.check_circle_outline_rounded,
+                  color: AppTheme.success,
+                  size: 26,
+                ),
+              ),
+              const SizedBox(height: 14),
+              const Text(
+                'Pelanggaran Berhasil Disimpan',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontFamily: AppTheme.fontFamily,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                  color: AppTheme.textPrimary,
+                ),
+              ),
+              const SizedBox(height: 6),
+              const Text(
+                'Catatan pelanggaran dan bukti telah tercatat ke dalam sistem BK.',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontFamily: AppTheme.fontFamily,
+                  fontSize: 12,
+                  color: AppTheme.textSecondary,
+                  height: 1.5,
+                ),
+              ),
+              const SizedBox(height: 16),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: AppTheme.background,
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: AppTheme.border, width: 1),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildSummaryRow('Siswa', studentClass.isNotEmpty ? '$studentName ($studentClass)' : studentName),
+                    const SizedBox(height: 6),
+                    _buildSummaryRow('Kasus', violationName),
+                    const SizedBox(height: 6),
+                    _buildSummaryRow('Poin / Tindakan', '${points > 0 ? '+$points Poin' : 'Tanpa Poin'} • $penaltyAction'),
+                    if (hasPhoto) ...[
+                      const SizedBox(height: 6),
+                      _buildSummaryRow('Lampiran', 'Foto bukti terunggah'),
+                    ],
+                  ],
+                ),
+              ),
+              const SizedBox(height: 18),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () => Navigator.of(dialogCtx).pop(),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppTheme.primary,
+                    foregroundColor: Colors.white,
+                    elevation: 0,
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  child: const Text(
+                    'Selesai',
+                    style: TextStyle(
+                      fontFamily: AppTheme.fontFamily,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSummaryRow(String label, String value) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(
+          width: 92,
+          child: Text(
+            label,
+            style: const TextStyle(
+              fontFamily: AppTheme.fontFamily,
+              fontSize: 11,
+              fontWeight: FontWeight.w500,
+              color: AppTheme.textSecondary,
+            ),
+          ),
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Text(
+            value,
+            style: const TextStyle(
+              fontFamily: AppTheme.fontFamily,
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
+              color: AppTheme.textPrimary,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
   void _submitForm() async {
     if (!_formKey.currentState!.validate()) return;
     _formKey.currentState!.save();
@@ -178,27 +325,26 @@ class _InputViolationScreenState extends State<InputViolationScreen> {
 
     final provider = context.read<ViolationProvider>();
     final points = int.tryParse(_pointsController.text.trim()) ?? 0;
+    final savedName = _studentName.trim();
+    final savedClass = _studentClass.trim();
+    final savedViolation = _violationNameController.text.trim();
+    final savedPenalty = _penaltyAction;
+    final hasPhoto = _selectedPhoto != null;
 
     final success = await provider.createViolation(
       studentId: _isManualInput ? null : _selectedStudentId,
-      studentName: _studentName.trim(),
-      studentClass: _studentClass.trim(),
+      studentName: savedName,
+      studentClass: savedClass,
       category: _category,
-      violationName: _violationNameController.text.trim(),
+      violationName: savedViolation,
       points: points,
-      penaltyAction: _penaltyAction,
+      penaltyAction: savedPenalty,
       notes: _notesController.text.trim(),
       photoFile: _selectedPhoto,
     );
 
     if (mounted) {
       if (success) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Catatan pelanggaran siswa berhasil tersimpan ke sistem BK.'),
-            backgroundColor: AppTheme.success,
-          ),
-        );
         _violationNameController.clear();
         _notesController.clear();
         setState(() {
@@ -207,6 +353,14 @@ class _InputViolationScreenState extends State<InputViolationScreen> {
           _selectedPhoto = null;
           _setPoints(5);
         });
+        await _showSuccessModalCard(
+          studentName: savedName,
+          studentClass: savedClass,
+          violationName: savedViolation,
+          points: points,
+          penaltyAction: savedPenalty,
+          hasPhoto: hasPhoto,
+        );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(

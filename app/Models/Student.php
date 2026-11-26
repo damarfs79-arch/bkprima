@@ -13,6 +13,7 @@ class Student extends Model
         'classroom_id',
         'rombel_id',
         'nis',
+        'no_absen',
         'nisn',
         'name',
         'class_name',
@@ -91,6 +92,16 @@ class Student extends Model
     public function scopeActive($query)
     {
         return $query->whereIn('status', ['aktif', 'Aktif']);
+    }
+
+    /**
+     * Scope for ordering students by attendance number, then name.
+     */
+    public function scopeOrderedByAbsen($query)
+    {
+        return $query->orderByRaw('CASE WHEN no_absen IS NULL THEN 1 ELSE 0 END ASC')
+            ->orderBy('no_absen', 'asc')
+            ->orderBy('name', 'asc');
     }
 
     /**

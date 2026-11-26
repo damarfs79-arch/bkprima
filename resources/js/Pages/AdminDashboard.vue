@@ -705,7 +705,7 @@
 
                 <div class="font-bold text-slate-900 text-sm mt-1">{{ j.name }}</div>
                 <div class="text-[11px] text-slate-400 line-clamp-1" :title="j.fullName">{{ j.fullName }}</div>
-                <div class="mt-2 text-[10px] font-bold px-2 py-0.5 rounded border" :class="j.rate >= 95 ? 'bg-emerald-50 text-emerald-800 border-emerald-200' : 'bg-amber-50 text-amber-800 border-amber-200'">
+                <div class="mt-2 text-[11px] font-semibold" :class="j.rate >= 95 ? 'text-emerald-700' : 'text-amber-700'">
                   {{ j.status }}
                 </div>
               </div>
@@ -791,7 +791,6 @@
                   <th class="py-3 px-4 text-center w-12 text-[11px] font-semibold uppercase tracking-wider text-slate-500">No</th>
                   <th class="py-3 px-4 text-[11px] font-semibold uppercase tracking-wider text-slate-500">Nama Lengkap &amp; Email</th>
                   <th class="py-3 px-4 text-[11px] font-semibold uppercase tracking-wider text-slate-500">Jabatan</th>
-                  <th class="py-3 px-4 text-[11px] font-semibold uppercase tracking-wider text-slate-500">No. WhatsApp</th>
                   <th class="py-3 px-4 text-center text-[11px] font-semibold uppercase tracking-wider text-slate-500">Status Akun</th>
                   <th class="py-3 px-4 text-center text-[11px] font-semibold uppercase tracking-wider text-slate-500">Aksi</th>
                 </tr>
@@ -804,7 +803,6 @@
                     <div class="text-xs text-slate-500 font-normal mt-0.5">{{ g.email }}</div>
                   </td>
                   <td class="py-3.5 px-4 font-semibold text-slate-800">{{ g.jabatan }}</td>
-                  <td class="py-3.5 px-4 font-mono text-slate-600">{{ g.wa || '-' }}</td>
                   <td class="py-3.5 px-4 text-center">
                     <span class="text-xs font-medium text-emerald-700">
                       Akun Aktif
@@ -1115,7 +1113,7 @@
               </thead>
               <tbody class="divide-y divide-slate-100 bg-white">
                 <tr v-for="(s, idx) in filteredSiswaList" :key="s.id" class="hover:bg-slate-50 transition">
-                  <td class="py-3.5 px-4 text-center font-medium text-slate-400">{{ idx + 1 }}</td>
+                  <td class="py-3.5 px-4 text-center font-medium text-slate-500">{{ s.noAbsen || (idx + 1) }}</td>
                   <td class="py-3.5 px-4 font-mono font-normal text-xs text-slate-500">{{ s.nisn }}</td>
                   <td class="py-3.5 px-4">
                     <span class="font-bold text-slate-900 text-xs sm:text-sm">{{ s.name }}</span>
@@ -1543,24 +1541,13 @@
               </div>
             </div>
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div>
-                <label class="block font-semibold text-slate-700 mb-1">Jabatan</label>
-                <input
-                  v-model="formGuru.jabatan"
-                  placeholder="Guru Pembimbing BK"
-                  class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-400"
-                />
-              </div>
-
-              <div>
-                <label class="block font-semibold text-slate-700 mb-1">No. WhatsApp</label>
-                <input
-                  v-model="formGuru.wa"
-                  placeholder="081234567890"
-                  class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-400"
-                />
-              </div>
+            <div>
+              <label class="block font-semibold text-slate-700 mb-1">Jabatan</label>
+              <input
+                v-model="formGuru.jabatan"
+                placeholder="Guru Pembimbing BK"
+                class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-400"
+              />
             </div>
 
             <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-200">
@@ -2031,17 +2018,23 @@
               <input v-model="formSiswa.name" required placeholder="Nama lengkap sesuai akta / Dapodik" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3.5 py-2.5 font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white" />
             </div>
 
-            <div>
-              <label class="block font-bold text-slate-700 mb-1">Rombel Kelas *</label>
-              <select v-model="formSiswa.className" required class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3.5 py-2.5 font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer">
-                <option v-for="k in kelasList" :key="k.id" :value="k.name">{{ k.name }} ({{ k.jurusan }})</option>
-              </select>
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block font-bold text-slate-700 mb-1">Rombel Kelas *</label>
+                <select v-model="formSiswa.className" required class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3.5 py-2.5 font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer">
+                  <option v-for="k in kelasList" :key="k.id" :value="k.name">{{ k.name }} ({{ k.jurusan }})</option>
+                </select>
+              </div>
+              <div>
+                <label class="block font-bold text-slate-700 mb-1">No. Absen <span class="font-normal text-slate-400">(Opsional)</span></label>
+                <input v-model.number="formSiswa.noAbsen" type="number" min="1" max="999" placeholder="Contoh: 1" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3.5 py-2.5 font-mono text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white" />
+              </div>
             </div>
 
             <div>
-              <label class="block font-bold text-slate-700 mb-1">No WhatsApp Wali Murid *</label>
-              <input v-model="formSiswa.parentWa" required placeholder="+62 8..." class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3.5 py-2.5 text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white" />
-              <p class="text-[10px] text-slate-400 mt-1">Digunakan untuk notifikasi presensi otomatis &amp; panggilan BK.</p>
+              <label class="block font-bold text-slate-700 mb-1">No WhatsApp Wali Murid <span class="font-normal text-slate-400">(Opsional)</span></label>
+              <input v-model="formSiswa.parentWa" placeholder="+62 8..." class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3.5 py-2.5 text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white" />
+              <p class="text-[10px] text-slate-400 mt-1">Digunakan untuk notifikasi presensi otomatis &amp; panggilan BK jika tersedia.</p>
             </div>
 
             <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-200">
@@ -2077,14 +2070,18 @@
           </div>
 
           <form @submit.prevent="updateSiswa" class="space-y-3.5 text-xs">
-            <div class="grid grid-cols-2 gap-3">
+            <div class="grid grid-cols-3 gap-3">
+              <div>
+                <label class="block font-bold text-slate-700 mb-1">No. Absen</label>
+                <input v-model.number="formEditSiswa.noAbsen" type="number" min="1" max="999" placeholder="1" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2.5 font-mono text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white" />
+              </div>
               <div>
                 <label class="block font-bold text-slate-700 mb-1">NISN Siswa *</label>
-                <input v-model="formEditSiswa.nisn" required placeholder="00729..." class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3.5 py-2.5 font-mono text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white" />
+                <input v-model="formEditSiswa.nisn" required placeholder="00729..." class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2.5 font-mono text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white" />
               </div>
               <div>
                 <label class="block font-bold text-slate-700 mb-1">Jenis Kelamin *</label>
-                <select v-model="formEditSiswa.gender" required class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3.5 py-2.5 font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer">
+                <select v-model="formEditSiswa.gender" required class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2.5 font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer">
                   <option value="L">Laki-laki (L)</option>
                   <option value="P">Perempuan (P)</option>
                 </select>
@@ -2110,9 +2107,9 @@
             </div>
 
             <div>
-              <label class="block font-bold text-slate-700 mb-1">No WhatsApp Wali Murid *</label>
-              <input v-model="formEditSiswa.parentWa" required placeholder="+62 8..." class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3.5 py-2.5 text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white" />
-              <p class="text-[10px] text-slate-400 mt-1">Digunakan untuk notifikasi presensi otomatis &amp; panggilan BK.</p>
+              <label class="block font-bold text-slate-700 mb-1">No WhatsApp Wali Murid <span class="font-normal text-slate-400">(Opsional)</span></label>
+              <input v-model="formEditSiswa.parentWa" placeholder="+62 8..." class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3.5 py-2.5 text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white" />
+              <p class="text-[10px] text-slate-400 mt-1">Digunakan untuk notifikasi presensi otomatis &amp; panggilan BK jika tersedia.</p>
             </div>
 
             <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-200">
@@ -2192,24 +2189,13 @@
               </div>
             </div>
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div>
-                <label class="block font-semibold text-slate-700 mb-1">Jabatan</label>
-                <input
-                  v-model="formEditGuru.jabatan"
-                  placeholder="Guru Pembimbing BK"
-                  class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-400"
-                />
-              </div>
-
-              <div>
-                <label class="block font-semibold text-slate-700 mb-1">No. WhatsApp</label>
-                <input
-                  v-model="formEditGuru.wa"
-                  placeholder="081234567890"
-                  class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-400"
-                />
-              </div>
+            <div>
+              <label class="block font-semibold text-slate-700 mb-1">Jabatan</label>
+              <input
+                v-model="formEditGuru.jabatan"
+                placeholder="Guru Pembimbing BK"
+                class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-400"
+              />
             </div>
 
             <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-200">
@@ -2405,7 +2391,7 @@
           <div class="bg-slate-50 p-4 rounded-lg border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
             <div>
               <span class="font-bold text-slate-800 block">Panduan Format Kolom:</span>
-              <span class="text-slate-500 text-[11px]">Format file harus memiliki kolom: <strong class="text-slate-700">NISN, Nama, Kelas, JK (L/P), No WA Wali</strong></span>
+              <span class="text-slate-500 text-[11px]">Unggah file Excel/CSV/Dapodik apa saja; backend otomatis menyaring hanya kolom tabel (<strong class="text-slate-700">No. Absen, NISN, Nama, Kelas, JK, No WA Wali</strong>).</span>
             </div>
             <div class="flex items-center gap-2 shrink-0">
               <button
@@ -2534,7 +2520,7 @@
                 </thead>
                 <tbody class="divide-y divide-slate-100 bg-white">
                   <tr v-for="(st, sIdx) in importedStudents" :key="sIdx" class="hover:bg-slate-50">
-                    <td class="py-1.5 px-3 text-center text-slate-400 font-mono">{{ sIdx + 1 }}</td>
+                    <td class="py-1.5 px-3 text-center text-slate-500 font-mono">{{ st.noAbsen || (sIdx + 1) }}</td>
                     <td class="py-1.5 px-3 font-mono font-medium text-slate-700">{{ st.nisn }}</td>
                     <td class="py-1.5 px-3 font-bold text-slate-900">{{ st.name }}</td>
                     <td class="py-1.5 px-3">
@@ -2804,12 +2790,12 @@ const tabs = computed(() => [
 // PENGATURAN SEKOLAH & SEMESTER
 // ==========================================
 const formSettings = ref({
-  kepala_sekolah: props.settings?.kepala_sekolah || 'Drs. H. Saiful Bahri, M.Pd',
-  nip_kepala_sekolah: props.settings?.nip_kepala_sekolah || '19680315 199403 1 008',
+  kepala_sekolah: props.settings?.kepala_sekolah || 'Saiful Anwar, S.Pd.',
+  nip_kepala_sekolah: props.settings?.nip_kepala_sekolah || '19780707 200902 1 002',
   semester: props.settings?.semester || 'Semester Genap 24/25',
   tahun_ajaran: props.settings?.tahun_ajaran || '2024/2025',
   school_name: props.settings?.school_name || 'SMK PGRI 05 JEMBER',
-  school_address: props.settings?.school_address || 'Jl. Krakatau No. 54 Tanggul, Kab. Jember - Jawa Timur',
+  school_address: props.settings?.school_address || 'Jl. Krakatau No. 60, Kencong, Kab. Jember - Jawa Timur',
 })
 
 const isSavingSettings = ref(false)
@@ -3264,7 +3250,6 @@ const formGuru = ref({
   email: '',
   password: '',
   jabatan: '',
-  wa: '',
   rombelText: ''
 })
 
@@ -3283,7 +3268,6 @@ const saveGuru = () => {
     email: cleanEmail,
     password: formGuru.value.password || '123456',
     jabatan: formGuru.value.jabatan && formGuru.value.jabatan.trim() ? formGuru.value.jabatan.trim() : 'Guru BK',
-    wa: formGuru.value.wa && formGuru.value.wa.trim() ? formGuru.value.wa.trim() : '-',
     rombelText: formGuru.value.rombelText && formGuru.value.rombelText.trim() ? formGuru.value.rombelText.trim() : '-'
   }, {
     preserveScroll: true,
@@ -3297,7 +3281,6 @@ const saveGuru = () => {
         email: '',
         password: '',
         jabatan: '',
-        wa: '',
         rombelText: ''
       }
       showGuruPassword.value = false
@@ -3315,7 +3298,6 @@ const formEditGuru = ref({
   email: '',
   password: '',
   jabatan: '',
-  wa: '',
   rombelText: ''
 })
 
@@ -3329,7 +3311,6 @@ const editGuru = (g) => {
     email: g.email || '',
     password: '',
     jabatan: g.jabatan || 'Guru BK',
-    wa: g.wa === '-' ? '' : (g.wa || ''),
     rombelText: Array.isArray(g.rombel) ? g.rombel.join(', ') : (g.rombel || '')
   }
   showEditGuruPassword.value = false
@@ -3349,7 +3330,6 @@ const updateGuru = () => {
     email: cleanEmail,
     password: formEditGuru.value.password || undefined,
     jabatan: formEditGuru.value.jabatan && formEditGuru.value.jabatan.trim() ? formEditGuru.value.jabatan.trim() : 'Guru BK',
-    wa: formEditGuru.value.wa && formEditGuru.value.wa.trim() ? formEditGuru.value.wa.trim() : '-',
     rombelText: formEditGuru.value.rombelText && formEditGuru.value.rombelText.trim() ? formEditGuru.value.rombelText.trim() : '-'
   }, {
     preserveScroll: true,
@@ -4032,6 +4012,7 @@ const filteredSiswaList = computed(() => {
 })
 
 const formSiswa = ref({
+  noAbsen: '',
   nisn: '',
   name: '',
   className: 'X RPL 1',
@@ -4063,6 +4044,7 @@ const saveSiswa = () => {
 
 const formEditSiswa = ref({
   id: null,
+  noAbsen: '',
   nisn: '',
   name: '',
   className: '',
@@ -4077,11 +4059,12 @@ const editSiswa = (s) => {
   editingSiswa.value = s
   formEditSiswa.value = {
     id: s.id,
+    noAbsen: s.noAbsen || '',
     nisn: s.nisn,
     name: s.name,
     className: s.className,
     gender: s.gender,
-    parentWa: s.parentWa,
+    parentWa: s.parentWa && s.parentWa !== '-' ? s.parentWa : '',
     poin: s.poin || 0
   }
   modalType.value = 'edit-siswa'
@@ -4153,14 +4136,16 @@ const isUploadingFile = ref(false)
 const uploadError = ref('')
 
 const downloadCsvTemplate = () => {
-  const sampleClass = selectedFilterKelas.value !== 'Semua' ? selectedFilterKelas.value : 'XI TKKR 2'
-  const csvContent = 'NISN,NAMA_LENGKAP,KELAS,JENIS_KELAMIN,NO_WA_WALI\n' +
-    `00729188,Muhammad Bagas Saputra,${sampleClass},L,+62 812-3344-5566\n` +
-    `00729189,Nabila Putri Ayu,${sampleClass},P,+62 813-7788-9900\n` +
-    `00729190,Rendy Wahyu Pratama,${sampleClass},L,+62 856-1122-3344\n` +
-    `00729191,Salsabila Dewi Lestari,${sampleClass},P,+62 878-4455-6677\n` +
-    `00729192,Yoga Dwi Kurniawan,${sampleClass},L,+62 821-9900-1122\n` +
-    `00729193,Zaskia Gotik Maharani,${sampleClass},P,+62 852-3344-7788`
+  const sampleClass = selectedFilterKelas.value !== 'Semua'
+    ? selectedFilterKelas.value
+    : (kelasList.value[0]?.name || 'X RPL 1')
+  const csvContent = 'NO_ABSEN,NISN,NAMA_LENGKAP,KELAS,JENIS_KELAMIN,NO_WA_WALI\n' +
+    `1,00729188,Muhammad Bagas Saputra,${sampleClass},L,+62 812-3344-5566\n` +
+    `2,00729189,Nabila Putri Ayu,${sampleClass},P,+62 813-7788-9900\n` +
+    `3,00729190,Rendy Wahyu Pratama,${sampleClass},L,+62 856-1122-3344\n` +
+    `4,00729191,Salsabila Dewi Lestari,${sampleClass},P,+62 878-4455-6677\n` +
+    `5,00729192,Yoga Dwi Kurniawan,${sampleClass},L,+62 821-9900-1122\n` +
+    `6,00729193,Zaskia Maharani,${sampleClass},P,+62 852-3344-7788`
   
   const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
   const url = URL.createObjectURL(blob)
@@ -4170,28 +4155,31 @@ const downloadCsvTemplate = () => {
   document.body.appendChild(link)
   link.click()
   document.body.removeChild(link)
+  URL.revokeObjectURL(url)
 }
 
 const loadSampleDapodikData = () => {
-  const target = selectedFilterKelas.value !== 'Semua' ? selectedFilterKelas.value : 'XI TKKR 2'
+  const target = selectedFilterKelas.value !== 'Semua'
+    ? selectedFilterKelas.value
+    : (kelasList.value[0]?.name || 'X RPL 1')
   importFileName.value = `Data_Siswa_Dapodik_${target.replace(/\s+/g, '_')}.csv`
-  importTargetClass.value = target
+  importTargetClass.value = selectedFilterKelas.value !== 'Semua' ? selectedFilterKelas.value : 'AUTO'
   importedStudents.value = [
-    { nisn: '00829101', name: 'Alifia Zahra Ramadhani', className: target, gender: 'P', parentWa: '+62 812-3401-1001' },
-    { nisn: '00829102', name: 'Bayu Aditya Pratama', className: target, gender: 'L', parentWa: '+62 813-3401-1002' },
-    { nisn: '00829103', name: 'Cahyo Wibowo', className: target, gender: 'L', parentWa: '+62 856-3401-1003' },
-    { nisn: '00829104', name: 'Dwi Lestari Handayani', className: target, gender: 'P', parentWa: '+62 878-3401-1004' },
-    { nisn: '00829105', name: 'Eko Prasetyo Nugroho', className: target, gender: 'L', parentWa: '+62 821-3401-1005' },
-    { nisn: '00829106', name: 'Fani Oktaviana', className: target, gender: 'P', parentWa: '+62 852-3401-1006' },
-    { nisn: '00829107', name: 'Guruh Arya Perkasa', className: target, gender: 'L', parentWa: '+62 812-3401-1007' },
-    { nisn: '00829108', name: 'Hendri Kurniawan', className: target, gender: 'L', parentWa: '+62 813-3401-1008' },
-    { nisn: '00829109', name: 'Indah Permata Sari', className: target, gender: 'P', parentWa: '+62 856-3401-1009' },
-    { nisn: '00829110', name: 'Jovan Ardiansyah', className: target, gender: 'L', parentWa: '+62 878-3401-1010' },
-    { nisn: '00829111', name: 'Kania Putri Jelita', className: target, gender: 'P', parentWa: '+62 821-3401-1011' },
-    { nisn: '00829112', name: 'Lukman Hakim', className: target, gender: 'L', parentWa: '+62 852-3401-1012' },
-    { nisn: '00829113', name: 'Muhammad Faizal Akbar', className: target, gender: 'L', parentWa: '+62 812-3401-1013' },
-    { nisn: '00829114', name: 'Nadia Safitri', className: target, gender: 'P', parentWa: '+62 813-3401-1014' },
-    { nisn: '00829115', name: 'Oky Firmansyah', className: target, gender: 'L', parentWa: '+62 856-3401-1015' }
+    { noAbsen: 1, nisn: '00829101', name: 'Alifia Zahra Ramadhani', className: target, gender: 'P', parentWa: '+62 812-3401-1001' },
+    { noAbsen: 2, nisn: '00829102', name: 'Bayu Aditya Pratama', className: target, gender: 'L', parentWa: '+62 813-3401-1002' },
+    { noAbsen: 3, nisn: '00829103', name: 'Cahyo Wibowo', className: target, gender: 'L', parentWa: '+62 856-3401-1003' },
+    { noAbsen: 4, nisn: '00829104', name: 'Dwi Lestari Handayani', className: target, gender: 'P', parentWa: '+62 878-3401-1004' },
+    { noAbsen: 5, nisn: '00829105', name: 'Eko Prasetyo Nugroho', className: target, gender: 'L', parentWa: '+62 821-3401-1005' },
+    { noAbsen: 6, nisn: '00829106', name: 'Fani Oktaviana', className: target, gender: 'P', parentWa: '+62 852-3401-1006' },
+    { noAbsen: 7, nisn: '00829107', name: 'Guruh Arya Perkasa', className: target, gender: 'L', parentWa: '+62 812-3401-1007' },
+    { noAbsen: 8, nisn: '00829108', name: 'Hendri Kurniawan', className: target, gender: 'L', parentWa: '+62 813-3401-1008' },
+    { noAbsen: 9, nisn: '00829109', name: 'Indah Permata Sari', className: target, gender: 'P', parentWa: '+62 856-3401-1009' },
+    { noAbsen: 10, nisn: '00829110', name: 'Jovan Ardiansyah', className: target, gender: 'L', parentWa: '+62 878-3401-1010' },
+    { noAbsen: 11, nisn: '00829111', name: 'Kania Putri Jelita', className: target, gender: 'P', parentWa: '+62 821-3401-1011' },
+    { noAbsen: 12, nisn: '00829112', name: 'Lukman Hakim', className: target, gender: 'L', parentWa: '+62 852-3401-1012' },
+    { noAbsen: 13, nisn: '00829113', name: 'Muhammad Faizal Akbar', className: target, gender: 'L', parentWa: '+62 812-3401-1013' },
+    { noAbsen: 14, nisn: '00829114', name: 'Nadia Safitri', className: target, gender: 'P', parentWa: '+62 813-3401-1014' },
+    { noAbsen: 15, nisn: '00829115', name: 'Oky Firmansyah', className: target, gender: 'L', parentWa: '+62 856-3401-1015' }
   ]
 }
 
@@ -4224,11 +4212,12 @@ const parseCsvText = (text) => {
   }
 
   const headerRow = splitRow(lines[0])
-  const colMap = { nisn: -1, name: -1, className: -1, gender: -1, parentWa: -1 }
+  const colMap = { noAbsen: -1, nisn: -1, name: -1, className: -1, gender: -1, parentWa: -1 }
 
   headerRow.forEach((col, idx) => {
     const c = col.toLowerCase().replace(/[^a-z0-9]/g, '')
-    if (['nisn', 'nis', 'noinduk'].includes(c)) colMap.nisn = idx
+    if (['no', 'noabsen', 'nomorabsen', 'nourut', 'nomorurut', 'absen', 'urut'].includes(c)) colMap.noAbsen = idx
+    else if (['nisn', 'nis', 'noinduk', 'nisnisn'].includes(c)) colMap.nisn = idx
     else if (['nama', 'namasiswa', 'namalengkap', 'namapesertadidik', 'studentname'].includes(c)) colMap.name = idx
     else if (['kelas', 'rombel', 'namarombel', 'tingkat', 'classname'].includes(c)) colMap.className = idx
     else if (['jk', 'jeniskelamin', 'lp', 'gender', 'sex'].includes(c)) colMap.gender = idx
@@ -4246,6 +4235,7 @@ const parseCsvText = (text) => {
     colMap.parentWa = 4
   }
 
+  const perClassCounter = {}
   const results = []
   for (let i = startIndex; i < lines.length; i++) {
     const cols = splitRow(lines[i])
@@ -4254,21 +4244,25 @@ const parseCsvText = (text) => {
     const name = (colMap.name !== -1 && cols[colMap.name]) ? cols[colMap.name] : (cols[1] || '')
     if (!name || /^(mengetahui|kepala|wali|total|jumlah)/i.test(name)) continue
 
-    const rawNisn = (colMap.nisn !== -1 && cols[colMap.nisn]) ? cols[colMap.nisn] : (cols[0] || '')
+    const rawNisn = (colMap.nisn !== -1 && cols[colMap.nisn]) ? cols[colMap.nisn] : (!hasRecognizedHeader ? (cols[0] || '') : '')
     const nisn = rawNisn.replace(/[^a-zA-Z0-9]/g, '') || `00829${1000 + i}`
     const rawClass = (colMap.className !== -1 && cols[colMap.className]) ? cols[colMap.className] : (cols[2] || '')
     const className = rawClass.trim().toUpperCase() || (selectedFilterKelas.value !== 'Semua' ? selectedFilterKelas.value : 'X RPL 1')
+    perClassCounter[className] = (perClassCounter[className] || 0) + 1
+    const rawNo = (colMap.noAbsen !== -1 && cols[colMap.noAbsen]) ? parseInt(String(cols[colMap.noAbsen]).replace(/[^0-9]/g, ''), 10) : NaN
+    const noAbsen = (!isNaN(rawNo) && rawNo > 0) ? rawNo : perClassCounter[className]
     const rawGender = (colMap.gender !== -1 && cols[colMap.gender]) ? cols[colMap.gender].toUpperCase() : (cols[3]?.toUpperCase() || 'L')
     const gender = (rawGender.startsWith('P') || rawGender.includes('WANITA') || rawGender.includes('PEREMPUAN')) ? 'P' : 'L'
     const parentWa = (colMap.parentWa !== -1 && cols[colMap.parentWa]) ? cols[colMap.parentWa] : (cols[4] || '')
 
     results.push({
+      noAbsen,
       nis: nisn,
       nisn,
       name,
       className,
       gender,
-      parentWa: parentWa || '+62 812-3344-5566'
+      parentWa: parentWa || '-'
     })
   }
 
@@ -4293,40 +4287,7 @@ const processFile = async (file) => {
   uploadError.value = ''
   isUploadingFile.value = true
 
-  const ext = file.name.split('.').pop().toLowerCase()
-
-  // Untuk file CSV atau TXT, baca langsung melalui browser secara instan
-  if (['csv', 'txt'].includes(ext)) {
-    const reader = new FileReader()
-    reader.onload = (e) => {
-      try {
-        const text = e.target.result
-        const parsed = parseCsvText(text)
-        if (parsed.length > 0) {
-          importedStudents.value = parsed
-          if (importTargetClass.value === 'AUTO' && parsed[0]?.className) {
-            importTargetClass.value = parsed[0].className
-          }
-          showToast(`Berhasil membaca ${parsed.length} data siswa dari file ${file.name}.`)
-        } else {
-          uploadError.value = 'Tidak ada baris data siswa yang terbaca dari file CSV/TXT ini.'
-        }
-      } catch (err) {
-        console.error(err)
-        uploadError.value = 'Gagal memproses struktur file CSV.'
-      } finally {
-        isUploadingFile.value = false
-      }
-    }
-    reader.onerror = () => {
-      uploadError.value = 'Gagal membaca file dari penyimpanan lokal.'
-      isUploadingFile.value = false
-    }
-    reader.readAsText(file)
-    return
-  }
-
-  // Untuk Excel (.xlsx, .xls), proses melalui server preview
+  // Proses seluruh file (.xlsx, .csv, .txt) melalui filter backend agar kolom & baris non-siswa otomatis tersaring
   try {
     const formData = new FormData()
     formData.append('file', file)
@@ -4349,10 +4310,7 @@ const processFile = async (file) => {
     if (response.ok && data.success) {
       if (data.students && data.students.length > 0) {
         importedStudents.value = data.students
-        if (data.detectedClass && importTargetClass.value === 'AUTO') {
-          importTargetClass.value = data.detectedClass
-        }
-        showToast(`Berhasil membaca ${data.students.length} data siswa dari file.`)
+        showToast(`Berhasil memfilter ${data.students.length} data siswa dari file.`)
       } else {
         uploadError.value = 'Tidak ada baris siswa yang terdeteksi di dalam file spreadsheet.'
       }
@@ -4361,7 +4319,21 @@ const processFile = async (file) => {
     }
   } catch (err) {
     console.error('Import preview error:', err)
-    uploadError.value = 'Terjadi kesalahan saat memproses file di server.'
+    const ext = file.name.split('.').pop().toLowerCase()
+    if (['csv', 'txt'].includes(ext)) {
+      const reader = new FileReader()
+      reader.onload = (e) => {
+        const parsed = parseCsvText(e.target.result || '')
+        if (parsed.length > 0) {
+          importedStudents.value = parsed
+        } else {
+          uploadError.value = 'Terjadi kesalahan saat memproses file di server.'
+        }
+      }
+      reader.readAsText(file)
+    } else {
+      uploadError.value = 'Terjadi kesalahan saat memproses file di server.'
+    }
   } finally {
     isUploadingFile.value = false
   }
@@ -4377,6 +4349,7 @@ const processImport = () => {
   if (importedStudents.value.length === 0 || isSubmittingImport.value) return
   
   const payload = importedStudents.value.map(st => ({
+    noAbsen: st.noAbsen || null,
     nisn: st.nisn,
     name: st.name,
     className: importTargetClass.value === 'AUTO' ? st.className : importTargetClass.value,
@@ -4415,7 +4388,7 @@ const processImport = () => {
 const openModal = (type) => {
   modalType.value = type
   if (type === 'guru') {
-    formGuru.value = { name: '', nip: '', nuptk: '', jabatan: '', email: '', wa: '', rombelText: '' }
+    formGuru.value = { name: '', nip: '', nuptk: '', jabatan: '', email: '', rombelText: '' }
   } else if (type === 'kelas') {
     const defaultJur = jurusanList.value[0]
     formKelas.value = {
@@ -4433,6 +4406,7 @@ const openModal = (type) => {
     errorMessageJurusan.value = ''
   } else if (type === 'siswa') {
     formSiswa.value = {
+      noAbsen: '',
       nisn: '',
       name: '',
       className: (selectedFilterKelas.value !== 'Semua' ? selectedFilterKelas.value : (kelasList.value[0]?.name || 'X RPL 1')),

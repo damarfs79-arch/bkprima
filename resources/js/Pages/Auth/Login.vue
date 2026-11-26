@@ -145,7 +145,7 @@
     <!-- Modal: Bantuan Lupa Sandi -->
     <div
       v-if="openForgotModal"
-      class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs"
+      class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50"
       @click.self="openForgotModal = false"
     >
       <div class="bg-white rounded-xl max-w-sm w-full p-5 sm:p-6 shadow-xl border border-slate-200 text-left">

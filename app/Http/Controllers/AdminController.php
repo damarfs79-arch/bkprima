@@ -19,7 +19,7 @@ class AdminController extends Controller
     public function index()
     {
         $stats = [
-            'totalStudents' => Student::count(),
+            'totalStudents' => Student::active()->count(),
             'totalViolations' => Violation::count(),
             'activeUsers' => User::count(),
             'systemHealth' => '100%',
@@ -47,7 +47,7 @@ class AdminController extends Controller
             });
 
         // 2. Ambil data Kelas / Rombel dari database
-        $kelasList = Classroom::with(['guruBk', 'jurusan'])->withCount('students')->orderBy('name')->get()->map(function ($c) {
+        $kelasList = Classroom::with(['guruBk', 'jurusan'])->withCount(['students' => fn ($q) => $q->active()])->orderBy('name')->get()->map(function ($c) {
             $guruName = '-';
             if ($c->guruBk && $c->guruBk->role === 'guru') {
                 $guruName = $c->guruBk->name;
@@ -69,10 +69,11 @@ class AdminController extends Controller
             ];
         });
 
-        // 3. Ambil data Siswa dari database
-        $siswaList = Student::orderBy('class_name')->orderBy('name')->get()->map(function ($s) {
+        // 3. Ambil data Siswa Aktif dari database (tidak termasuk alumni lulus)
+        $siswaList = Student::active()->orderBy('class_name')->orderedByAbsen()->get()->map(function ($s) {
             return [
                 'id' => $s->id,
+                'noAbsen' => $s->no_absen,
                 'nis' => $s->nis,
                 'nisn' => $s->nis,
                 'name' => $s->name,
@@ -244,7 +245,7 @@ class AdminController extends Controller
         $request->merge([
             'email' => $rawEmail,
             'jabatan' => !empty(trim((string)$request->input('jabatan', ''))) ? trim($request->input('jabatan')) : ($user->jabatan ?: 'Guru BK'),
-            'wa' => !empty(trim((string)$request->input('wa', ''))) ? trim($request->input('wa')) : '-',
+            'wa' => $request->has('wa') ? (!empty(trim((string)$request->input('wa', ''))) ? trim($request->input('wa')) : '-') : ($user->phone ?: '-'),
             'rombelText' => !empty(trim((string)$request->input('rombelText', ''))) ? trim($request->input('rombelText')) : '-',
         ]);
 
@@ -407,7 +408,7 @@ class AdminController extends Controller
                     'waliKelas' => $classroom->wali_kelas,
                     'guruBK' => $classroom->guru_bk_name,
                     'guruBkId' => $classroom->guru_bk_id,
-                    'studentCount' => Student::where('class_name', $classroom->name)->count(),
+                    'studentCount' => Student::active()->where('class_name', $classroom->name)->count(),
                 ]
             ]);
         }
@@ -520,7 +521,9 @@ class AdminController extends Controller
         $name = $classroom->name;
 
         // Proteksi jika masih ada siswa yang terdaftar di kelas ini
-        $studentCount = Student::where('classroom_id', $classroom->id)->orWhere('class_name', $name)->count();
+        $studentCount = Student::active()->where(function ($q) use ($classroom, $name) {
+            $q->where('classroom_id', $classroom->id)->orWhere('class_name', $name);
+        })->count();
         if ($studentCount > 0) {
             return redirect()->back()->with('error', "Rombel Kelas {$name} tidak dapat dihapus karena masih digunakan oleh {$studentCount} siswa aktif. Hapus atau pindahkan data siswa terlebih dahulu.");
         }
@@ -551,6 +554,7 @@ class AdminController extends Controller
             'className' => 'required|string|max:100',
             'gender' => 'required|in:L,P',
             'parentWa' => 'nullable|string|max:50',
+            'noAbsen' => 'nullable|integer|min:1|max:999',
         ], [
             'nis.required' => 'NISN wajib diisi.',
             'nis.unique' => 'NISN sudah terdaftar.',
@@ -592,6 +596,7 @@ class AdminController extends Controller
         $student = Student::create([
             'classroom_id' => $cls->id,
             'nis' => $rawNis,
+            'no_absen' => $request->filled('noAbsen') ? (int)$request->input('noAbsen') : ($request->filled('no_absen') ? (int)$request->input('no_absen') : null),
             'name' => trim($request->input('name')),
             'class_name' => $className,
             'level' => $level,
@@ -625,6 +630,7 @@ class AdminController extends Controller
             'gender' => 'required|in:L,P',
             'parentWa' => 'nullable|string|max:50',
             'poin' => 'nullable|integer|min:0',
+            'noAbsen' => 'nullable|integer|min:1|max:999',
         ], [
             'nis.required' => 'NISN wajib diisi.',
             'nis.unique' => 'NISN sudah digunakan oleh siswa lain.',
@@ -663,9 +669,14 @@ class AdminController extends Controller
         $rombelParts = explode(' ', trim($className));
         $rombel = end($rombelParts);
 
+        $noAbsen = ($request->has('noAbsen') || $request->has('no_absen'))
+            ? ($request->filled('noAbsen') ? (int)$request->input('noAbsen') : ($request->filled('no_absen') ? (int)$request->input('no_absen') : null))
+            : $student->no_absen;
+
         $student->update([
             'classroom_id' => $cls->id,
             'nis' => $rawNis,
+            'no_absen' => $noAbsen,
             'name' => trim($request->input('name')),
             'class_name' => $className,
             'level' => $level,
@@ -703,20 +714,16 @@ class AdminController extends Controller
 
         $file = $request->file('file');
         $ext = strtolower($file->getClientOriginalExtension());
-        $rows = [];
 
-        if (in_array($ext, ['xlsx', 'xls'])) {
-            if (class_exists('\ZipArchive')) {
-                $rows = $this->parseXlsxFile($file->getRealPath());
-            } else {
-                $rows = $this->parseCsvFile($file->getRealPath());
-            }
-        } else {
-            $rows = $this->parseCsvFile($file->getRealPath());
+        if ($ext === 'xls') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Format .XLS lama tidak didukung. Silakan simpan ulang file sebagai .XLSX atau .CSV.',
+            ], 422);
         }
 
         $overrideClass = $request->input('targetClass');
-        $parsed = $this->mapRowsToStudents($rows, $overrideClass);
+        $parsed = $this->extractStudentsFromUploadedFile($file, $overrideClass);
 
         return response()->json([
             'success' => true,
@@ -734,10 +741,7 @@ class AdminController extends Controller
 
         // Jika upload file langsung tanpa preview
         if ($request->hasFile('file')) {
-            $file = $request->file('file');
-            $ext = strtolower($file->getClientOriginalExtension());
-            $rows = in_array($ext, ['xlsx']) ? $this->parseXlsxFile($file->getRealPath()) : $this->parseCsvFile($file->getRealPath());
-            $parsed = $this->mapRowsToStudents($rows, $targetClass);
+            $parsed = $this->extractStudentsFromUploadedFile($request->file('file'), $targetClass);
             $studentsData = $parsed['students'];
         }
 
@@ -749,19 +753,21 @@ class AdminController extends Controller
         }
 
         $importedCount = 0;
-        $availableMajors = Major::orderByRaw('LENGTH(code) DESC')->pluck('code')->toArray();
+        $perClassCounter = [];
+        $majorsByCode = Major::orderByRaw('LENGTH(code) DESC')->get()->keyBy('code');
+        $availableMajors = $majorsByCode->keys()->toArray();
 
         foreach ($studentsData as $item) {
             if (empty($item['name'])) {
                 continue;
             }
 
-            $nis = !empty($item['nis']) ? trim((string)$item['nis']) : (!empty($item['nisn']) ? trim((string)$item['nisn']) : 'NIS' . rand(10000000, 99999999));
-            
+            $nis = !empty($item['nis']) ? trim((string)$item['nis']) : (!empty($item['nisn']) ? trim((string)$item['nisn']) : '008' . rand(1000000, 9999999));
+
             $className = ($targetClass !== 'AUTO' && !empty($targetClass))
                 ? strtoupper(trim($targetClass))
                 : (!empty($item['className']) ? strtoupper(trim($item['className'])) : 'X RPL 1');
-            
+
             // Ekstrak level & jurusan dari nama kelas
             $levelNum = '10';
             $roman = 'X';
@@ -776,13 +782,14 @@ class AdminController extends Controller
                 $roman = 'X';
             }
 
-            $major = 'RPL';
+            $major = $availableMajors[0] ?? 'UMUM';
             foreach ($availableMajors as $mCode) {
-                if (str_contains($className, $mCode)) {
+                if (str_contains($className, strtoupper($mCode))) {
                     $major = $mCode;
                     break;
                 }
             }
+            $majorModel = $majorsByCode->get($major);
 
             // Pastikan Classroom ada di database
             $cls = Classroom::firstOrCreate(
@@ -790,6 +797,7 @@ class AdminController extends Controller
                 [
                     'level' => "Kelas {$levelNum} ({$roman})",
                     'major' => $major,
+                    'jurusan_id' => $majorModel?->id,
                     'wali_kelas' => 'Wali Kelas ' . $className,
                 ]
             );
@@ -799,13 +807,17 @@ class AdminController extends Controller
             $rombelParts = explode(' ', trim($className));
             $rombel = end($rombelParts);
 
+            $perClassCounter[$className] = ($perClassCounter[$className] ?? 0) + 1;
+            $rawNoAbsen = $item['noAbsen'] ?? ($item['no_absen'] ?? null);
+            $noAbsen = (is_numeric($rawNoAbsen) && (int)$rawNoAbsen > 0) ? (int)$rawNoAbsen : $perClassCounter[$className];
+
             $student = Student::updateOrCreate(
                 ['nis' => $nis],
                 [
                     'classroom_id' => $cls->id,
+                    'no_absen' => $noAbsen,
                     'name' => trim($item['name']),
                     'class_name' => $className,
-                    'classroom_id' => $classroom->id,
                     'level' => $levelNum,
                     'major' => $major,
                     'gender' => in_array(strtoupper($item['gender'] ?? 'L'), ['L', 'P']) ? strtoupper($item['gender']) : 'L',
@@ -836,9 +848,48 @@ class AdminController extends Controller
         return redirect()->back()->with('success', "Berhasil mengimpor {$importedCount} data siswa ke database BK Prima.");
     }
 
-    private function parseXlsxFile(string $filePath): array
+    private function extractStudentsFromUploadedFile(\Illuminate\Http\UploadedFile $file, ?string $overrideClass = null): array
     {
-        $rows = [];
+        $ext = strtolower($file->getClientOriginalExtension());
+        $sheets = [];
+
+        if ($ext === 'xlsx' && class_exists('\ZipArchive')) {
+            $sheets = $this->parseXlsxSheets($file->getRealPath());
+        } else {
+            $sheets = [[
+                'sheetName' => pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME),
+                'rows' => $this->parseCsvFile($file->getRealPath()),
+            ]];
+        }
+
+        $allStudents = [];
+        $detectedClass = '';
+
+        foreach ($sheets as $sheet) {
+            $parsed = $this->mapRowsToStudents(
+                $sheet['rows'] ?? [],
+                $overrideClass,
+                $sheet['sheetName'] ?? null,
+                count($allStudents)
+            );
+            if (!empty($parsed['students'])) {
+                if (empty($detectedClass) && !empty($parsed['detectedClass'])) {
+                    $detectedClass = $parsed['detectedClass'];
+                }
+                foreach ($parsed['students'] as $st) {
+                    $allStudents[] = $st;
+                }
+            }
+        }
+
+        return [
+            'detectedClass' => $detectedClass,
+            'students' => $allStudents,
+        ];
+    }
+
+    private function parseXlsxSheets(string $filePath): array
+    {
         $zip = new \ZipArchive();
         if ($zip->open($filePath) !== true) {
             return [];
@@ -865,71 +916,119 @@ class AdminController extends Controller
             }
         }
 
-        $sheetPath = 'xl/worksheets/sheet1.xml';
-        if ($zip->locateName($sheetPath) === false) {
+        $sheetEntries = [];
+        $relTargets = [];
+
+        $relsXmlContent = $zip->getFromName('xl/_rels/workbook.xml.rels');
+        if ($relsXmlContent !== false) {
+            $relsXml = @simplexml_load_string($relsXmlContent);
+            if ($relsXml) {
+                foreach ($relsXml->Relationship as $rel) {
+                    $id = (string)($rel['Id'] ?? '');
+                    $target = ltrim((string)($rel['Target'] ?? ''), '/');
+                    if ($id !== '' && $target !== '') {
+                        if (!str_starts_with($target, 'xl/')) {
+                            $target = 'xl/' . $target;
+                        }
+                        $relTargets[$id] = $target;
+                    }
+                }
+            }
+        }
+
+        $workbookXmlContent = $zip->getFromName('xl/workbook.xml');
+        if ($workbookXmlContent !== false) {
+            $wbXml = @simplexml_load_string($workbookXmlContent);
+            if ($wbXml && isset($wbXml->sheets->sheet)) {
+                foreach ($wbXml->sheets->sheet as $sheetNode) {
+                    $sheetName = (string)($sheetNode['name'] ?? '');
+                    $rAttrs = $sheetNode->attributes('http://schemas.openxmlformats.org/officeDocument/2006/relationships');
+                    $rId = (string)($rAttrs['id'] ?? '');
+                    $path = $relTargets[$rId] ?? '';
+                    if ($path !== '' && $zip->locateName($path) !== false) {
+                        $sheetEntries[] = ['name' => $sheetName, 'path' => $path];
+                    }
+                }
+            }
+        }
+
+        if (empty($sheetEntries)) {
+            $fallbackPaths = [];
             for ($i = 0; $i < $zip->numFiles; $i++) {
                 $name = $zip->getNameIndex($i);
                 if (preg_match('#^xl/worksheets/sheet\d+\.xml$#i', $name)) {
-                    $sheetPath = $name;
-                    break;
+                    $fallbackPaths[] = $name;
                 }
+            }
+            natsort($fallbackPaths);
+            foreach ($fallbackPaths as $path) {
+                $sheetEntries[] = ['name' => pathinfo($path, PATHINFO_FILENAME), 'path' => $path];
             }
         }
 
-        $sheetXmlContent = $zip->getFromName($sheetPath);
-        $zip->close();
+        $sheets = [];
+        foreach ($sheetEntries as $entry) {
+            $sheetXmlContent = $zip->getFromName($entry['path']);
+            if ($sheetXmlContent === false) {
+                continue;
+            }
+            $sheetXml = @simplexml_load_string($sheetXmlContent);
+            if (!$sheetXml || !isset($sheetXml->sheetData->row)) {
+                continue;
+            }
 
-        if ($sheetXmlContent === false) {
-            return [];
-        }
+            $rows = [];
+            foreach ($sheetXml->sheetData->row as $row) {
+                $rowCells = [];
+                foreach ($row->c as $cell) {
+                    $cellVal = '';
+                    $type = (string)($cell['t'] ?? '');
+                    $val = (string)($cell->v ?? '');
 
-        $sheetXml = @simplexml_load_string($sheetXmlContent);
-        if (!$sheetXml || !isset($sheetXml->sheetData->row)) {
-            return [];
-        }
-
-        foreach ($sheetXml->sheetData->row as $row) {
-            $rowCells = [];
-            foreach ($row->c as $cell) {
-                $cellVal = '';
-                $type = (string)($cell['t'] ?? '');
-                $val = (string)($cell->v ?? '');
-
-                if ($type === 's') {
-                    $idx = (int)$val;
-                    $cellVal = $sharedStrings[$idx] ?? '';
-                } elseif ($type === 'inlineStr' && isset($cell->is->t)) {
-                    $cellVal = (string)$cell->is->t;
-                } else {
-                    $cellVal = $val;
-                }
-
-                $r = (string)($cell['r'] ?? '');
-                $colIndex = 0;
-                if (preg_match('/^([A-Z]+)(\d+)$/i', $r, $matches)) {
-                    $colLetters = strtoupper($matches[1]);
-                    for ($ci = 0; $ci < strlen($colLetters); $ci++) {
-                        $colIndex = $colIndex * 26 + (ord($colLetters[$ci]) - 64);
+                    if ($type === 's') {
+                        $idx = (int)$val;
+                        $cellVal = $sharedStrings[$idx] ?? '';
+                    } elseif ($type === 'inlineStr' && isset($cell->is->t)) {
+                        $cellVal = (string)$cell->is->t;
+                    } else {
+                        $cellVal = $val;
                     }
-                    $colIndex = max(1, $colIndex) - 1;
-                } else {
-                    $colIndex = count($rowCells);
+
+                    $r = (string)($cell['r'] ?? '');
+                    $colIndex = 0;
+                    if (preg_match('/^([A-Z]+)(\d+)$/i', $r, $matches)) {
+                        $colLetters = strtoupper($matches[1]);
+                        for ($ci = 0; $ci < strlen($colLetters); $ci++) {
+                            $colIndex = $colIndex * 26 + (ord($colLetters[$ci]) - 64);
+                        }
+                        $colIndex = max(1, $colIndex) - 1;
+                    } else {
+                        $colIndex = count($rowCells);
+                    }
+
+                    $rowCells[$colIndex] = trim($cellVal);
                 }
 
-                $rowCells[$colIndex] = trim($cellVal);
+                if (!empty($rowCells)) {
+                    $maxKey = max(array_keys($rowCells));
+                    $normalizedRow = [];
+                    for ($k = 0; $k <= $maxKey; $k++) {
+                        $normalizedRow[$k] = $rowCells[$k] ?? '';
+                    }
+                    $rows[] = $normalizedRow;
+                }
             }
 
-            if (!empty($rowCells)) {
-                $maxKey = max(array_keys($rowCells));
-                $normalizedRow = [];
-                for ($k = 0; $k <= $maxKey; $k++) {
-                    $normalizedRow[$k] = $rowCells[$k] ?? '';
-                }
-                $rows[] = $normalizedRow;
+            if (!empty($rows)) {
+                $sheets[] = [
+                    'sheetName' => $entry['name'],
+                    'rows' => $rows,
+                ];
             }
         }
 
-        return $rows;
+        $zip->close();
+        return $sheets;
     }
 
     private function parseCsvFile(string $filePath): array
@@ -981,7 +1080,7 @@ class AdminController extends Controller
         return $rows;
     }
 
-    private function mapRowsToStudents(array $rows, ?string $overrideClass = null): array
+    private function mapRowsToStudents(array $rows, ?string $overrideClass = null, ?string $sheetName = null, int $generatedNisOffset = 0): array
     {
         $students = [];
         $detectedClass = '';
@@ -993,7 +1092,7 @@ class AdminController extends Controller
         $availableClasses = Classroom::orderByRaw('LENGTH(name) DESC')->pluck('name')->toArray();
         $classRegex = '/\b(X|XI|XII)\s+([A-Z0-9]+)(\s+\d+)?\b/i';
 
-        foreach (array_slice($rows, 0, 10) as $row) {
+        foreach (array_slice($rows, 0, 12) as $row) {
             $rowStr = strtoupper(implode(' ', $row));
             foreach ($availableClasses as $ac) {
                 if (str_contains($rowStr, strtoupper($ac))) {
@@ -1006,36 +1105,101 @@ class AdminController extends Controller
             }
         }
 
+        if (empty($detectedClass) && !empty($sheetName)) {
+            $upperSheet = strtoupper(trim($sheetName));
+            foreach ($availableClasses as $ac) {
+                if (str_contains($upperSheet, strtoupper($ac))) {
+                    $detectedClass = $ac;
+                    break;
+                }
+            }
+            if (empty($detectedClass) && preg_match($classRegex, $upperSheet, $match)) {
+                $detectedClass = trim($match[0]);
+            }
+        }
+
         $headerIndex = -1;
         $colMap = [
+            'no_absen' => -1,
             'nisn' => -1,
             'name' => -1,
             'class' => -1,
             'gender' => -1,
             'phone' => -1,
         ];
+        $nisnPriority = 99;
+        $namePriority = 99;
+        $classPriority = 99;
+        $phonePriority = 99;
+        $fallbackPhoneCols = [];
 
         foreach ($rows as $idx => $row) {
             $hasName = false;
             $hasNisn = false;
+            $rowColMap = ['no_absen' => -1, 'nisn' => -1, 'name' => -1, 'class' => -1, 'gender' => -1, 'phone' => -1];
+            $nisnPriority = 99;
+            $namePriority = 99;
+            $classPriority = 99;
+            $phonePriority = 99;
+            $fallbackPhoneCols = [];
+
             foreach ($row as $colIdx => $colVal) {
-                $normalized = strtolower(trim((string)$colVal));
-                if (in_array($normalized, ['nama', 'nama siswa', 'nama lengkap', 'nama peserta didik', 'nama murid'])) {
-                    $hasName = true;
-                    $colMap['name'] = $colIdx;
-                } elseif (in_array($normalized, ['nisn', 'nis', 'no induk', 'nomor induk'])) {
+                $normalized = strtolower(preg_replace('/\s+/', ' ', trim((string)$colVal)));
+                $alpha = preg_replace('/[^a-z0-9]/', '', $normalized);
+                if ($alpha === '') {
+                    continue;
+                }
+
+                if (in_array($alpha, ['no', 'noabsen', 'nomorabsen', 'nourut', 'nomorurut', 'absen', 'urut']) && $rowColMap['no_absen'] === -1) {
+                    $rowColMap['no_absen'] = $colIdx;
+                } elseif (in_array($alpha, ['nisn', 'nisnisn'])) {
                     $hasNisn = true;
-                    $colMap['nisn'] = $colIdx;
-                } elseif (in_array($normalized, ['kelas', 'rombel', 'nama rombel', 'tingkat'])) {
-                    $colMap['class'] = $colIdx;
-                } elseif (in_array($normalized, ['jk', 'jenis kelamin', 'l/p', 'gender', 'sex'])) {
-                    $colMap['gender'] = $colIdx;
-                } elseif (in_array($normalized, ['no hp', 'no wa', 'no telepon', 'telepon', 'whatsapp', 'no hp wali', 'wa wali', 'kontak', 'hp', 'no wa orang tua'])) {
-                    $colMap['phone'] = $colIdx;
+                    $rowColMap['nisn'] = $colIdx;
+                    $nisnPriority = 1;
+                } elseif (in_array($alpha, ['nis', 'nipd', 'noinduk', 'nomorinduk', 'noinduksiswa']) && $nisnPriority > 2) {
+                    $hasNisn = true;
+                    $rowColMap['nisn'] = $colIdx;
+                    $nisnPriority = 2;
+                } elseif (
+                    !preg_match('/(ayah|ibu|wali|orangtua|ortu|sekolah|rombel|kelas|jurusan|guru)/', $alpha)
+                    && in_array($alpha, ['namalengkap', 'namasiswa', 'namasiswai', 'namapesertadidik', 'namamurid', 'namasiswapesertadidik'])
+                ) {
+                    $hasName = true;
+                    $rowColMap['name'] = $colIdx;
+                    $namePriority = 1;
+                } elseif (
+                    !preg_match('/(ayah|ibu|wali|orangtua|ortu|sekolah|rombel|kelas|jurusan|guru)/', $alpha)
+                    && in_array($alpha, ['nama', 'pesertadidik', 'studentname', 'fullname'])
+                    && $namePriority > 2
+                ) {
+                    $hasName = true;
+                    $rowColMap['name'] = $colIdx;
+                    $namePriority = 2;
+                } elseif (in_array($alpha, ['rombelsaatini', 'kelassaatini', 'kelasrombel', 'namarombel', 'kelas', 'rombel', 'kls'])) {
+                    $rowColMap['class'] = $colIdx;
+                    $classPriority = 1;
+                } elseif ($alpha === 'tingkat' && $classPriority > 2) {
+                    $rowColMap['class'] = $colIdx;
+                    $classPriority = 2;
+                } elseif (in_array($alpha, ['jk', 'jeniskelamin', 'lp', 'kelamin', 'gender', 'sex'])) {
+                    $rowColMap['gender'] = $colIdx;
+                } elseif (in_array($alpha, ['nowawali', 'wawali', 'nowaorangtua', 'nowaortu', 'nohpwali', 'hpwali', 'nohporangtua', 'hportu', 'teleponwali', 'kontakwali', 'nohpibu', 'hpibu', 'nohpayah', 'hpayah'])) {
+                    $fallbackPhoneCols[] = $colIdx;
+                    if ($phonePriority > 1) {
+                        $rowColMap['phone'] = $colIdx;
+                        $phonePriority = 1;
+                    }
+                } elseif (in_array($alpha, ['nowa', 'whatsapp', 'nohp', 'hp', 'notelepon', 'telepon', 'telp', 'kontak'])) {
+                    $fallbackPhoneCols[] = $colIdx;
+                    if ($phonePriority > 2) {
+                        $rowColMap['phone'] = $colIdx;
+                        $phonePriority = 2;
+                    }
                 }
             }
 
             if ($hasName || ($hasNisn && count($row) >= 2)) {
+                $colMap = $rowColMap;
                 $headerIndex = $idx;
                 break;
             }
@@ -1045,13 +1209,27 @@ class AdminController extends Controller
         if ($headerIndex !== -1) {
             $startIndex = $headerIndex + 1;
         } else {
-            $colMap['nisn'] = 0;
-            $colMap['name'] = 1;
-            $colMap['class'] = 2;
-            $colMap['gender'] = 3;
-            $colMap['phone'] = 4;
+            $firstRow = $rows[0] ?? [];
+            $col0 = trim((string)($firstRow[0] ?? ''));
+            $col1 = trim((string)($firstRow[1] ?? ''));
+            if (is_numeric($col0) && (int)$col0 > 0 && (int)$col0 <= 100 && preg_match('/^\d{5,}$/', $col1)) {
+                $colMap['no_absen'] = 0;
+                $colMap['nisn'] = 1;
+                $colMap['name'] = 2;
+                $colMap['class'] = 3;
+                $colMap['gender'] = 4;
+                $colMap['phone'] = 5;
+            } else {
+                $colMap['nisn'] = 0;
+                $colMap['name'] = 1;
+                $colMap['class'] = 2;
+                $colMap['gender'] = 3;
+                $colMap['phone'] = 4;
+            }
             $startIndex = 0;
         }
+
+        $perClassCounter = [];
 
         for ($i = $startIndex; $i < count($rows); $i++) {
             $row = $rows[$i];
@@ -1059,41 +1237,57 @@ class AdminController extends Controller
 
             $name = '';
             if ($colMap['name'] !== -1 && isset($row[$colMap['name']])) {
-                $name = trim((string)$row[$colMap['name']]);
-            } elseif (isset($row[1])) {
-                $name = trim((string)$row[1]);
+                $name = preg_replace('/\s+/', ' ', trim((string)$row[$colMap['name']]));
+            } elseif ($headerIndex === -1 && isset($row[1])) {
+                $name = preg_replace('/\s+/', ' ', trim((string)$row[1]));
             }
 
-            if ($name === '' || is_numeric($name) || preg_match('/^(mengetahui|kepala sekolah|wali kelas|total|jumlah|catatan)/i', $name)) {
+            if (
+                $name === ''
+                || mb_strlen($name) < 2
+                || preg_match('/^[\d\W_]+$/', $name)
+                || in_array(strtolower($name), ['nama', 'nama siswa', 'nama lengkap', 'nama peserta didik', 'nama murid', 'l/p', 'jk', 'nisn', 'nis', 'no', 'keterangan', 'status', 'jumlah', 'total'])
+                || preg_match('/^(mengetahui|kepala\s*sekolah|wakil\s*kepala|wali\s*kelas|guru\s*bk|ketua|sekretaris|bendahara|total|jumlah|sub\s*total|rekap|rata-rata|persentase|catatan|keterangan|ket\.?|nip\.?|nuptk\.?|laki-laki|perempuan|hadir|sakit|izin|alpa|jember,|tanggal|dicetak|sumber\s*:|daftar\s*hadir|absensi|kelas\s*:)/i', $name)
+                || preg_match('/^(l|p)\s*[:=]/i', $name)
+            ) {
                 continue;
             }
 
             $nisn = '';
             if ($colMap['nisn'] !== -1 && isset($row[$colMap['nisn']])) {
                 $nisn = trim((string)$row[$colMap['nisn']]);
-            } elseif (isset($row[0])) {
+            } elseif ($headerIndex === -1 && isset($row[0])) {
                 $nisn = trim((string)$row[0]);
             }
             $nisn = preg_replace('/[^a-zA-Z0-9]/', '', $nisn);
             if (empty($nisn) || strlen($nisn) < 4) {
-                $nisn = '008' . str_pad((string)(count($students) + 1001), 7, '0', STR_PAD_LEFT);
+                $nisn = '008' . str_pad((string)($generatedNisOffset + count($students) + 1001), 7, '0', STR_PAD_LEFT);
             }
 
             $className = '';
             if (!empty($overrideClass) && $overrideClass !== 'AUTO') {
                 $className = $overrideClass;
             } elseif ($colMap['class'] !== -1 && isset($row[$colMap['class']]) && trim((string)$row[$colMap['class']]) !== '') {
-                $className = strtoupper(trim((string)$row[$colMap['class']]));
+                $className = strtoupper(preg_replace('/\s+/', ' ', trim((string)$row[$colMap['class']])));
             } elseif (!empty($detectedClass)) {
                 $className = $detectedClass;
             } else {
                 $className = 'X RPL 1';
             }
 
+            $perClassCounter[$className] = ($perClassCounter[$className] ?? 0) + 1;
+            $noAbsen = $perClassCounter[$className];
+            if ($colMap['no_absen'] !== -1 && isset($row[$colMap['no_absen']])) {
+                $rawNo = preg_replace('/[^0-9]/', '', (string)$row[$colMap['no_absen']]);
+                if (!empty($rawNo) && (int)$rawNo > 0) {
+                    $noAbsen = (int)$rawNo;
+                }
+            }
+
             $gender = 'L';
             if ($colMap['gender'] !== -1 && isset($row[$colMap['gender']])) {
                 $rawG = strtoupper(trim((string)$row[$colMap['gender']]));
-                if (str_starts_with($rawG, 'P') || str_contains($rawG, 'PEREMPUAN') || str_contains($rawG, 'WANITA')) {
+                if (str_starts_with($rawG, 'P') || str_starts_with($rawG, 'F') || str_contains($rawG, 'PEREMPUAN') || str_contains($rawG, 'WANITA')) {
                     $gender = 'P';
                 } else {
                     $gender = 'L';
@@ -1104,8 +1298,26 @@ class AdminController extends Controller
             if ($colMap['phone'] !== -1 && isset($row[$colMap['phone']])) {
                 $phone = trim((string)$row[$colMap['phone']]);
             }
+            if (($phone === '' || $phone === '-' || $phone === '0') && !empty($fallbackPhoneCols)) {
+                foreach ($fallbackPhoneCols as $fIdx) {
+                    $cand = trim((string)($row[$fIdx] ?? ''));
+                    if ($cand !== '' && $cand !== '-' && $cand !== '0') {
+                        $phone = $cand;
+                        break;
+                    }
+                }
+            }
+            if ($phone !== '' && $phone !== '-' && $phone !== '0') {
+                $digitsOnly = preg_replace('/[^0-9]/', '', $phone);
+                if (preg_match('/^8\d{8,12}$/', $digitsOnly)) {
+                    $phone = '0' . $digitsOnly;
+                }
+            } else {
+                $phone = '';
+            }
 
             $students[] = [
+                'noAbsen' => $noAbsen,
                 'nis' => $nisn,
                 'nisn' => $nisn,
                 'name' => $name,

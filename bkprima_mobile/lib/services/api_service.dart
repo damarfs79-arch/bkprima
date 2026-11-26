@@ -7,6 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../models/user_model.dart';
 import '../models/attendance_model.dart';
 import '../models/violation_model.dart';
+import '../models/absence_alert_model.dart';
 
 class ApiService {
   // Deteksi URL server backend: Android Emulator menggunakan 10.0.2.2, Browser Web/Desktop menggunakan 127.0.0.1
@@ -655,6 +656,36 @@ class ApiService {
       };
     } catch (e) {
       return {'success': false, 'message': 'Kesalahan koneksi server: $e'};
+    }
+  }
+
+  /// 11. Notifikasi Siswa >= 3 Hari Tidak Masuk
+  static Future<Map<String, dynamic>> getAbsenceAlerts() async {
+    try {
+      final url = await getBaseUrl();
+      final response = await http
+          .get(
+            Uri.parse('$url/notifikasi-absensi'),
+            headers: await _headers(),
+          )
+          .timeout(const Duration(seconds: 10));
+
+      if (response.statusCode == 200) {
+        final data = _safeDecode(response.body);
+        final List rawAlerts = data['alerts'] ?? [];
+        final alerts = rawAlerts
+            .whereType<Map<String, dynamic>>()
+            .map(AbsenceAlert.fromJson)
+            .toList();
+        return {
+          'success': true,
+          'total_alerts': (data['total_alerts'] as num?)?.toInt() ?? alerts.length,
+          'alerts': alerts,
+        };
+      }
+      return {'success': false, 'total_alerts': 0, 'alerts': <AbsenceAlert>[]};
+    } catch (e) {
+      return {'success': false, 'total_alerts': 0, 'alerts': <AbsenceAlert>[], 'message': '$e'};
     }
   }
 }

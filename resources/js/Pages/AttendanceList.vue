@@ -285,13 +285,12 @@
                 <th class="py-3 px-3 text-center text-[11px] font-semibold uppercase tracking-wider text-slate-500">JK</th>
                 <th class="py-3 px-4 text-center text-[11px] font-semibold uppercase tracking-wider text-slate-500">Status</th>
                 <th class="py-3 px-4 text-[11px] font-semibold uppercase tracking-wider text-slate-500">Keterangan</th>
-                <th class="py-3 px-4 text-[11px] font-semibold uppercase tracking-wider text-slate-500">Kontak</th>
                 <th class="py-3 px-4 text-center text-[11px] font-semibold uppercase tracking-wider text-slate-500">Aksi</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-slate-100 bg-white">
               <tr v-for="(student, index) in filteredStudents" :key="student.id" class="hover:bg-slate-50/80 transition">
-                <td class="py-3.5 px-4 text-center font-medium text-slate-400">{{ index + 1 }}</td>
+                <td class="py-3.5 px-4 text-center font-medium text-slate-500">{{ student.no_absen || (index + 1) }}</td>
                 
                 <!-- Nama & NIS -->
                 <td class="py-3.5 px-4">
@@ -299,14 +298,11 @@
                   <div class="text-xs text-slate-500 font-normal mt-0.5">NISN: {{ student.nis || student.nisn }}</div>
                 </td>
 
-                <!-- Kelas, Tingkat, Jurusan, Rombel -->
+                <!-- Kelas -->
                 <td class="py-3.5 px-4 text-center">
                   <span class="inline-block px-2.5 py-1 bg-slate-100 rounded-md text-xs font-semibold text-slate-800 font-mono">
                     {{ student.class_name }}
                   </span>
-                  <div class="text-[10px] text-slate-500 font-medium mt-1">
-                    Tingkat {{ student.level || (student.class_name.startsWith('XI ') ? '11' : (student.class_name.startsWith('XII ') ? '12' : '10')) }} &bull; {{ student.major || 'Umum' }} &bull; Rombel {{ student.rombel || '1' }}
-                  </div>
                 </td>
 
                 <!-- JK -->
@@ -355,25 +351,6 @@
                   <span class="text-xs text-slate-600">
                     {{ getStudentAttendance(student).notes || '-' }}
                   </span>
-                </td>
-
-                <!-- Kontak -->
-                <td class="py-3.5 px-4">
-                  <div class="flex items-center gap-1.5">
-                    <span class="text-xs text-slate-600 font-mono">{{ student.parent_phone || '-' }}</span>
-                    <a
-                      v-if="student.parent_phone"
-                      :href="'https://wa.me/' + student.parent_phone.replace(/[^0-9]/g, '')"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      class="p-1 text-slate-400 hover:text-emerald-600 transition"
-                      title="WhatsApp"
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                      </svg>
-                    </a>
-                  </div>
                 </td>
 
                 <!-- Aksi: Icon Group minimalis tanpa multiple bordered buttons -->
@@ -439,7 +416,7 @@
               </tr>
 
               <tr v-if="filteredStudents.length === 0">
-                <td colspan="9" class="py-12 text-center text-slate-400 text-xs">
+                <td colspan="7" class="py-12 text-center text-slate-400 text-xs">
                   Tidak ada data siswa yang cocok dengan filter atau pencarian saat ini.
                 </td>
               </tr>
@@ -470,7 +447,7 @@
       <!-- ============================================================ -->
       <!-- MODAL CARD: KONFIRMASI HAPUS SISWA                           -->
       <!-- ============================================================ -->
-      <div v-if="showDeleteStudentModal" @click.self="showDeleteStudentModal = false" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs overflow-y-auto">
+      <div v-if="showDeleteStudentModal" @click.self="showDeleteStudentModal = false" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 overflow-y-auto">
         <div class="bg-white rounded-xl max-w-sm w-full border border-slate-200 shadow-xl overflow-hidden animate-in fade-in zoom-in-95 duration-150 my-auto">
           <div class="p-4 border-b border-slate-100 flex items-center justify-between bg-white">
             <div class="flex items-center gap-3">
@@ -539,7 +516,7 @@
       <!-- ============================================================ -->
       <!-- MODAL: HAPUS 1 KELAS SECARA LANGSUNG                         -->
       <!-- ============================================================ -->
-      <div v-if="showDeleteClassModal" @click.self="showDeleteClassModal = false" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto">
+      <div v-if="showDeleteClassModal" @click.self="showDeleteClassModal = false" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 overflow-y-auto">
         <div class="bg-white rounded-2xl max-w-md w-full border border-slate-200 shadow-xl overflow-hidden my-auto">
           <div class="p-5 border-b border-slate-100 flex items-center justify-between bg-rose-50/50">
             <div class="flex items-center gap-3">
@@ -620,7 +597,7 @@
       <div
         v-if="showAddModal"
         @click.self="closeAddStudentModal"
-        class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto"
+        class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 overflow-y-auto"
       >
         <div class="bg-white rounded-2xl max-w-md w-full border border-slate-200 shadow-2xl overflow-hidden flex flex-col max-h-[92vh] my-auto">
           <div class="p-4 sm:p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50 shrink-0">
@@ -789,7 +766,7 @@
       <!-- ============================================================ -->
       <!-- MODAL 2: UBAH STATUS PRESENSI                                -->
       <!-- ============================================================ -->
-      <div v-if="showStatusModal" @click.self="showStatusModal = false" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto">
+      <div v-if="showStatusModal" @click.self="showStatusModal = false" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 overflow-y-auto">
         <div class="bg-white rounded-2xl max-w-md w-full border border-slate-200 shadow-xl overflow-hidden my-auto">
           <div class="p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50">
             <div>
@@ -873,7 +850,7 @@
       <div
         v-if="showEditStudentModal"
         @click.self="showEditStudentModal = false"
-        class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto"
+        class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 overflow-y-auto"
       >
         <div class="bg-white rounded-2xl max-w-md w-full border border-slate-200 shadow-2xl overflow-hidden flex flex-col max-h-[92vh] my-auto">
           <div class="p-4 sm:p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50 shrink-0">
@@ -1038,7 +1015,7 @@
       <!-- ============================================================ -->
       <!-- MODAL 4: IMPORT DATA SISWA (EXCEL / CSV / DAPODIK)           -->
       <!-- ============================================================ -->
-      <div v-if="showImportModal" class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto">
+      <div v-if="showImportModal" class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 overflow-y-auto">
         <div class="bg-white rounded-2xl max-w-2xl w-full p-5 sm:p-6 shadow-xl border border-slate-200 space-y-4 my-8">
           
           <!-- Header Modal -->
@@ -1118,7 +1095,7 @@
                   <p class="text-xs sm:text-sm font-semibold text-slate-800">
                     <span class="text-blue-700 font-semibold underline">Klik untuk memilih file</span> atau seret file ke sini
                   </p>
-                  <p class="text-[11px] text-slate-400 mt-0.5">Mendukung format file CSV, TXT, atau ekspor Dapodik</p>
+                  <p class="text-[11px] text-slate-400 mt-0.5">Mendukung format .XLSX, .CSV, .TXT — kolom &amp; baris otomatis difilter backend</p>
                 </div>
                 <div v-if="importFileName" class="mt-2 inline-flex items-center gap-1.5 px-3 py-1 rounded-md bg-emerald-50 text-emerald-800 font-semibold text-xs border border-emerald-200">
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor">
@@ -1187,7 +1164,7 @@
                 </thead>
                 <tbody class="divide-y divide-slate-100 bg-white">
                   <tr v-for="(st, sIdx) in importedStudents" :key="sIdx" class="hover:bg-slate-50">
-                    <td class="py-1.5 px-3 text-center text-slate-400 font-mono">{{ sIdx + 1 }}</td>
+                    <td class="py-1.5 px-3 text-center text-slate-500 font-mono">{{ st.noAbsen || (sIdx + 1) }}</td>
                     <td class="py-1.5 px-3 font-mono text-slate-700">{{ st.nis || st.nisn }}</td>
                     <td class="py-1.5 px-3 font-semibold text-slate-900">{{ st.name }}</td>
                     <td class="py-1.5 px-3">
@@ -1245,7 +1222,7 @@
       <!-- ============================================================ -->
       <!-- MODAL: KENAIKAN KELAS & KELULUSAN (MASTER ADMIN ONLY)        -->
       <!-- ============================================================ -->
-      <div v-if="showPromotionModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
+      <div v-if="showPromotionModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60">
         <div class="bg-white rounded-2xl max-w-2xl w-full border border-slate-200 shadow-2xl overflow-hidden flex flex-col max-h-[92vh]">
           
           <!-- Modal Header -->
@@ -1640,20 +1617,35 @@ const availableRombels = computed(() => {
   }))
 })
 
+const extractGradeFromClass = (className, fallbackLevel = '') => {
+  const upper = String(className || '').trim().toUpperCase()
+  if (upper.startsWith('XII ') || upper === 'XII') return '12'
+  if (upper.startsWith('XI ') || upper === 'XI') return '11'
+  if (upper.startsWith('X ') || upper === 'X') return '10'
+  const lvl = String(fallbackLevel || '').trim().toUpperCase()
+  if (lvl === '12' || lvl === 'XII' || lvl.includes('(XII)')) return '12'
+  if (lvl === '11' || lvl === 'XI' || lvl.includes('(XI)')) return '11'
+  if (lvl === '10' || lvl === 'X' || lvl.includes('(X)')) return '10'
+  return ''
+}
+
 // Tingkat options only for levels present in authorized classes
 const levelOptions = computed(() => {
-  const levels = new Set(['10', '11', '12'])
+  const levels = new Set()
   allClasses.value.forEach(cls => {
-    const upper = cls.toUpperCase()
-    if (upper.startsWith('X ') || upper.includes('10')) levels.add('10')
-    if (upper.startsWith('XI ') || upper.includes('11')) levels.add('11')
-    if (upper.startsWith('XII ') || upper.includes('12')) levels.add('12')
+    const grade = extractGradeFromClass(cls)
+    if (grade) levels.add(grade)
   })
+  if (levels.size === 0) {
+    levels.add('10')
+    levels.add('11')
+    levels.add('12')
+  }
   return [
     { value: '10', label: 'Kelas 10 (X)' },
     { value: '11', label: 'Kelas 11 (XI)' },
     { value: '12', label: 'Kelas 12 (XII)' },
-  ].filter(l => levels.size === 0 || levels.has(l.value))
+  ].filter(l => levels.has(l.value))
 })
 
 const todayDateShort = computed(() => {
@@ -1669,15 +1661,17 @@ const filteredRombels = computed(() => {
   return allClasses.value.filter(cls => {
     // Level match
     if (selectedLevel.value !== 'ALL') {
-      const prefix = selectedLevel.value === '10' ? 'X ' : (selectedLevel.value === '11' ? 'XI ' : 'XII ')
-      if (!cls.startsWith(prefix) && !cls.includes(selectedLevel.value)) {
+      if (extractGradeFromClass(cls) !== selectedLevel.value) {
         return false
       }
     }
 
     // Jurusan match
     if (selectedJurusan.value !== 'ALL') {
-      if (!cls.toUpperCase().includes(selectedJurusan.value)) {
+      const rombelObj = availableRombels.value.find(r => r.name === cls)
+      const rombelMajor = String(rombelObj?.major || '').toUpperCase()
+      const selJur = selectedJurusan.value.toUpperCase()
+      if (rombelMajor !== selJur && !cls.toUpperCase().includes(selJur)) {
         return false
       }
     }
@@ -1778,8 +1772,8 @@ const activeRombelInfo = computed(() => {
     const rate = students.length > 0 ? Math.round((present / students.length) * 100) : 100
 
     return {
-      name: `${levelLabel} • ${jurLabel}`,
-      jurusan: selectedJurusan.value !== 'ALL' ? selectedJurusan.value : 'Semua Jurusan',
+      name: levelLabel,
+      jurusan: jurLabel,
       waliKelas: 'Koordinator Jurusan',
       guruBK: 'Guru BK Pendamping',
       attendanceRate: rate
@@ -1807,14 +1801,9 @@ const filteredStudents = computed(() => {
   return props.dbStudents.filter(s => {
     // Level filter
     if (selectedLevel.value !== 'ALL') {
-      const sLvl = String(s.level || '').trim()
-      const sCls = String(s.class_name || '').toUpperCase()
-      const isLvl10 = sLvl === '10' || sCls.startsWith('X ') || sCls.includes(' 10 ') || sCls.includes('10')
-      const isLvl11 = sLvl === '11' || sCls.startsWith('XI ') || sCls.includes(' 11 ') || sCls.includes('11')
-      const isLvl12 = sLvl === '12' || sCls.startsWith('XII ') || sCls.includes(' 12 ') || sCls.includes('12')
-      if (selectedLevel.value === '10' && !isLvl10) return false
-      if (selectedLevel.value === '11' && !isLvl11) return false
-      if (selectedLevel.value === '12' && !isLvl12) return false
+      if (extractGradeFromClass(s.class_name, s.level) !== selectedLevel.value) {
+        return false
+      }
     }
 
     // Jurusan filter
@@ -2261,30 +2250,59 @@ const loadSampleData = () => {
   const target2 = allClasses.value[1] || target
 
   importedStudents.value = [
-    { nis: '10451', name: 'Alifia Zahra Ramadhani', className: target, gender: 'P', parentWa: '+62 812-3401-1001' },
-    { nis: '10452', name: 'Bayu Aditya Pratama', className: target, gender: 'L', parentWa: '+62 813-3401-1002' },
-    { nis: '10453', name: 'Cahyo Wibowo', className: target, gender: 'L', parentWa: '+62 856-3401-1003' },
-    { nis: '10454', name: 'Dwi Lestari Handayani', className: target2, gender: 'P', parentWa: '+62 878-3401-1004' },
-    { nis: '10455', name: 'Eko Prasetyo Nugroho', className: target2, gender: 'L', parentWa: '+62 821-3401-1005' }
+    { noAbsen: 1, nis: '10451', name: 'Alifia Zahra Ramadhani', className: target, gender: 'P', parentWa: '+62 812-3401-1001' },
+    { noAbsen: 2, nis: '10452', name: 'Bayu Aditya Pratama', className: target, gender: 'L', parentWa: '+62 813-3401-1002' },
+    { noAbsen: 3, nis: '10453', name: 'Cahyo Wibowo', className: target, gender: 'L', parentWa: '+62 856-3401-1003' },
+    { noAbsen: 1, nis: '10454', name: 'Dwi Lestari Handayani', className: target2, gender: 'P', parentWa: '+62 878-3401-1004' },
+    { noAbsen: 2, nis: '10455', name: 'Eko Prasetyo Nugroho', className: target2, gender: 'L', parentWa: '+62 821-3401-1005' }
   ]
 }
 
 const parseCsvText = (text) => {
   const lines = text.split(/\r?\n/).map(l => l.trim()).filter(Boolean)
   if (lines.length <= 1) return []
-  
+
+  const firstCols = (lines[0].includes(';') ? lines[0].split(';') : lines[0].split(',')).map(c => c.trim().replace(/['"]/g, ''))
+  const colMap = { noAbsen: -1, nis: -1, name: -1, className: -1, gender: -1, parentWa: -1 }
+  firstCols.forEach((col, idx) => {
+    const c = col.toLowerCase().replace(/[^a-z0-9]/g, '')
+    if (['no', 'noabsen', 'nomorabsen', 'nourut', 'absen', 'urut'].includes(c)) colMap.noAbsen = idx
+    else if (['nis', 'nisn', 'noinduk', 'nisnisn'].includes(c)) colMap.nis = idx
+    else if (['nama', 'namasiswa', 'namalengkap', 'namapesertadidik'].includes(c)) colMap.name = idx
+    else if (['kelas', 'rombel', 'namarombel', 'tingkat'].includes(c)) colMap.className = idx
+    else if (['jk', 'jeniskelamin', 'lp', 'gender', 'sex'].includes(c)) colMap.gender = idx
+    else if (['nowa', 'nohp', 'nowawali', 'telepon', 'whatsapp', 'kontak', 'parentwa'].includes(c)) colMap.parentWa = idx
+  })
+
+  const hasHeader = colMap.name !== -1 || colMap.nis !== -1
+  const startIndex = hasHeader ? 1 : 0
+  if (!hasHeader) {
+    colMap.nis = 0
+    colMap.name = 1
+    colMap.className = 2
+    colMap.gender = 3
+    colMap.parentWa = 4
+  }
+
+  const perClassCounter = {}
   const results = []
-  for (let i = 1; i < lines.length; i++) {
+  for (let i = startIndex; i < lines.length; i++) {
     const line = lines[i]
-    const cols = line.includes(';') ? line.split(';') : line.split(',')
+    const cols = (line.includes(';') ? line.split(';') : line.split(',')).map(c => c.trim().replace(/['"]/g, ''))
     if (cols.length >= 2) {
-      const nis = cols[0]?.trim().replace(/['"]/g, '') || `10${450 + i}`
-      const name = cols[1]?.trim().replace(/['"]/g, '') || 'Siswa Baru'
-      const className = cols[2]?.trim().replace(/['"]/g, '').toUpperCase() || (allClasses.value[0] || 'X RPL 1')
-      const gender = (cols[3]?.trim().replace(/['"]/g, '').toUpperCase() === 'P') ? 'P' : 'L'
-      const parentWa = cols[4]?.trim().replace(/['"]/g, '') || `+62 812-${1000 + i}-${2000 + i}`
-      
+      const name = (colMap.name !== -1 && cols[colMap.name]) ? cols[colMap.name] : (cols[1] || 'Siswa Baru')
+      const rawNis = (colMap.nis !== -1 && cols[colMap.nis]) ? cols[colMap.nis] : (!hasHeader ? (cols[0] || '') : '')
+      const nis = rawNis || `10${450 + i}`
+      const className = ((colMap.className !== -1 && cols[colMap.className]) ? cols[colMap.className] : (cols[2] || '')).toUpperCase() || (allClasses.value[0] || 'X RPL 1')
+      perClassCounter[className] = (perClassCounter[className] || 0) + 1
+      const parsedNo = colMap.noAbsen !== -1 && cols[colMap.noAbsen] ? parseInt(cols[colMap.noAbsen].replace(/[^0-9]/g, ''), 10) : NaN
+      const noAbsen = (!isNaN(parsedNo) && parsedNo > 0) ? parsedNo : perClassCounter[className]
+      const rawGender = ((colMap.gender !== -1 && cols[colMap.gender]) ? cols[colMap.gender] : (cols[3] || '')).toUpperCase()
+      const gender = rawGender.startsWith('P') ? 'P' : 'L'
+      const parentWa = ((colMap.parentWa !== -1 && cols[colMap.parentWa]) ? cols[colMap.parentWa] : (cols[4] || '')) || '-'
+
       results.push({
+        noAbsen,
         nis,
         name,
         className,
@@ -2309,20 +2327,61 @@ const handleDrop = (e) => {
   processImportFile(file)
 }
 
-const processImportFile = (file) => {
+const processImportFile = async (file) => {
   importFileName.value = file.name
-  const reader = new FileReader()
-  reader.onload = (event) => {
-    const content = event.target.result
-    const parsed = parseCsvText(content)
-    if (parsed.length > 0) {
-      importedStudents.value = parsed
+
+  try {
+    const formData = new FormData()
+    formData.append('file', file)
+    const targetRombelObj = availableRombels.value.find(r => r.id === importTargetClass.value || r.id == importTargetClass.value)
+    const resolvedClass = targetRombelObj ? (targetRombelObj.nama_rombel || targetRombelObj.name) : null
+    if (importTargetClass.value !== 'AUTO' && resolvedClass) {
+      formData.append('targetClass', resolvedClass)
+    }
+
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+    const response = await fetch('/admin/siswa/preview-import', {
+      method: 'POST',
+      body: formData,
+      headers: {
+        'X-CSRF-TOKEN': csrfToken,
+        'X-Requested-With': 'XMLHttpRequest',
+        'Accept': 'application/json'
+      }
+    })
+
+    const data = await response.json()
+    if (response.ok && data.success && data.students && data.students.length > 0) {
+      importedStudents.value = data.students.map(st => ({
+        noAbsen: st.noAbsen || null,
+        nis: st.nisn || st.nis,
+        name: st.name,
+        className: st.className,
+        gender: st.gender,
+        parentWa: st.parentWa || '-'
+      }))
+      showToast(`Berhasil memfilter ${data.students.length} data siswa dari file.`)
     } else {
-      loadSampleData()
-      alert(`File "${file.name}" berhasil diunggah. Menampilkan data hasil konversi.`)
+      alert(data.message || 'Tidak ada data siswa yang valid ditemukan di dalam file tersebut.')
+    }
+  } catch (err) {
+    console.error('Import preview error:', err)
+    const ext = file.name.split('.').pop().toLowerCase()
+    if (['csv', 'txt'].includes(ext)) {
+      const reader = new FileReader()
+      reader.onload = (event) => {
+        const parsed = parseCsvText(event.target.result || '')
+        if (parsed.length > 0) {
+          importedStudents.value = parsed
+        } else {
+          alert('Gagal membaca data siswa dari file.')
+        }
+      }
+      reader.readAsText(file)
+    } else {
+      alert('Terjadi kesalahan saat memproses file di server.')
     }
   }
-  reader.readAsText(file)
 }
 
 const submitImport = () => {
@@ -2332,11 +2391,12 @@ const submitImport = () => {
   const resolvedTargetClassName = targetRombelObj ? (targetRombelObj.nama_rombel || targetRombelObj.name) : null
 
   const payload = importedStudents.value.map(st => ({
+    noAbsen: st.noAbsen || null,
     nis: st.nis,
     name: st.name,
     className: importTargetClass.value === 'AUTO' ? st.className : (resolvedTargetClassName || st.className),
     gender: st.gender,
-    parentWa: st.parentWa,
+    parentWa: st.parentWa && st.parentWa !== '-' ? st.parentWa : '',
   }))
 
   isSubmittingImport.value = true

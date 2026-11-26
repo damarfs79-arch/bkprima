@@ -100,7 +100,7 @@
     <!-- ============================================================ -->
     <div v-if="mobileDrawerOpen" class="print:hidden fixed inset-0 z-50 lg:hidden flex">
       <!-- Backdrop -->
-      <div @click="mobileDrawerOpen = false" class="fixed inset-0 bg-black/40 backdrop-blur-xs transition-opacity animate-in fade-in"></div>
+      <div @click="mobileDrawerOpen = false" class="fixed inset-0 bg-black/40 transition-opacity animate-in fade-in"></div>
 
       <!-- Drawer Content -->
       <div class="relative w-72 max-w-[82vw] bg-white h-full flex flex-col z-50 shadow-2xl animate-in slide-in-from-left duration-200">
@@ -175,9 +175,7 @@
         </div>
 
         <div class="flex items-center gap-3">
-          <div class="px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-md text-xs text-slate-600 font-medium">
-            <span>HadirMu Terhubung</span>
-          </div>
+          <span class="text-xs text-slate-500 font-medium">HadirMu Terhubung</span>
 
           <!-- Notification Button -->
           <button type="button" class="p-2 text-slate-500 hover:text-slate-800 hover:bg-slate-100 rounded-lg transition relative cursor-pointer" title="Notifikasi Sistem">
@@ -189,53 +187,27 @@
       </header>
 
       <!-- Main Content Slot -->
-      <main class="flex-1 p-3 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full pb-32 lg:pb-10 print:p-0 print:m-0 print:max-w-none print:w-full">
+      <main class="flex-1 p-3 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full pb-20 lg:pb-10 print:p-0 print:m-0 print:max-w-none print:w-full">
         <slot />
       </main>
     </div>
 
     <!-- ============================================================ -->
-    <!-- 5. MOBILE BOTTOM NAVIGATION (ANIMATED SLIDING CIRCLE)        -->
+    <!-- 5. MOBILE BOTTOM NAVIGATION (FLAT BAR)                       -->
     <!-- ============================================================ -->
-    <nav class="print:hidden lg:hidden fixed bottom-4 left-4 right-4 z-40 max-w-sm mx-auto">
-      <div class="bg-blue-600 rounded-3xl shadow-xl shadow-blue-600/35 h-[68px] px-1 flex items-center relative select-none">
-        
-        <!-- Sliding Elevated Animated Indicator (Geser & Naik ke Atas / Tidak Sejajar) -->
-        <div 
-          class="absolute top-0 bottom-0 left-0 w-1/3 flex items-center justify-center pointer-events-none transition-transform duration-300 ease-[cubic-bezier(0.34,1.35,0.64,1)] z-10"
-          :style="{
-            transform: `translateX(${activeBottomIndex * 100}%)`
-          }"
-        >
-          <!-- Elemen Bulat Putih dengan Pusat Biru Naik ke Atas (-translate-y-4) -->
-          <div class="w-[62px] h-[62px] rounded-full bg-white flex items-center justify-center shadow-xl shadow-blue-950/35 border-[3px] border-white -translate-y-4 transition-transform duration-200">
-            <div class="w-[48px] h-[48px] rounded-full bg-blue-600 flex flex-col items-center justify-center shadow-inner">
-              <component :is="bottomNavTabs[activeBottomIndex].activeIcon || bottomNavTabs[activeBottomIndex].icon" class="w-5 h-5 text-white" />
-              <span class="text-[7.5px] font-bold text-white leading-none mt-0.5 tracking-tight px-0.5">
-                {{ bottomNavTabs[activeBottomIndex].label }}
-              </span>
-            </div>
-          </div>
-        </div>
-
-        <!-- 4 Tab Buttons -->
+    <nav class="print:hidden lg:hidden fixed bottom-0 inset-x-0 z-40 bg-white border-t border-slate-200 px-2 py-1.5 pb-safe">
+      <div class="max-w-md mx-auto flex items-center select-none">
         <router-link
           v-for="(item, idx) in bottomNavTabs"
           :key="item.key"
           :to="item.path"
           @click="handleBottomTabClick(idx)"
-          class="flex-1 flex flex-col items-center justify-center relative z-20 h-full py-1 cursor-pointer select-none text-center"
+          class="flex-1 flex flex-col items-center justify-center py-1 rounded-lg transition cursor-pointer select-none text-center"
+          :class="activeBottomIndex === idx ? 'text-blue-600' : 'text-slate-500 hover:text-slate-800'"
         >
-          <!-- Inactive State: Sejajar di dalam bar, memudar saat lingkaran aktif meluncur di atasnya -->
-          <div 
-            class="flex flex-col items-center justify-center py-1 transition-all duration-200"
-            :class="activeBottomIndex === idx ? 'opacity-0 scale-75' : 'opacity-85 hover:opacity-100'"
-          >
-            <component :is="item.inactiveIcon || item.icon" class="w-5 h-5 text-white" />
-            <span class="text-[10px] font-semibold text-white mt-1 leading-tight">{{ item.label }}</span>
-          </div>
+          <component :is="activeBottomIndex === idx ? (item.activeIcon || item.icon) : (item.inactiveIcon || item.icon)" class="w-5 h-5" />
+          <span class="text-[10px] mt-1 leading-tight" :class="activeBottomIndex === idx ? 'font-semibold' : 'font-medium'">{{ item.label }}</span>
         </router-link>
-
       </div>
     </nav>
     <!-- ============================================================ -->
@@ -243,10 +215,10 @@
     <!-- ============================================================ -->
     <div
       v-if="showLogoutModal"
-      class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-150"
+      class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 animate-in fade-in duration-150"
       @click.self="showLogoutModal = false"
     >
-      <div class="bg-white rounded-3xl max-w-sm sm:max-w-md w-full p-6 sm:p-7 shadow-2xl border border-slate-200 text-center animate-in zoom-in-95 duration-150">
+      <div class="bg-white rounded-xl max-w-sm sm:max-w-md w-full p-6 sm:p-7 shadow-lg border border-slate-200 text-center animate-in zoom-in-95 duration-150">
         
         <!-- Icon Logout -->
         <div class="w-14 h-14 mx-auto rounded-2xl bg-rose-50 border border-rose-200 text-rose-600 flex items-center justify-center mb-4">

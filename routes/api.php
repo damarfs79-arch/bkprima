@@ -9,6 +9,7 @@ Route::post('/login', [ApiController::class, 'login']);
 
 // Protected or Public BK Prima API Endpoints
 Route::get('/absensi', [ApiController::class, 'getAttendance']);
+Route::get('/notifikasi-absensi', [ApiController::class, 'getAbsenceAlerts']);
 Route::post('/absensi/sync', [ApiController::class, 'syncAttendance']);
 Route::post('/absensi/status', [ApiController::class, 'updateAttendanceStatus']);
 Route::post('/absensi/bulk', [ApiController::class, 'bulkAttendance']);

@@ -148,15 +148,15 @@
     </div>
 
     <!-- Main Chart Container -->
-    <div class="relative w-full bg-slate-50/80 rounded-3xl p-4 sm:p-6 border border-slate-200">
+    <div class="relative w-full bg-slate-50 rounded-xl p-4 sm:p-6 border border-slate-200">
       
       <!-- Top Legend Bar Inside Chart Area (Ukuran Font Besar & Jelas) -->
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 mb-3 border-b border-slate-200 text-sm">
         <!-- Academic Period Notes -->
         <div class="flex items-center gap-2">
-          <span class="font-black text-slate-800">Periode:</span>
-          <span class="text-slate-700 font-bold">Januari s.d Desember (1 Tahun Penuh)</span>
-          <span class="hidden md:inline-block px-2.5 py-0.5 bg-blue-100 text-blue-800 rounded-md text-xs font-black">SMK PGRI 05 Jember</span>
+          <span class="font-bold text-slate-800">Periode:</span>
+          <span class="text-slate-700 font-semibold">Januari s.d Desember (1 Tahun Penuh)</span>
+          <span class="hidden md:inline-block text-xs font-semibold text-slate-500">SMK PGRI 05 Jember</span>
         </div>
 
         <!-- Interactive Legend Buttons (Tebal & Mudah Diklik) -->
@@ -408,7 +408,7 @@
       <!-- Detail Card on Hover (Contextual Academic Tooltip for Guru BK - Huruf Besar & Tegas) -->
       <div
         v-if="hoverIndex !== null && currentHoverItem"
-        class="mt-4 p-4 sm:p-5 rounded-2xl bg-slate-900 text-white shadow-xl border border-slate-700 transition-all flex flex-col md:flex-row md:items-center justify-between gap-4"
+        class="mt-4 p-4 sm:p-5 rounded-xl bg-slate-900 text-white border border-slate-700 transition-all flex flex-col md:flex-row md:items-center justify-between gap-4"
       >
         <div class="flex items-center gap-3.5">
           <div class="w-13 h-13 rounded-2xl bg-blue-600 border-2 border-blue-400 flex flex-col items-center justify-center font-black text-white shrink-0 shadow-md">
@@ -490,7 +490,7 @@
     <!-- ========================================================================= -->
     <!-- TABEL RINCIAN BULANAN (SANGAT MUDAH DIBACA OLEH GURU / ORANG TUA)         -->
     <!-- ========================================================================= -->
-    <div class="bg-white rounded-3xl p-5 sm:p-6 border border-slate-200 shadow-sm space-y-4">
+    <div class="bg-white rounded-xl p-5 sm:p-6 border border-slate-200 space-y-4">
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-200">
         <div>
           <h3 class="text-lg sm:text-xl font-bold text-slate-900">
@@ -530,23 +530,23 @@
               class="hover:bg-blue-50/60 transition"
               :class="item.val2026 >= 90 ? 'bg-white' : 'bg-amber-50/30'"
             >
-              <td class="py-3 px-3.5 font-black text-slate-900">
+              <td class="py-3 px-3.5 font-semibold text-slate-900">
                 {{ item.month < 10 ? '0' + item.month : item.month }}. {{ item.monthName }}
               </td>
               <td class="py-3 px-3.5 text-center">
-                <span class="inline-block px-3 py-1 rounded-lg bg-blue-100 text-blue-900 font-black text-sm border border-blue-300">
+                <span class="text-blue-800 font-semibold text-sm">
                   {{ formatValue(item.val2026) }}
                 </span>
               </td>
               <td class="py-3 px-3.5 text-center">
-                <span class="inline-block px-3 py-1 rounded-lg bg-amber-100 text-amber-900 font-bold text-sm border border-amber-300">
+                <span class="text-amber-800 font-semibold text-sm">
                   {{ formatValue(item.val2025) }}
                 </span>
               </td>
-              <td class="py-3 px-3.5 text-center font-black">
+              <td class="py-3 px-3.5 text-center font-semibold">
                 <span
-                  class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs sm:text-sm font-black"
-                  :class="item.val2026 >= item.val2025 ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'"
+                  class="inline-flex items-center gap-1 text-xs sm:text-sm font-semibold"
+                  :class="item.val2026 >= item.val2025 ? 'text-emerald-700' : 'text-rose-700'"
                 >
                   <svg v-if="item.val2026 >= item.val2025" xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor">
                     <path fill-rule="evenodd" d="M12 7a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0V8.414l-4.293 4.293a1 1 0 01-1.414 0L8 10.414l-4.293 4.293a1 1 0 01-1.414-1.414l5-5a1 1 0 011.414 0L11 10.586 14.586 7H12z" clip-rule="evenodd" />
@@ -560,8 +560,8 @@
               <td class="py-3 px-3.5 text-center">
                 <span
                   v-if="activeDataset === 'kehadiran'"
-                  class="inline-block px-2.5 py-1 rounded-full text-xs font-black border"
-                  :class="item.val2026 >= 90 ? 'bg-emerald-50 text-emerald-800 border-emerald-300' : 'bg-amber-50 text-amber-800 border-amber-300'"
+                  class="text-xs font-semibold"
+                  :class="item.val2026 >= 90 ? 'text-emerald-700' : 'text-amber-700'"
                 >
                   {{ item.val2026 >= 90 ? 'Memenuhi Target' : 'Perlu Pembinaan' }}
                 </span>

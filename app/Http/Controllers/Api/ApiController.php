@@ -223,7 +223,7 @@ class ApiController extends Controller
             ]);
         }
 
-        $studentsQuery = Student::query();
+        $studentsQuery = Student::active();
         if ($assignedRombels !== null) {
             $studentsQuery->whereIn('class_name', $assignedRombels);
         }
@@ -239,7 +239,7 @@ class ApiController extends Controller
             });
         }
 
-        $students = $studentsQuery->orderBy('name')->get();
+        $students = $studentsQuery->orderedByAbsen()->get();
 
         $attendances = Attendance::where('date', $date)
             ->whereIn('student_id', $students->pluck('id'))
@@ -265,6 +265,7 @@ class ApiController extends Controller
 
             return [
                 'id' => $s->id,
+                'no_absen' => $s->no_absen,
                 'nisn' => $s->nisn,
                 'name' => $s->name,
                 'class_name' => $s->class_name,
@@ -272,7 +273,7 @@ class ApiController extends Controller
                 'status' => $status,
                 'check_in_time' => $checkIn,
                 'parent_name' => $s->parent_name ?? 'Wali Murid',
-                'parent_phone' => $s->parent_phone ?? '081234567890',
+                'parent_phone' => $s->parent_phone ?: '-',
                 'total_points' => $s->total_violation_points,
             ];
         });
@@ -297,12 +298,121 @@ class ApiController extends Controller
     }
 
     /**
+     * GET /api/notifikasi-absensi
+     * Mengambil daftar siswa yang tidak masuk >= 3 hari (berturut-turut maupun akumulasi Alpa 30 hari terakhir).
+     */
+    public function getAbsenceAlerts(Request $request)
+    {
+        $user = $this->getAuthenticatedUser($request);
+        $assignedRombels = ($user && $user->role === 'guru') ? $this->getUserAssignedRombels($user) : null;
+
+        if ($assignedRombels !== null && empty($assignedRombels)) {
+            return response()->json([
+                'success' => true,
+                'total_alerts' => 0,
+                'alerts' => [],
+            ]);
+        }
+
+        $sinceDate = now()->subDays(30)->toDateString();
+
+        $studentsQuery = Student::active()->with([
+            'attendances' => function ($q) use ($sinceDate) {
+                $q->where('date', '>=', $sinceDate)->orderByDesc('date');
+            },
+        ]);
+
+        if ($assignedRombels !== null) {
+            $studentsQuery->whereIn('class_name', $assignedRombels);
+        }
+
+        $absentStatuses = ['Alpa', 'Alpha', 'Izin', 'Sakit'];
+        $alpaStatuses = ['Alpa', 'Alpha'];
+
+        $alerts = [];
+
+        foreach ($studentsQuery->get() as $student) {
+            $attendances = $student->attendances;
+            if ($attendances->isEmpty()) {
+                continue;
+            }
+
+            $consecutiveDays = 0;
+            foreach ($attendances as $att) {
+                if (in_array($att->status, $absentStatuses, true)) {
+                    $consecutiveDays++;
+                } else {
+                    break;
+                }
+            }
+
+            $totalAlpa = $attendances->filter(fn ($a) => in_array($a->status, $alpaStatuses, true))->count();
+
+            if ($consecutiveDays < 3 && $totalAlpa < 3) {
+                continue;
+            }
+
+            $recentAbsences = $attendances
+                ->filter(fn ($a) => in_array($a->status, $absentStatuses, true))
+                ->take(5)
+                ->map(fn ($a) => [
+                    'date' => $a->date,
+                    'status' => $a->status === 'Alpha' ? 'Alpa' : $a->status,
+                ])
+                ->values()
+                ->toArray();
+
+            $lastAbsent = $recentAbsences[0] ?? null;
+            $lastStatus = $lastAbsent['status'] ?? 'Alpa';
+            $isConsecutive = $consecutiveDays >= 3;
+
+            $reason = $isConsecutive
+                ? "{$consecutiveDays} hari berturut-turut tidak masuk (terakhir: {$lastStatus})"
+                : "Tercatat {$totalAlpa} hari Alpa dalam 30 hari terakhir";
+
+            $alerts[] = [
+                'student_id' => $student->id,
+                'name' => $student->name,
+                'nisn' => $student->nisn,
+                'class_name' => $student->class_name,
+                'parent_name' => $student->parent_name ?? 'Wali Murid',
+                'parent_phone' => $student->parent_phone ?: '-',
+                'consecutive_days' => $consecutiveDays,
+                'alpa_count' => $totalAlpa,
+                'last_status' => $lastStatus,
+                'last_date' => $lastAbsent['date'] ?? null,
+                'alert_type' => $isConsecutive ? 'consecutive' : 'accumulated',
+                'reason' => $reason,
+                'recent_dates' => $recentAbsences,
+            ];
+        }
+
+        usort($alerts, function ($a, $b) {
+            $aConsec = $a['consecutive_days'] >= 3 ? 1 : 0;
+            $bConsec = $b['consecutive_days'] >= 3 ? 1 : 0;
+            if ($aConsec !== $bConsec) {
+                return $bConsec <=> $aConsec;
+            }
+            if ($a['consecutive_days'] !== $b['consecutive_days']) {
+                return $b['consecutive_days'] <=> $a['consecutive_days'];
+            }
+            return $b['alpa_count'] <=> $a['alpa_count'];
+        });
+
+        return response()->json([
+            'success' => true,
+            'total_alerts' => count($alerts),
+            'alerts' => $alerts,
+        ]);
+    }
+
+    /**
      * POST /api/absensi/sync
      */
     public function syncAttendance(Request $request)
     {
         $today = now()->toDateString();
-        $students = Student::all();
+        $students = Student::active()->get();
 
         foreach ($students as $student) {
             $statuses = ['Hadir', 'Hadir', 'Hadir', 'Terlambat', 'Izin', 'Hadir'];
@@ -425,7 +535,7 @@ class ApiController extends Controller
             ], 403);
         }
 
-        $query = Student::query();
+        $query = Student::active();
         if ($assignedRombels !== null) {
             $query->whereIn('class_name', $assignedRombels);
         }
@@ -521,8 +631,8 @@ class ApiController extends Controller
         $peringatanSp = $violations->filter(fn ($v) => $v['points'] > 10 && $v['points'] < 30)->count();
         $panggilanOrtu = $violations->where('points', '>=', 30)->count();
 
-        // Surat Panggilan Siswa (Siswa dengan total poin >= 30)
-        $spQuery = Student::where('total_violation_points', '>=', 30);
+        // Surat Panggilan Siswa (Siswa aktif dengan total poin >= 30)
+        $spQuery = Student::active()->where('total_violation_points', '>=', 30);
         if ($assignedRombels !== null) {
             $spQuery->whereIn('class_name', $assignedRombels);
         }
@@ -1194,7 +1304,7 @@ class ApiController extends Controller
             $month = max(1, min(12, (int) $request->query('month', now()->month)));
             $year = max(2020, min(2100, (int) $request->query('year', now()->year)));
 
-            $totalStudents = Student::count();
+            $totalStudents = Student::active()->count();
             $attendanceBase = Attendance::whereYear('date', $year)->whereMonth('date', $month);
 
             $hadirCount = (clone $attendanceBase)->where('status', 'Hadir')->count();
@@ -1356,7 +1466,7 @@ class ApiController extends Controller
             ]);
         }
 
-        $studentQuery = Student::whereIn('class_name', $assignedRombels);
+        $studentQuery = Student::active()->whereIn('class_name', $assignedRombels);
         $totalStudents = (clone $studentQuery)->count();
         $studentIds = (clone $studentQuery)->pluck('id');
 
@@ -1378,7 +1488,7 @@ class ApiController extends Controller
         });
         $violationsCount = (clone $violationsToday)->count();
 
-        $spStudents = Student::whereIn('class_name', $assignedRombels)
+        $spStudents = Student::active()->whereIn('class_name', $assignedRombels)
             ->where('total_violation_points', '>=', 30)
             ->get()
             ->map(function ($s) {

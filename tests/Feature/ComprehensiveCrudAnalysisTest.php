@@ -419,8 +419,8 @@ class ComprehensiveCrudAnalysisTest extends TestCase
         $this->actingAs($this->admin);
 
         $response = $this->post('/admin/pengaturan', [
-            'kepala_sekolah' => 'Drs. H. Saiful Bahri, M.Pd',
-            'nip_kepala_sekolah' => '196802151994031003',
+            'kepala_sekolah' => 'Saiful Anwar, S.Pd.',
+            'nip_kepala_sekolah' => '19780707 200902 1 002',
             'semester' => 'Semester Genap 2026/2027',
             'tahun_ajaran' => '2026/2027',
             'school_name' => 'SMK PGRI 05 JEMBER',
@@ -428,7 +428,7 @@ class ComprehensiveCrudAnalysisTest extends TestCase
         ]);
         $response->assertStatus(302);
 
-        $this->assertEquals('Drs. H. Saiful Bahri, M.Pd', Setting::get('kepala_sekolah'));
+        $this->assertEquals('Saiful Anwar, S.Pd.', Setting::get('kepala_sekolah'));
         $this->assertEquals('2026/2027', Setting::get('tahun_ajaran'));
     }
 }

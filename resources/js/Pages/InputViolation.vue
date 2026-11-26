@@ -2,21 +2,6 @@
   <AppLayout active-tab="verifikasi" show-back>
     <div class="max-w-2xl mx-auto space-y-5">
 
-      <!-- Toast Notification -->
-      <transition enter-active-class="transform ease-out duration-300 transition" enter-from-class="translate-y-2 opacity-0 sm:translate-y-0 sm:translate-x-2" enter-to-class="translate-y-0 opacity-100 sm:translate-x-0" leave-active-class="transition ease-in duration-100" leave-from-class="opacity-100" leave-to-class="opacity-0">
-        <div v-if="showSuccessToast" class="fixed top-20 right-4 sm:right-8 z-50 bg-white border border-emerald-200 rounded-xl shadow-lg p-3.5 flex items-center gap-3 text-xs max-w-sm">
-          <div class="w-7 h-7 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center font-bold text-sm shrink-0">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-              <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
-            </svg>
-          </div>
-          <div>
-            <p class="font-bold text-slate-900">Data Tersimpan</p>
-            <p class="text-slate-500 text-[11px]">Catatan pelanggaran berhasil disimpan.</p>
-          </div>
-        </div>
-      </transition>
-
       <!-- Main Form Container -->
       <div class="bg-white rounded-xl p-5 sm:p-6 border border-slate-200 shadow-xs space-y-5">
         
@@ -250,15 +235,15 @@
           <!-- Photo State: If Photo Exists -->
           <div 
             v-if="form.photoUrl"
-            class="relative rounded-lg overflow-hidden border border-slate-200 bg-slate-900 group"
+            class="rounded-lg overflow-hidden border border-slate-200 bg-slate-900"
           >
             <img
               :src="form.photoUrl"
               alt="Bukti Foto"
               class="w-full max-h-56 object-contain bg-slate-950 mx-auto"
             />
-            <div class="absolute inset-x-0 bottom-0 bg-slate-950/80 p-2.5 flex items-center justify-between">
-              <span class="text-white text-xs font-medium">Foto Terlampir</span>
+            <div class="bg-slate-50 border-t border-slate-200 p-2.5 flex items-center justify-between">
+              <span class="text-slate-700 text-xs font-medium">Foto Terlampir</span>
               <button
                 type="button"
                 @click="removePhoto"
@@ -339,7 +324,7 @@
     <!-- ========================================================= -->
     <div 
       v-if="isCameraModalOpen" 
-      class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 animate-fadeIn"
+      class="fixed inset-0 z-50 bg-slate-950/80 flex items-center justify-center p-3 sm:p-4 animate-fadeIn"
       @click.self="closeCameraModal"
     >
       <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-lg w-full overflow-hidden shadow-2xl flex flex-col text-slate-100">
@@ -486,6 +471,69 @@
       </div>
     </div>
 
+    <!-- ========================================================= -->
+    <!-- SUCCESS NOTIFICATION MODAL CARD                           -->
+    <!-- ========================================================= -->
+    <div
+      v-if="isSuccessModalOpen"
+      class="fixed inset-0 z-50 bg-slate-950/50 flex items-center justify-center p-4"
+      @click.self="isSuccessModalOpen = false"
+    >
+      <div class="bg-white border border-slate-200 rounded-xl max-w-md w-full p-6 shadow-xl space-y-4">
+        <div class="flex flex-col items-center text-center">
+          <div class="w-12 h-12 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-600 flex items-center justify-center mb-3">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+            </svg>
+          </div>
+          <h3 class="text-base font-bold text-slate-900">Pelanggaran Berhasil Disimpan</h3>
+          <p class="text-xs text-slate-500 mt-1 leading-relaxed">
+            Catatan pelanggaran dan bukti telah tercatat ke dalam sistem BK.
+          </p>
+        </div>
+
+        <div class="bg-slate-50 border border-slate-200 rounded-lg p-3.5 space-y-2 text-xs">
+          <div class="flex justify-between gap-3">
+            <span class="text-slate-500 shrink-0">Siswa</span>
+            <span class="font-semibold text-slate-900 text-right">
+              {{ savedViolationSummary.studentName }}{{ savedViolationSummary.studentClass ? ` (${savedViolationSummary.studentClass})` : '' }}
+            </span>
+          </div>
+          <div class="flex justify-between gap-3">
+            <span class="text-slate-500 shrink-0">Pelanggaran</span>
+            <span class="font-semibold text-slate-900 text-right">{{ savedViolationSummary.category }}</span>
+          </div>
+          <div class="flex justify-between gap-3">
+            <span class="text-slate-500 shrink-0">Poin</span>
+            <span class="font-semibold text-slate-900 text-right">
+              {{ savedViolationSummary.points !== null ? `+${savedViolationSummary.points} Poin` : 'Tanpa Poin (Pembinaan)' }}
+            </span>
+          </div>
+          <div v-if="savedViolationSummary.hasPhoto" class="flex justify-between gap-3">
+            <span class="text-slate-500 shrink-0">Lampiran</span>
+            <span class="font-semibold text-emerald-700 text-right">Foto bukti terunggah</span>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2.5 pt-1">
+          <button
+            type="button"
+            @click="router.visit('/pelanggaran')"
+            class="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold transition cursor-pointer"
+          >
+            Lihat Daftar
+          </button>
+          <button
+            type="button"
+            @click="isSuccessModalOpen = false"
+            class="w-full px-3.5 py-2.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold transition cursor-pointer"
+          >
+            Selesai
+          </button>
+        </div>
+      </div>
+    </div>
+
   </AppLayout>
 </template>
 
@@ -503,7 +551,14 @@ const props = defineProps({
   }
 })
 
-const showSuccessToast = ref(false)
+const isSuccessModalOpen = ref(false)
+const savedViolationSummary = ref({
+  studentName: '',
+  studentClass: '',
+  category: '',
+  points: null,
+  hasPhoto: false,
+})
 const serverErrors = ref({})
 const isSubmitting = ref(false)
 const fileUpload = ref(null)
@@ -810,11 +865,20 @@ const handleSubmit = () => {
     payload.photo_url = form.value.photoUrl
   }
 
+  const savedSummary = {
+    studentName: form.value.studentName.trim(),
+    studentClass: form.value.studentClass.trim(),
+    category: form.value.category.trim(),
+    points: pointsVal,
+    hasPhoto: Boolean(photoFile.value || (form.value.photoUrl && form.value.photoUrl.startsWith('data:image'))),
+  }
+
   router.post('/pelanggaran', payload, {
     forceFormData: true,
     onSuccess: () => {
       serverErrors.value = {}
-      showSuccessToast.value = true
+      savedViolationSummary.value = savedSummary
+      isSuccessModalOpen.value = true
       resetStudentSelection()
       photoFile.value = null
       form.value = {
@@ -827,9 +891,6 @@ const handleSubmit = () => {
         photoUrl: null,
         photoTimestamp: ''
       }
-      setTimeout(() => {
-        showSuccessToast.value = false
-      }, 3000)
     },
     onError: (errors) => {
       serverErrors.value = errors || {}

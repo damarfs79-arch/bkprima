@@ -43,15 +43,6 @@
         <div class="pt-4 mt-4 border-t border-slate-800 space-y-1">
           <p class="px-3 text-xs font-semibold text-slate-400 mb-2">Akses Cepat</p>
           <router-link
-            to="/absensi"
-            class="flex items-center gap-3 px-3 py-2 rounded-lg text-xs font-medium text-slate-400 hover:bg-slate-800/60 hover:text-slate-200 transition group"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-slate-400 group-hover:text-slate-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-            </svg>
-            <span>Portal Guru BK</span>
-          </router-link>
-          <router-link
             to="/arsip-lulus"
             class="flex items-center gap-3 px-3 py-2 rounded-lg text-xs font-medium text-slate-400 hover:bg-slate-800/60 hover:text-slate-200 transition group"
           >
@@ -131,16 +122,6 @@
 
           <div class="pt-3 border-t border-slate-800 space-y-1">
             <router-link
-              to="/absensi"
-              @click="mobileDrawerOpen = false"
-              class="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-xs font-medium text-slate-300 hover:bg-slate-800 transition"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-              </svg>
-              <span>Portal Guru BK</span>
-            </router-link>
-            <router-link
               to="/arsip-lulus"
               @click="mobileDrawerOpen = false"
               class="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-xs font-medium text-slate-300 hover:bg-slate-800 transition"
@@ -177,9 +158,7 @@
         </div>
 
         <div class="flex items-center gap-3">
-          <div class="px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-md text-xs text-slate-600 font-medium">
-            <span>SIM-Pegawai &bull; Mode Kelola Penuh</span>
-          </div>
+          <span class="text-xs text-slate-500 font-medium">SIM-Pegawai &bull; Mode Kelola Penuh</span>
         </div>
       </header>
 

@@ -69,7 +69,7 @@ class AttendanceController extends Controller
             }
         }
 
-        $students = $studentQuery->orderBy('class_name')->orderBy('name')->get();
+        $students = $studentQuery->orderBy('class_name')->orderedByAbsen()->get();
         $classes = $authorizedClasses;
 
         $visibleStudentIds = $students->pluck('id');
@@ -174,6 +174,7 @@ class AttendanceController extends Controller
 
         $importedCount = 0;
         $touchedClasses = [];
+        $perClassCounter = [];
 
         foreach ($studentsData as $item) {
             if (empty($item['name'])) {
@@ -236,16 +237,21 @@ class AttendanceController extends Controller
 
             $nis = !empty($item['nis']) ? trim((string)$item['nis']) : (!empty($item['nisn']) ? trim((string)$item['nisn']) : '00' . rand(10000000, 99999999));
 
+            $perClassCounter[$className] = ($perClassCounter[$className] ?? 0) + 1;
+            $rawNoAbsen = $item['noAbsen'] ?? ($item['no_absen'] ?? null);
+            $noAbsen = (is_numeric($rawNoAbsen) && (int)$rawNoAbsen > 0) ? (int)$rawNoAbsen : $perClassCounter[$className];
+
             $student = Student::updateOrCreate(
                 ['nis' => $nis],
                 [
                     'classroom_id' => $classId,
+                    'no_absen' => $noAbsen,
                     'name' => trim($item['name']),
                     'class_name' => $className,
                     'level' => $level,
                     'major' => $major,
                     'gender' => in_array(strtoupper($item['gender'] ?? 'L'), ['L', 'P']) ? strtoupper($item['gender']) : 'L',
-                    'parent_phone' => $item['parentWa'] ?? ($item['parent_phone'] ?? null),
+                    'parent_phone' => (!empty($item['parentWa']) && $item['parentWa'] !== '-') ? $item['parentWa'] : ((!empty($item['parent_phone']) && $item['parent_phone'] !== '-') ? $item['parent_phone'] : null),
                     'parent_name' => $item['parent_name'] ?? ('Orang Tua ' . trim($item['name'])),
                     'rombel' => end($parts),
                     'status' => 'aktif',
@@ -285,6 +291,7 @@ class AttendanceController extends Controller
             'gender' => 'required|in:L,P',
             'parent_name' => 'nullable|string|max:255',
             'parent_phone' => 'nullable|string|max:20',
+            'no_absen' => 'nullable|integer|min:1|max:999',
         ]);
 
         $nis = !empty($validated['nis']) ? trim($validated['nis']) : (!empty($validated['nisn']) ? trim($validated['nisn']) : '');
@@ -350,6 +357,7 @@ class AttendanceController extends Controller
         $student = Student::create([
             'classroom_id' => $classroom->id,
             'nis' => $nis,
+            'no_absen' => !empty($validated['no_absen']) ? (int)$validated['no_absen'] : null,
             'name' => $validated['name'],
             'class_name' => $className,
             'level' => $level,
@@ -357,7 +365,7 @@ class AttendanceController extends Controller
             'rombel' => $rombel,
             'gender' => $validated['gender'],
             'parent_name' => $validated['parent_name'] ?? 'Bpk/Ibu ' . $validated['name'],
-            'parent_phone' => $validated['parent_phone'] ?? '081234567890',
+            'parent_phone' => !empty($validated['parent_phone']) ? $validated['parent_phone'] : null,
             'total_violation_points' => 0,
             'status' => 'aktif',
         ]);
@@ -390,6 +398,7 @@ class AttendanceController extends Controller
             'gender' => 'required|in:L,P',
             'parent_name' => 'nullable|string|max:255',
             'parent_phone' => 'nullable|string|max:20',
+            'no_absen' => 'nullable|integer|min:1|max:999',
         ]);
 
         $nis = !empty($validated['nis']) ? trim($validated['nis']) : (!empty($validated['nisn']) ? trim($validated['nisn']) : $student->nis);
@@ -448,6 +457,7 @@ class AttendanceController extends Controller
         $student->update([
             'classroom_id' => $classroom->id,
             'nis' => $nis,
+            'no_absen' => array_key_exists('no_absen', $validated) ? ($validated['no_absen'] ? (int)$validated['no_absen'] : null) : $student->no_absen,
             'name' => $validated['name'],
             'class_name' => $className,
             'level' => $level,
@@ -455,7 +465,7 @@ class AttendanceController extends Controller
             'rombel' => $rombel,
             'gender' => $validated['gender'],
             'parent_name' => $validated['parent_name'] ?? $student->parent_name,
-            'parent_phone' => $validated['parent_phone'] ?? $student->parent_phone,
+            'parent_phone' => array_key_exists('parent_phone', $validated) ? ($validated['parent_phone'] ?: null) : $student->parent_phone,
         ]);
 
         return redirect()->back()->with('success', 'Data siswa berhasil diperbarui!');
@@ -673,7 +683,7 @@ class AttendanceController extends Controller
 
         // Query students in selected class
         $students = Student::active()->where('class_name', $selectedClass)
-            ->orderBy('name')
+            ->orderedByAbsen()
             ->get();
 
         // Get attendances for this month & class
@@ -802,11 +812,11 @@ class AttendanceController extends Controller
             'schoolInfo' => [
                 'name' => \App\Models\Setting::get('school_name', 'SMK PGRI 05 JEMBER'),
                 'npsn' => \App\Models\Setting::get('school_npsn', '20523801'),
-                'address' => \App\Models\Setting::get('school_address', 'Jl. Krakatau No. 54 Tanggul, Kab. Jember - Jawa Timur'),
+                'address' => \App\Models\Setting::get('school_address', 'Jl. Krakatau No. 60, Kencong, Kab. Jember - Jawa Timur'),
                 'waliKelas' => $classroomObj?->wali_kelas ?? ('Wali Kelas ' . $selectedClass),
                 'guruBk' => $classroomObj?->guru_bk_name ?? ($user?->name ?? 'Guru BK'),
-                'kepalaSekolah' => \App\Models\Setting::get('kepala_sekolah', 'Drs. H. Saiful Bahri, M.Pd'),
-                'nipKepalaSekolah' => \App\Models\Setting::get('nip_kepala_sekolah', '196802151994031003'),
+                'kepalaSekolah' => \App\Models\Setting::get('kepala_sekolah', 'Saiful Anwar, S.Pd.'),
+                'nipKepalaSekolah' => \App\Models\Setting::get('nip_kepala_sekolah', '19780707 200902 1 002'),
                 'tahunAjaran' => \App\Models\Setting::get('tahun_ajaran', \App\Models\Setting::get('academic_year', '2026/2027')),
             ]
         ]);

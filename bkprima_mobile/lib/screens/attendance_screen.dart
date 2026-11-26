@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../core/theme/app_theme.dart';
 import '../core/widgets/searchable_bottom_sheet.dart';
+import '../widgets/absence_alert_sheet.dart';
 import '../models/attendance_model.dart';
 import '../providers/attendance_provider.dart';
 
@@ -28,8 +29,14 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<AttendanceProvider>().fetchAttendance();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final provider = context.read<AttendanceProvider>();
+      provider.resetStartupAlert();
+      await provider.fetchAttendance();
+      if (mounted && provider.absenceAlerts.isNotEmpty && !provider.hasShownStartupAlert) {
+        provider.markStartupAlertShown();
+        AbsenceAlertDialogs.showStartupModal(context, provider.absenceAlerts);
+      }
     });
   }
 
@@ -414,6 +421,64 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                 ),
               ),
               const SizedBox(height: 10),
+
+              // Banner Notifikasi Siswa >= 3 Hari Tidak Masuk
+              if (provider.absenceAlerts.isNotEmpty) ...[
+                InkWell(
+                  onTap: () => AbsenceAlertDialogs.showListSheet(context, provider.absenceAlerts),
+                  borderRadius: BorderRadius.circular(10),
+                  child: Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                    decoration: BoxDecoration(
+                      color: AppTheme.dangerLight,
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: AppTheme.dangerBorder, width: 1),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(
+                          Icons.notifications_active_outlined,
+                          size: 18,
+                          color: AppTheme.danger,
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                '${provider.absenceAlerts.length} Siswa Tidak Masuk >= 3 Hari',
+                                style: const TextStyle(
+                                  fontFamily: AppTheme.fontFamily,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w700,
+                                  color: AppTheme.dangerDark,
+                                ),
+                              ),
+                              const SizedBox(height: 1),
+                              const Text(
+                                'Ketuk untuk melihat daftar siswa dan kontak wali murid',
+                                style: TextStyle(
+                                  fontFamily: AppTheme.fontFamily,
+                                  fontSize: 10,
+                                  color: AppTheme.danger,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const Icon(
+                          Icons.chevron_right_rounded,
+                          size: 18,
+                          color: AppTheme.danger,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 10),
+              ],
 
               // 2. Pencarian & Filter Rombel
               Row(
